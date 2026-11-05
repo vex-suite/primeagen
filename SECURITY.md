@@ -1,7 +1,7 @@
 # SECURITY.md — primeagen
 
 > **Internal invariant set, not a public disclosure channel.** See the
-> [vexgraph security baseline](../../../SECURITY.md) for everything inherited
+> [vexgraph security baseline](../../SECURITY.md) for everything inherited
 > here. This file states only this project's own surface.
 
 **Role:** a standalone personal R5 agent client. It is a **consumer adapter**: it

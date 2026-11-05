@@ -10,7 +10,7 @@ root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 vex=${VEXSPOKE_SOURCE_DIR:-"$root/../../host-behavior/vexspoke/src"}
 hot=${HOTCWAP_SOURCE_DIR:-"$root/../../host-behavior/hotcwap"}
 det=${DETERMINANT_SOURCE_DIR:-"$root/../../drivers/determinant/src"}
-rel=${RELATIONAL_ENGINE_SOURCE_DIR:-"$root/../../host-behavior/relational-engine/src"}
+rel=${RELATIONAL_ENGINE_SOURCE_DIR:-"$root/../../vex/re/src"}
 PRIMEAGEN_ROOT="$root"
 export PRIMEAGEN_ROOT
 mkdir -p "$root/.build"

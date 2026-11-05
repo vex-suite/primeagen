@@ -142,5 +142,5 @@ constitution's reverse order.
 - No sandbox claims: the file adapters remain non-sandboxed consumer adapters.
 - No remote session/permission endpoints; no headless agent host as the product.
 - No GUI; the ncurses frame stays the surface.
-- No SQL. The native query contract is structured; text is at most a `cli/`
+- No SQL. The native query contract is structured; text is at most a `cli`
   convenience later.

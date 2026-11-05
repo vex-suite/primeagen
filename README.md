@@ -21,12 +21,12 @@ API Haven's actual EngineProvider/Harness bridge callbacks. Its login/model conf
 (including Go when configured) stays with OpenCode; Primeagen reads no auth files.
 
 This is an initial implementation, not production-ready. Offline owner evidence
-lives in `tests/primeagen` in the workspace's independent tests checkout.
+lives in `../../tests/primeagen` in the workspace's independent tests checkout.
 Direct-provider behavior, macOS 14 runtime, Windows and GUI integration are unproven.
 The existing R4 message value is reused, not a claim that Harness's planned agent
 objects or server are implemented.
 
-The **C23 ncurses TUI** lives in `cli/` and `tui/`, with normalized mouse
+The **C23 ncurses TUI** lives in `cli` and `tui`, with normalized mouse
 events in `tui/event/`. It is an offline interface preview, not yet the native
 agent replacement: disconnected start, wrapped transcript scrolling, fixed input,
 clickable Clear/Quit and optional `personality/owo.c` presentation mode.
@@ -289,7 +289,7 @@ sh install-command.sh
 primeagen
 ```
 
-Running `./primeagen` with no arguments also opens the terminal. Enter `/connect`
+Running `primeagen` with no arguments also opens the terminal. Enter `/connect`
 (or click it in the lower hint line), then type your message and press Enter.
 This uses your existing OpenCode Go connection for text generation and can consume
 Go quota; it never attaches to this coding session. If Go is not
@@ -438,7 +438,7 @@ uses these local C adapters behind the host-controlled execution gate instead.
   routing, server membership, persistent user/channel/chat histories, private-chat
   saving, model controls or role/tool enforcement. Example entries make no calls.
 - Updates reload only `cli/view.c` rendering/command exports. Host, Tui layouts,
-   provider adapters, roles and tool integration require separate implementation/restart.
+  provider adapters, roles and tool integration require separate implementation/restart.
   SHA256 references come from the trusted local builder, not model output.
   Constructors/native modules are trusted, not sandboxed. Complete-set checks and
   detected rollback are tested; crash/power-loss recovery, signatures, hostile
