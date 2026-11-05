@@ -1,10 +1,8 @@
-#include "src/json_admit.h"
+#include "primeagen/json/json_admit.h"
 
 #include <string.h>
 
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 
 ;;DEFINITION

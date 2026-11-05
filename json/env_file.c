@@ -1,4 +1,4 @@
-#include "src/env_file.h"
+#include "primeagen/json/env_file.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -7,8 +7,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 
 ;;DEFINITION
@@ -141,7 +140,7 @@ static int parseAll(char *buffer, size_t length, PendingKey *out, size_t cap) {
             return -1;
 
         buffer[nameEnd] = '\0';
-        char *valueCopy = (char *) value;
+        char *valueCopy = (char*) value;
         valueCopy[valueLength] = '\0';
         out[count].name = buffer + nameStart;
         out[count].value = valueCopy;

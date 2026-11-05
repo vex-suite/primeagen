@@ -1,4 +1,4 @@
-#include "src/settings.h"
+#include "primeagen/json/settings.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -8,11 +8,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
-#include "hot/manifest.h"
+#include "hotcwap/manifest.h"
 
 ;;DEFINITION
 /**
