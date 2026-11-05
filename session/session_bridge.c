@@ -1,10 +1,7 @@
 #include "session/session_bridge.h"
 #include "personality/owo.h"
 #include "net/json.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
-#include "annotation/what.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 #include <errno.h>
 #include <stdio.h>
