@@ -1,9 +1,7 @@
 #include "tui/tui.h"
 #include "tui/markdown.h"
 #include "tui/utf8.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 #include "net/json.h"
 
