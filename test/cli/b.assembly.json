@@ -1,0 +1,48 @@
+{
+  "application": {
+    "id": "local.vexgraph.primeagen-cli",
+    "name": "cli",
+    "displayName": "cli",
+    "version": "0.1.0",
+    "type": "cli",
+    "authors": [
+      "vexgraph"
+    ],
+    "publisher": "vexgraph",
+    "description": "primeagen/test/cli owner test",
+    "license": "UNLICENSED",
+    "homepage": "",
+    "icon": ""
+  },
+  "build": {
+    "entry": "main_test.c",
+    "sources": [
+      "main_test.c"
+    ],
+    "includes": [
+      "primeagen",
+      "vexspoke",
+      "re",
+      "lifetime"
+    ],
+    "dependencies": [
+      "vexspoke",
+      "re",
+      "lifetime"
+    ],
+    "defines": [],
+    "options": [
+      "-Wall",
+      "-Wextra"
+    ],
+    "link": "executable"
+  },
+  "payload": {
+    "files": []
+  },
+  "targets": {},
+  "formats": [
+    "portable"
+  ],
+  "statePolicy": "clean"
+}

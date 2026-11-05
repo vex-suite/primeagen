@@ -1,0 +1,48 @@
+{
+  "application": {
+    "id": "local.vexgraph.primeagen-tui",
+    "name": "tui",
+    "displayName": "tui",
+    "version": "0.1.0",
+    "type": "cli",
+    "authors": [
+      "vexgraph"
+    ],
+    "publisher": "vexgraph",
+    "description": "primeagen/test/tui owner test",
+    "license": "UNLICENSED",
+    "homepage": "",
+    "icon": ""
+  },
+  "build": {
+    "entry": "tui_test.c",
+    "sources": [
+      "tui_test.c"
+    ],
+    "includes": [
+      "primeagen",
+      "vexspoke",
+      "re",
+      "lifetime"
+    ],
+    "dependencies": [
+      "vexspoke",
+      "re",
+      "lifetime"
+    ],
+    "defines": [],
+    "options": [
+      "-Wall",
+      "-Wextra"
+    ],
+    "link": "executable"
+  },
+  "payload": {
+    "files": []
+  },
+  "targets": {},
+  "formats": [
+    "portable"
+  ],
+  "statePolicy": "clean"
+}
