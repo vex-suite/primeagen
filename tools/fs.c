@@ -1,8 +1,6 @@
 #include "tools/fs.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
-#include "annotation/intention.h"
+#include "annotation/annotation.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>

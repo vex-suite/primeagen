@@ -1,7 +1,6 @@
 #include "tools/delete.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include <fcntl.h>
 #include <limits.h>
 #include <sys/stat.h>

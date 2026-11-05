@@ -1,7 +1,6 @@
 #include "tools/bash.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include <unistd.h>
 ;;DEFINITION
 /* Explicitly approved Bash replaces the supervised tool child, never system().

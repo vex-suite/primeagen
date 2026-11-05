@@ -1,6 +1,5 @@
 #include "tools/write.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 ;;DEFINITION
 /* Replace one existing file only after complete new bytes have staged. The host
  * approves this exact action; the operation is not crash-durable or a sandbox. */

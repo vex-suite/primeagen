@@ -7,8 +7,7 @@
 #include "tools/bash.h"
 #include "tools/websearch.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,7 +1,6 @@
 #include "tools/websearch.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include <unistd.h>
 ;;DEFINITION
 /* Provider-neutral search delegates to one explicitly configured trusted search

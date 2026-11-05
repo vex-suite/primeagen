@@ -1,8 +1,7 @@
 #include "tools/list.h"
 #include "net/json.h"
 #include "exception/throw.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
