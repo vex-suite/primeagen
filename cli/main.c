@@ -5,10 +5,9 @@
 #include "cli/view.h"
 #include "cli/update.h"
 #include "cli/appearance.h"
-#include "image/png.h"
-#include "hot/manifest.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "decode/png.h"
+#include "hotcwap/manifest.h"
+#include "annotation/annotation.h"
 #include "exception/throw.h"
 #include <curses.h>
 #include <signal.h>
@@ -354,23 +353,23 @@ int main(int argc, char **argv) {
             !MANIFEST_REFLECT("primeagen", updatePayload) ||
             (hot = Hot_init("primeagen")) == nullptr ||
             !Primeagen_update(hot, updatePayload, updateChecksum, &loaded)) {
-            HotShutdown(hot);
+            Hot_shutdown(hot);
             TerminalTreeView_free(tree);
             Tui_free(&state);
             return 1;
         }
-        view = (PrimeagenDrawFn) Hot_get_symbol(hot, "Primeagen_draw");
-        localCommand = (PrimeagenCommandFn) Hot_get_symbol(hot, "Primeagen_command");
-        panelsView = (PrimeagenPanelsFn) Hot_get_symbol(hot, "Primeagen_drawPanels");
-        treePanelsView = (PrimeagenTreePanelsFn) Hot_get_symbol(hot, "Primeagen_drawTreePanels");
-        appearanceView = (PrimeagenAppearanceFn) Hot_get_symbol(hot, "Primeagen_setAppearance");
+        view = (PrimeagenDrawFn) Hot_getSymbol(hot, "Primeagen_draw");
+        localCommand = (PrimeagenCommandFn) Hot_getSymbol(hot, "Primeagen_command");
+        panelsView = (PrimeagenPanelsFn) Hot_getSymbol(hot, "Primeagen_drawPanels");
+        treePanelsView = (PrimeagenTreePanelsFn) Hot_getSymbol(hot, "Primeagen_drawTreePanels");
+        appearanceView = (PrimeagenAppearanceFn) Hot_getSymbol(hot, "Primeagen_setAppearance");
         {
-            PrimeagenBannerFn refreshedBanner = (PrimeagenBannerFn) Hot_get_symbol(hot, "Primeagen_setBanner");
+            PrimeagenBannerFn refreshedBanner = (PrimeagenBannerFn) Hot_getSymbol(hot, "Primeagen_setBanner");
             if (refreshedBanner != nullptr)
                 bannerView = refreshedBanner;
         }
         if (view == nullptr || localCommand == nullptr || panelsView == nullptr || treePanelsView == nullptr) {
-            HotShutdown(hot);
+            Hot_shutdown(hot);
             TerminalTreeView_free(tree);
             Tui_free(&state);
             return 1;
@@ -378,7 +377,7 @@ int main(int argc, char **argv) {
     }
     const char *greeting = sessionMode ? "Primeagen | OpenCode-backed chat; no model request until Enter" : "Primeagen | Type /connect or click /connect below to chat with OpenCode Go. No key is copied; uses your existing login.";
     if (!Tui_add(&state, greeting, strlen(greeting))) {
-        HotShutdown(hot);
+        Hot_shutdown(hot);
         TerminalTreeView_free(tree);
         Tui_free(&state);
         return 1;
@@ -386,13 +385,13 @@ int main(int argc, char **argv) {
     if (sessionMode) {
         const char *notice = "OpenCode session | read/glob/grep auto | edit/shell/web ask: [o]nce [a]lways [r]eject | Ctrl-Q exits";
         if (!Tui_add(&state, notice, strlen(notice))) {
-            HotShutdown(hot);
+            Hot_shutdown(hot);
             TerminalTreeView_free(tree);
             Tui_free(&state);
             return 1;
         }
     }
-#include "src/settings.h"
+#include "primeagen/json/settings.h"
 
     // Apply the persisted look before the first frame: the appearance lives in the
     // view module, so it is set through the same pointer the draws use.
@@ -438,7 +437,7 @@ int main(int argc, char **argv) {
     setlocale(LC_CTYPE, ""); // text symbols, not emoji; ASCII fallback if unavailable
     SCREEN *screen = newterm(nullptr, stdout, stdin);
     if (screen == nullptr) {
-        HotShutdown(hot);
+        Hot_shutdown(hot);
         TerminalTreeView_free(tree);
         Tui_free(&state);
         THROW("terminal initialization failed");
@@ -532,7 +531,7 @@ int main(int argc, char **argv) {
             ok = openTurn(&state, &turnOpen) &&
                  Tui_addStyled(&state, "working...", 10, TEXT_STYLE_CODE, false) && (workingShown = true);
         if (updateRequested && !SessionBridge_isBusy(&bridge)) {
-            uint64_t before = Hot_get_generation(hot);
+            uint64_t before = Hot_getGeneration(hot);
             uint32_t loaded = 0;
             bool updated = Primeagen_update(hot, updatePayload, updateChecksum, &loaded);
             if (Hot_requiresRecovery(hot)) {
@@ -540,18 +539,18 @@ int main(int argc, char **argv) {
                 break;
             }
         if (updated) {
-                view = (PrimeagenDrawFn) Hot_get_symbol(hot, "Primeagen_draw");
-                localCommand = (PrimeagenCommandFn) Hot_get_symbol(hot, "Primeagen_command");
-                panelsView = (PrimeagenPanelsFn) Hot_get_symbol(hot, "Primeagen_drawPanels");
-                treePanelsView = (PrimeagenTreePanelsFn) Hot_get_symbol(hot, "Primeagen_drawTreePanels");
-                PrimeagenAppearanceFn refreshed = (PrimeagenAppearanceFn) Hot_get_symbol(hot, "Primeagen_setAppearance");
+                view = (PrimeagenDrawFn) Hot_getSymbol(hot, "Primeagen_draw");
+                localCommand = (PrimeagenCommandFn) Hot_getSymbol(hot, "Primeagen_command");
+                panelsView = (PrimeagenPanelsFn) Hot_getSymbol(hot, "Primeagen_drawPanels");
+                treePanelsView = (PrimeagenTreePanelsFn) Hot_getSymbol(hot, "Primeagen_drawTreePanels");
+                PrimeagenAppearanceFn refreshed = (PrimeagenAppearanceFn) Hot_getSymbol(hot, "Primeagen_setAppearance");
                 if (refreshed != nullptr)
                     appearanceView = refreshed;
                 (void) appearanceView(PrimeagenAppearance_name());
             }
             char notice[192];
             snprintf(notice, sizeof(notice), updated ? "Updated running CLI: generation %llu -> %llu. Resumed." : "Update rejected; running generation %llu retained. Resumed.",
-                     (unsigned long long) before, (unsigned long long) Hot_get_generation(hot));
+                     (unsigned long long) before, (unsigned long long) Hot_getGeneration(hot));
             ok = view != nullptr && localCommand != nullptr && panelsView != nullptr && treePanelsView != nullptr && Tui_add(&state, notice, strlen(notice));
             updateRequested = false;
             Tui_setDirty(&state, true);
@@ -830,7 +829,7 @@ int main(int argc, char **argv) {
     free(row);
     free(styles);
     Tui_free(&state);
-    HotShutdown(hot);
+    Hot_shutdown(hot);
     if (ok && connectRequested)
         return connectHost(sessionHost, owo);
     if (!ok)

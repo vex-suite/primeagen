@@ -11,9 +11,8 @@
 #include <curses.h>
 
 #include "cli/screen.h"
-#include "image/png.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "decode/png.h"
+#include "annotation/annotation.h"
 
 ;;DEFINITION
 /** A development preview, not the product: it exists so the frame can be looked

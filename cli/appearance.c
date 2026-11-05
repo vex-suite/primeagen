@@ -6,8 +6,7 @@
 
 #include "ui/surface/terminal_canvas.h"
 #include "format/terminal_style.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 
 ;;DEFINITION
 /** The app's chosen look and its rule drawing. The choice is a preset NAME

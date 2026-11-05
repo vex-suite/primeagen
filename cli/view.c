@@ -3,9 +3,8 @@
 #include "cli/appearance.h"
 #include "cli/screen.h"
 #include "tui/utf8.h"
-#include "hot/hot.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "hotcwap/hot.h"
+#include "annotation/annotation.h"
 #include <curses.h>
 #include <string.h>
 #include <wchar.h>
@@ -22,7 +21,7 @@
  *   bool Primeagen_draw(Tui *, bool owo, bool focused, bool sessionMode, bool busy,
  *                       bool failed, char *row, uint8_t *styles, size_t cap)
  *       Paint the sole live Users/OpenCode context to the right-side chat pane.
- *   const void *VkModuleGetTrampolines(uint32_t *count) : trusted loader exports.
+ *   const void *Hot_getExports(uint32_t *count) : trusted loader exports.
  *   int Primeagen_command(Tui *, bool sessionMode) : local command admission;
  *       emits display notices/actions, never executes model/provider/tools.
  * PRIVATE: attributes(style) : host-defined visible style to ncurses attributes.
@@ -414,7 +413,7 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
     return refresh() != ERR;
 }
 
-const void *VkModuleGetTrampolines(uint32_t *count) {
+const void *Hot_getExports(uint32_t *count) {
     static const struct { const char *name; void *fn; } exports[] = {
         {"Primeagen_draw", (void*) Primeagen_draw}, {"Primeagen_command", (void*) Primeagen_command},
         {"Primeagen_drawPanels", (void*) Primeagen_drawPanels},

@@ -12,8 +12,7 @@
 #include "ui/text/terminal_text_view.h"
 #include "ui/field/terminal_input_line.h"
 #include "ui/text/terminal_status_bar.h"
-#include "annotation/definition.h"
-#include "annotation/overview.h"
+#include "annotation/annotation.h"
 
 ;;DEFINITION
 /** Primeagen's frame as a RENDERER: the whole screen is composed into an owned

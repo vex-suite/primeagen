@@ -7,7 +7,7 @@
 // rebuild and a Hot_cold_abi version bump, not migration by address casting.
 typedef bool (*PrimeagenDrawFn)(Tui *, bool, bool, bool, bool, bool, char *, uint8_t *, size_t);
 typedef int (*PrimeagenCommandFn)(Tui *, bool);
-typedef bool (*PrimeagenAppearanceFn)(const char *);
+typedef bool (*PrimeagenAppearanceFn)(const char*);
 typedef bool (*PrimeagenBannerFn)(const uint8_t *, uint32_t, uint32_t);
 typedef bool (*PrimeagenPanelsFn)(Tui *, bool, bool, bool, bool, bool, int, int, int, char *, uint8_t *, size_t);
 typedef bool (*PrimeagenTreePanelsFn)(Tui *, TerminalTreeView *, bool, bool, bool, bool, bool,
