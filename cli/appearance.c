@@ -23,7 +23,7 @@
  *   static TerminalAppearance s_current   resolved preset (lazy default)
  *   static bool s_loaded                  false until first use
  *   static char s_name[]                  the chosen preset name
- *   static uint32_t *s_cells; size_t s_cap  rule scratch (cold growth)
+ *   static u32 *s_cells; bytes s_cap  rule scratch (cold growth)
  * FUNCTION REGISTRY:
  *   - void PrimeagenAppearance_use(const char *presetName)
  *   - const TerminalAppearance *PrimeagenAppearance_current(void)
@@ -39,9 +39,9 @@
 static TerminalAppearance s_current;
 static bool s_loaded = false;
 static char s_name[PRIMEAGEN_APPEARANCE_NAME_MAX] = "ascii-striped";
-static uint32_t *s_cells = nullptr;
-static size_t s_cap = 0;
-static uint16_t *s_styles = nullptr;
+static u32 *s_cells = nullptr;
+static bytes s_cap = 0;
+static u16 *s_styles = nullptr;
 
 const TerminalAppearance *PrimeagenAppearance_current(void) {
     if (!s_loaded) {
@@ -56,7 +56,7 @@ const char *PrimeagenAppearance_name(void) { return s_name; }
 void PrimeagenAppearance_use(const char *presetName) {
     const char *wanted = (presetName != nullptr && presetName[0] != '\0') ? presetName : "ascii-striped";
     s_current = TerminalAppearance_named(wanted);
-    size_t n = strlen(wanted);
+    bytes n = strlen(wanted);
     if (n >= sizeof s_name)
         n = sizeof s_name - 1;
     memcpy(s_name, wanted, n);
@@ -67,18 +67,18 @@ void PrimeagenAppearance_use(const char *presetName) {
 bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
     if (win == nullptr || width <= 0 || row < 0 || left < 0)
         return false;
-    if ((size_t) width > s_cap) {
-        uint32_t *cells = (uint32_t*) realloc(s_cells, (size_t) width * sizeof(uint32_t));
+    if ((bytes) width > s_cap) {
+        u32 *cells = (u32*) realloc(s_cells, (bytes) width * sizeof(u32));
         if (cells == nullptr)
             return false;
         s_cells = cells;
-        uint16_t *styles = (uint16_t*) realloc(s_styles, (size_t) width * sizeof(uint16_t));
+        u16 *styles = (u16*) realloc(s_styles, (bytes) width * sizeof(u16));
         if (styles == nullptr)
             return false;
         s_styles = styles;
-        s_cap = (size_t) width;
+        s_cap = (bytes) width;
     }
-    TerminalCanvas canvas = TerminalCanvas(s_cells, s_styles, (size_t) width, 1);
+    TerminalCanvas canvas = TerminalCanvas(s_cells, s_styles, (bytes) width, 1);
     if (!TerminalCanvas_isValid(&canvas))
         return false;
     const TerminalAppearance *look = PrimeagenAppearance_current();
@@ -86,7 +86,7 @@ bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
 
     // One blit: wide-cell aware, dimmed, so a box-drawing or ASCII glyph both land.
     for (int x = 0; x < width; ++x) {
-        uint32_t cp = TerminalCanvas_glyphAt(&canvas, (size_t) x, 0);
+        u32 cp = TerminalCanvas_glyphAt(&canvas, (bytes) x, 0);
         if (cp == 0)
             continue;   // wide-glyph continuation cell: the wide cell already spans it
         wchar_t text[2] = { (wchar_t) cp, L'\0' };

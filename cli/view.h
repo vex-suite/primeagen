@@ -5,13 +5,13 @@
 // Cold reload contract: resident host owns Tui, ncurses and borrowed session
 // pipes. Views own no state or callbacks. Incompatible layout requires a host
 // rebuild and a Hot_cold_abi version bump, not migration by address casting.
-typedef bool (*PrimeagenDrawFn)(Tui *, bool, bool, bool, bool, bool, char *, uint8_t *, size_t);
+typedef bool (*PrimeagenDrawFn)(Tui *, bool, bool, bool, bool, bool, char *, u8 *, bytes);
 typedef int (*PrimeagenCommandFn)(Tui *, bool);
 typedef bool (*PrimeagenAppearanceFn)(const char*);
-typedef bool (*PrimeagenBannerFn)(const uint8_t *, uint32_t, uint32_t);
-typedef bool (*PrimeagenPanelsFn)(Tui *, bool, bool, bool, bool, bool, int, int, int, char *, uint8_t *, size_t);
+typedef bool (*PrimeagenBannerFn)(const u8 *, u32, u32);
+typedef bool (*PrimeagenPanelsFn)(Tui *, bool, bool, bool, bool, bool, int, int, int, char *, u8 *, bytes);
 typedef bool (*PrimeagenTreePanelsFn)(Tui *, TerminalTreeView *, bool, bool, bool, bool, bool,
-                                      int, int, int, char *, uint8_t *, size_t);
+                                      int, int, int, char *, u8 *, bytes);
 // Presentation defaults, overridden by the host's --list-width option. Below the
 // rail/list safety floor the view collapses to a full-width chat.
 #define PRIMEAGEN_LIST_WIDTH_DEFAULT 32
@@ -34,10 +34,10 @@ bool Primeagen_panelsClick(int x, int y, int rows, int columns, int listWidth,
                            int panel, int selection, int *outPanel, int *outSelection);
 bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
                           int panel, int selection, int listWidth,
-                          char *row, uint8_t *styles, size_t cap);
+                          char *row, u8 *styles, bytes cap);
 bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool focused,
                               bool sessionMode, bool busy, bool failed, int panel, int selection,
-                              int listWidth, char *row, uint8_t *styles, size_t cap);
+                              int listWidth, char *row, u8 *styles, bytes cap);
 #define PRIMEAGEN_COMMAND_MESSAGE 1
 #define PRIMEAGEN_COMMAND_CONNECT 2
 #define PRIMEAGEN_COMMAND_QUIT 3
@@ -47,7 +47,7 @@ int Primeagen_command(Tui *state, bool sessionMode);
 // draw/command pointers so a hot swap adopts the same appearance.
 bool Primeagen_setAppearance(const char *presetName);
 // The app's banner image: the host decodes its own PNG and pushes the pixels.
-bool Primeagen_setBanner(const uint8_t *rgba, uint32_t width, uint32_t height);
+bool Primeagen_setBanner(const u8 *rgba, u32 width, u32 height);
 bool Primeagen_draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
-                    char *row, uint8_t *styles, size_t cap);
+                    char *row, u8 *styles, bytes cap);
 #endif

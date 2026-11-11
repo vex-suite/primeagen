@@ -53,17 +53,17 @@ typedef struct PendingKey {
     const char *value;   // NUL-terminated, in-place within the buffer
 } PendingKey;
 
-static bool isKeyName(const char *name, size_t length) {
+static bool isKeyName(const char *name, bytes length) {
     static const char *const KEYS[ENV_FILE_KEYS_MAX] = {"OPENAI_API_KEY", "ANTHROPIC_API_KEY"};
-    for (size_t i = 0; i < ENV_FILE_KEYS_MAX; ++i) {
+    for (bytes i = 0; i < ENV_FILE_KEYS_MAX; ++i) {
         if (strlen(KEYS[i]) == length && memcmp(KEYS[i], name, length) == 0)
             return true;
     }
     return false;
 }
 
-static bool valueCharsValid(const char *value, size_t length) {
-    for (size_t i = 0; i < length; ++i) {
+static bool valueCharsValid(const char *value, bytes length) {
+    for (bytes i = 0; i < length; ++i) {
         unsigned char c = (unsigned char) value[i];
         if (c < 33 || c > 126 || c == '"' || c == '\'')
             return false;
@@ -72,9 +72,9 @@ static bool valueCharsValid(const char *value, size_t length) {
 }
 
 /** Strip one matching quote pair when the value opens with a quote. */
-static bool stripQuotes(const char **value, size_t *length) {
+static bool stripQuotes(const char **value, bytes *length) {
     const char *text = *value;
-    size_t size = *length;
+    bytes size = *length;
     if (size > 0 && (text[0] == '\'' || text[0] == '"')) {
         if (size < 2 || text[size - 1] != text[0])
             return false;
@@ -88,15 +88,15 @@ static bool stripQuotes(const char **value, size_t *length) {
  * Validate the whole file into `out`. Mutates only the owned buffer (NUL
  * termination). Returns the number of keys, or -1 on any rejection.
  */
-static int parseAll(char *buffer, size_t length, PendingKey *out, size_t cap) {
-    size_t count = 0;
-    size_t at = 0;
+static int parseAll(char *buffer, bytes length, PendingKey *out, bytes cap) {
+    bytes count = 0;
+    bytes at = 0;
     while (at < length) {
-        size_t end = at;
+        bytes end = at;
         while (end < length && buffer[end] != '\n')
             ++end;
-        size_t lineStart = at;
-        size_t lineEnd = end;                       // exclusive of '\n'
+        bytes lineStart = at;
+        bytes lineEnd = end;                       // exclusive of '\n'
         if (lineEnd > lineStart && buffer[lineEnd - 1] == '\r')
             --lineEnd;                              // permit CRLF endings
         while (lineStart < lineEnd && (buffer[lineStart] == ' ' || buffer[lineStart] == '\t'))
@@ -107,31 +107,31 @@ static int parseAll(char *buffer, size_t length, PendingKey *out, size_t cap) {
         if (lineStart == lineEnd || buffer[lineStart] == '#')
             continue;
 
-        size_t equals = lineStart;
+        bytes equals = lineStart;
         while (equals < lineEnd && buffer[equals] != '=')
             ++equals;
         if (equals == lineEnd)
             return -1;                              // no assignment
-        size_t nameStart = lineStart;
-        size_t nameEnd = equals;
+        bytes nameStart = lineStart;
+        bytes nameEnd = equals;
         while (nameEnd > nameStart && (buffer[nameEnd - 1] == ' ' || buffer[nameEnd - 1] == '\t'))
             --nameEnd;
         if (!isKeyName(buffer + nameStart, nameEnd - nameStart))
             return -1;
-        for (size_t i = 0; i < count; ++i) {
+        for (bytes i = 0; i < count; ++i) {
             if (strlen(out[i].name) == nameEnd - nameStart &&
                 memcmp(out[i].name, buffer + nameStart, nameEnd - nameStart) == 0)
                 return -1;                          // duplicate assignment
         }
 
-        size_t valueStart = equals + 1;
-        size_t valueEnd = lineEnd;
+        bytes valueStart = equals + 1;
+        bytes valueEnd = lineEnd;
         while (valueStart < valueEnd && (buffer[valueStart] == ' ' || buffer[valueStart] == '\t'))
             ++valueStart;
         while (valueEnd > valueStart && (buffer[valueEnd - 1] == ' ' || buffer[valueEnd - 1] == '\t'))
             --valueEnd;
         const char *value = buffer + valueStart;
-        size_t valueLength = valueEnd - valueStart;
+        bytes valueLength = valueEnd - valueStart;
         if (!stripQuotes(&value, &valueLength))
             return -1;
         if (!valueCharsValid(value, valueLength))
@@ -166,7 +166,7 @@ bool EnvFile_load(const char *path) {
         return false;
     }
     char buffer[ENV_FILE_BYTES_MAX + 1];
-    size_t total = 0;
+    bytes total = 0;
     while (total < ENV_FILE_BYTES_MAX + 1) {
         ssize_t got = read(descriptor, buffer + total, (ENV_FILE_BYTES_MAX + 1) - total);
         if (got < 0) {
@@ -176,7 +176,7 @@ bool EnvFile_load(const char *path) {
         }
         if (got == 0)
             break;
-        total += (size_t) got;
+        total += (bytes) got;
     }
     close(descriptor);
     if (total > ENV_FILE_BYTES_MAX) {

@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     }
     const char *tag = argv[3];
     char *data = nullptr, *output = nullptr;
-    size_t length = 0, used = 0;
+    bytes length = 0, used = 0;
     bool ok = false;
     if (argc == 5 && strcmp(tag, "read") == 0)
         ok = ToolRead_execute(root, argv[4], budget, &output, &used);

@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     assert(strcmp(name, "a") == 0 && parent >= 0);
     close(parent);
     char *text = nullptr;
-    size_t length = 99;
+    bytes length = 99;
     assert(!ToolFs_read(root, "a", 16, nullptr, &length));
     assert(!ToolFs_read(root, "a", 16, &text, nullptr));
     assert(!ToolFs_read(root, "a", 0, &text, &length));

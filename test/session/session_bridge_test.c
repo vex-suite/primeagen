@@ -132,7 +132,7 @@ int main(void) {
     const char *malformed[] = {"{\"ask\":{\"id\":\"per_abc\"}}\n",
                                "{\"ask\":{\"id\":\"per_abc\",\"label\":\"x\",\"extra\":1}}\n",
                                "{\"ask\":{\"id\":5,\"label\":\"x\"}}\n"};
-    for (size_t i = 0; i < sizeof(malformed) / sizeof(*malformed); ++i) {
+    for (bytes i = 0; i < sizeof(malformed) / sizeof(*malformed); ++i) {
         fixture(request, response, &bridge);
         assert(SessionBridge_submit(&bridge, "malformed"));
         assert(write(response[1], malformed[i], strlen(malformed[i])) == (ssize_t) strlen(malformed[i]));
@@ -143,7 +143,7 @@ int main(void) {
     fixture(request, response, &bridge);
     const char *bad[] = {"{}\n", "{\"ok\":true,\"ok\":true}\n", "{\"ok\":false,\"text\":\"secret\"}\n",
                         "{\"ok\":true,\"text\":\"a\\u0000b\"}\n", "not-json\n"};
-    for (size_t i = 0; i < sizeof(bad) / sizeof(*bad); ++i) {
+    for (bytes i = 0; i < sizeof(bad) / sizeof(*bad); ++i) {
         fixture(request, response, &bridge);
         assert(SessionBridge_submit(&bridge, "test"));
         assert(write(response[1], bad[i], strlen(bad[i])) == (ssize_t) strlen(bad[i]));
@@ -184,7 +184,7 @@ int main(void) {
     cleanup(request, response, &bridge);
     /* A malformed note frame is a wire defect, not a silent skip. */
     const char *badNote[] = {"{\"note\":5}\n", "{\"note\":\"x\",\"extra\":1}\n", "{\"note\":\"a\\u0000b\"}\n"};
-    for (size_t i = 0; i < sizeof(badNote) / sizeof(*badNote); ++i) {
+    for (bytes i = 0; i < sizeof(badNote) / sizeof(*badNote); ++i) {
         fixture(request, response, &bridge);
         assert(SessionBridge_submit(&bridge, "bad note"));
         assert(write(response[1], badNote[i], strlen(badNote[i])) == (ssize_t) strlen(badNote[i]));
@@ -197,7 +197,7 @@ int main(void) {
     oversized[sizeof(oversized) - 1] = '\0';
     assert(!SessionBridge_submit(&bridge, oversized));
     assert(SessionBridge_submit(&bridge, "idle watchdog"));
-    const uint64_t admitted = bridge.startedMs;
+    const u64 admitted = bridge.startedMs;
     const char *firstNote = "{\"note\":\"first\"}\n";
     assert(write(response[1], firstNote, strlen(firstNote)) == (ssize_t) strlen(firstNote));
     struct timespec pause = {0, 20000000}; /* 20ms: advance the millisecond clock only. */
@@ -219,8 +219,8 @@ int main(void) {
     fixture(request, response, &bridge);
     assert(SessionBridge_submit(&bridge, "wire overflow"));
     char block[1024]; memset(block, 'x', sizeof(block));
-    for (size_t i = 0; i < 64; ++i) {
-        size_t size = i == 63 ? sizeof(block) - 1 : sizeof(block);
+    for (bytes i = 0; i < 64; ++i) {
+        bytes size = i == 63 ? sizeof(block) - 1 : sizeof(block);
         assert(write(response[1], block, size) == (ssize_t) size);
         assert(SessionBridge_poll(&bridge) == 0);
     }

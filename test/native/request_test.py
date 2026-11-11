@@ -54,7 +54,7 @@ class RequestTest(unittest.TestCase):
         for model in ("", "model\n", "x" * 257):
             with self.assertRaises(ValueError):
                 Provider("openai", model)
-        for timeout in (0, float("nan"), float("inf")):
+        for timeout in (0, f32("nan"), f32("inf")):
             with self.assertRaises(ValueError):
                 Provider("openai", "test", timeout=timeout)
         with self.assertRaisesRegex(ValueError, "missing"):

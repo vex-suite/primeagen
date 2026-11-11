@@ -15,9 +15,9 @@
 #define AT(y, x) (screen.cells[(y) * COLS + (x)])
 
 // A tiny "white paper, dark ink" image: one dark pixel, one blank.
-static uint8_t pixels[2 * 4] = { 0, 0, 0, 255,   255, 255, 255, 255 };
+static u8 pixels[2 * 4] = { 0, 0, 0, 255,   255, 255, 255, 255 };
 // A bright-paper banner (the other polarity).
-static uint8_t brightPixels[2 * 4] = { 255, 255, 255, 255,   255, 255, 255, 255 };
+static u8 brightPixels[2 * 4] = { 255, 255, 255, 255,   255, 255, 255, 255 };
 
 int main(void) {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
@@ -90,8 +90,8 @@ int main(void) {
     // The picture is zoom-fit in the panel, and its decor fills the panel.
     assert(AT(1, 24) == ' ');
     int bannerInk = 0;
-    for (size_t y = 0; y < ROWS; ++y)
-        for (size_t x = 24; x < COLS - 1; ++x)
+    for (bytes y = 0; y < ROWS; ++y)
+        for (bytes x = 24; x < COLS - 1; ++x)
             if (AT(y, x) != ' ')
                 bannerInk = 1;
     assert(bannerInk);
@@ -117,7 +117,7 @@ int main(void) {
         PrimeagenScreen_renderHome(&edge, "Primeagen", menu, 3, 0, nullptr);
         // One row below the minimum: the centred notice, not a half-drawn frame.
         int notice = 0;
-        for (size_t i = 0; i < (size_t) PRIMEAGEN_SCREEN_MIN_ROWS * (PRIMEAGEN_SCREEN_MIN_COLUMNS - 1); ++i)
+        for (bytes i = 0; i < (bytes) PRIMEAGEN_SCREEN_MIN_ROWS * (PRIMEAGEN_SCREEN_MIN_COLUMNS - 1); ++i)
             if (edge.cells[i] == 'R')
                 notice = 1;
         assert(notice);
@@ -152,7 +152,7 @@ int main(void) {
     assert(TerminalCanvas_fgAt(&canvas, 3, 5) != TERMINAL_COLOR_DEFAULT);
     // The input prompt sits on the input row; the transcript carries the text.
     int seen = 0;
-    for (size_t i = 0; i < ROWS * COLS; ++i)
+    for (bytes i = 0; i < ROWS * COLS; ++i)
         if (screen.cells[i] == 'h')
             seen = 1;
     assert(seen);
@@ -183,12 +183,12 @@ int main(void) {
     // so the field is sized by the panel rather than by the picture's fit rect.
     assert(AT(1, 24) != ' ');
     assert(AT(ROWS - 2, COLS - 2) != ' ');
-    uint32_t paper[COLS];
-    for (size_t x = 24; x < COLS - 2; ++x)
+    u32 paper[COLS];
+    for (bytes x = 24; x < COLS - 2; ++x)
         paper[x] = AT(9, x);
     PrimeagenScreen_renderHome(&screen, "Primeagen", menu, 3, 0, stored);
     int rescattered = 0;
-    for (size_t x = 24; x < COLS - 2; ++x)
+    for (bytes x = 24; x < COLS - 2; ++x)
         if (AT(9, x) != paper[x])
             rescattered = 1;
     assert(rescattered);

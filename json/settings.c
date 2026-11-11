@@ -36,7 +36,7 @@
  *     char provider[SETTINGS_PROVIDER_MAX]; // openai / anthropic / local ("" = unset)
  *     char model[SETTINGS_MODEL_MAX];       // selected model id ("" = unset)
  *     bool owo;                             // canonical C personality prompt on
- *     uint32_t consent;                     // SettingsConsent (prompt / deny)
+ *     u32 consent;                     // SettingsConsent (prompt / deny)
  *     char appearance[SETTINGS_APPEARANCE_MAX]; // TerminalAppearance preset name
  *   }
  *
@@ -62,10 +62,10 @@
 
 #define SETTINGS_BYTES_MAX 4096u
 
-static bool copyBounded(char *dest, size_t cap, const char *value) {
+static bool copyBounded(char *dest, bytes cap, const char *value) {
     if (value == nullptr)
         return false;
-    size_t length = strlen(value);
+    bytes length = strlen(value);
     if (length >= cap)
         return false;
     memcpy(dest, value, length + 1);
@@ -105,7 +105,7 @@ void Settings_setOwo(Settings *self, bool value) {
         (*self).owo = value;
 }
 
-bool Settings_setConsent(Settings *self, uint32_t value) {
+bool Settings_setConsent(Settings *self, u32 value) {
     if (self == nullptr || value > SETTINGS_CONSENT_DENY)
         return false;
     (*self).consent = value;
@@ -124,7 +124,7 @@ bool Settings_isOwo(const Settings *self) {
     return self != nullptr && (*self).owo;
 }
 
-uint32_t Settings_getConsent(const Settings *self) {
+u32 Settings_getConsent(const Settings *self) {
     return self == nullptr ? SETTINGS_CONSENT_PROMPT : (*self).consent;
 }
 
@@ -135,18 +135,18 @@ static bool ensureManifest(void) {
     return state == 1;
 }
 
-bool Settings_resolvePath(char *dest, size_t cap) {
+bool Settings_resolvePath(char *dest, bytes cap) {
     if (dest == nullptr || cap == 0 || !ensureManifest())
         return false;
     const char *root = MANIFEST_ROOT();
     if (root == nullptr)
         return false;
     int written = snprintf(dest, cap, "%s/settings", root);
-    return written > 0 && (size_t) written < cap;
+    return written > 0 && (bytes) written < cap;
 }
 
 /** Apply one "name=value" line to `parsed`. False on unknown key / bad value. */
-static bool applyLine(Settings *parsed, const char *name, size_t nameLength, const char *value) {
+static bool applyLine(Settings *parsed, const char *name, bytes nameLength, const char *value) {
     if (nameLength == 8 && memcmp(name, "provider", 8) == 0)
         return Settings_setProvider(parsed, value);
     if (nameLength == 5 && memcmp(name, "model", 5) == 0)
@@ -191,7 +191,7 @@ bool Settings_load(Settings *self, const char *path) {
         return false;
     }
     char buffer[SETTINGS_BYTES_MAX + 1];
-    size_t total = 0;
+    bytes total = 0;
     while (total < SETTINGS_BYTES_MAX + 1) {
         ssize_t got = read(descriptor, buffer + total, (SETTINGS_BYTES_MAX + 1) - total);
         if (got < 0) {
@@ -201,7 +201,7 @@ bool Settings_load(Settings *self, const char *path) {
         }
         if (got == 0)
             break;
-        total += (size_t) got;
+        total += (bytes) got;
     }
     close(descriptor);
     if (total > SETTINGS_BYTES_MAX) {
@@ -211,13 +211,13 @@ bool Settings_load(Settings *self, const char *path) {
     buffer[total] = '\0';
 
     Settings parsed = Settings_0();
-    size_t at = 0;
+    bytes at = 0;
     while (at < total) {
-        size_t end = at;
+        bytes end = at;
         while (end < total && buffer[end] != '\n')
             ++end;
-        size_t start = at;
-        size_t lineEnd = end;
+        bytes start = at;
+        bytes lineEnd = end;
         if (lineEnd > start && buffer[lineEnd - 1] == '\r')
             --lineEnd;
         at = end + 1;
@@ -228,7 +228,7 @@ bool Settings_load(Settings *self, const char *path) {
         buffer[lineEnd] = '\0';  // terminate the value at the line end
         if (start == lineEnd || buffer[start] == '#')
             continue;
-        size_t equals = start;
+        bytes equals = start;
         while (equals < lineEnd && buffer[equals] != '=')
             ++equals;
         if (equals == lineEnd) {
@@ -250,7 +250,7 @@ bool Settings_save(const Settings *self, const char *path) {
         return false;
     char temporary[600];
     int written = snprintf(temporary, sizeof temporary, "%s.tmp", path);
-    if (written <= 0 || (size_t) written >= sizeof temporary)
+    if (written <= 0 || (bytes) written >= sizeof temporary)
         return false;
     int descriptor = open(temporary, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW, 0600);
     if (descriptor < 0) {
@@ -262,21 +262,21 @@ bool Settings_save(const Settings *self, const char *path) {
                           (*self).provider, (*self).model, (*self).owo ? 1 : 0,
                           (*self).consent == SETTINGS_CONSENT_DENY ? "deny" : "prompt",
                           Settings_getAppearance(self));
-    if (length <= 0 || (size_t) length >= sizeof body) {
+    if (length <= 0 || (bytes) length >= sizeof body) {
         close(descriptor);
         unlink(temporary);
         return false;
     }
-    size_t offset = 0;
-    while (offset < (size_t) length) {
-        ssize_t put = write(descriptor, body + offset, (size_t) length - offset);
+    bytes offset = 0;
+    while (offset < (bytes) length) {
+        ssize_t put = write(descriptor, body + offset, (bytes) length - offset);
         if (put < 0) {
             close(descriptor);
             unlink(temporary);
             THROW("settings: cannot write file");
             return false;
         }
-        offset += (size_t) put;
+        offset += (bytes) put;
     }
     if (fsync(descriptor) != 0 || close(descriptor) != 0) {
         unlink(temporary);

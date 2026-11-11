@@ -19,8 +19,8 @@
 //                                  earlier consent-relevant one.
 // Every rejection is cold and loud (THROW); caller storage stays caller-owned.
 
-bool JsonAdmit_parse(JsonDoc *doc, JsonNode *nodes, uint32_t nodeCap,
-                     char *scratch, uint32_t scratchCap, const char *text);
+bool JsonAdmit_parse(JsonDoc *doc, JsonNode *nodes, u32 nodeCap,
+                     char *scratch, u32 scratchCap, const char *text);
 
 bool JsonAdmit_depthOk(const char *text);
 bool JsonAdmit_noDuplicateKeys(const JsonDoc *doc);

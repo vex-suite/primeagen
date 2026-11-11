@@ -5,7 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "c23/constructor.h"
+#include "util/constructor.h"
 
 // src/settings.h — persisted C-TUI settings (provider/model/personality/consent).
 //
@@ -30,7 +30,7 @@ typedef struct Settings {
     char provider[SETTINGS_PROVIDER_MAX];
     char model[SETTINGS_MODEL_MAX];
     bool owo;
-    uint32_t consent;
+    u32 consent;
     char appearance[SETTINGS_APPEARANCE_MAX];   // TerminalAppearance preset name
 } Settings;
 
@@ -40,18 +40,18 @@ Settings Settings_0(void);
 bool Settings_setProvider(Settings *self, const char *value);
 bool Settings_setModel(Settings *self, const char *value);
 void Settings_setOwo(Settings *self, bool value);
-bool Settings_setConsent(Settings *self, uint32_t value);
+bool Settings_setConsent(Settings *self, u32 value);
 bool Settings_setAppearance(Settings *self, const char *value);
 
 const char *Settings_getProvider(const Settings *self);
 const char *Settings_getModel(const Settings *self);
 bool Settings_isOwo(const Settings *self);
-uint32_t Settings_getConsent(const Settings *self);
+u32 Settings_getConsent(const Settings *self);
 const char *Settings_getAppearance(const Settings *self);
 
 // Resolve <app-data root>/settings (mounting + ensuring the manifest once).
 // false when the manifest cannot mount.
-bool Settings_resolvePath(char *dest, size_t cap);
+bool Settings_resolvePath(char *dest, bytes cap);
 
 // Load into self. Missing file leaves defaults and returns true; a malformed file
 // returns false and applies NOTHING.

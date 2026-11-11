@@ -46,7 +46,7 @@
  * ----------------------------------------------------------------------------
  * Private helpers:
  *   static void stop(int signalNumber) : flag shutdown; no terminal API/logging.
- *   static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, uint8_t *styles, size_t cap)
+ *   static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, u8 *styles, bytes cap)
  *     Draw per-cell styled wrapped viewport, fixed input/status and cursor.
  *     No model-supplied terminal escape sequences; unsupported italic uses underline.
  *   static int command(Tui *, bool) : local slash dispatch; connect/quit actions.
@@ -132,7 +132,7 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
     bool valid = true, pressed = true;
     timeout(TUI_MOUSE_READ_MS);
     if (key == TUI_MOUSE_X10) {
-        for (size_t i = 0; i < 3; ++i) {
+        for (bytes i = 0; i < 3; ++i) {
             int byte = getch();
             if (byte < 32 || byte > 255) {
                 valid = false;
@@ -141,7 +141,7 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
             fields[i] = (unsigned) byte - 32;
         }
     } else if (key == TUI_MOUSE_SGR) {
-        for (size_t i = 0; i < 3 && valid; ++i) {
+        for (bytes i = 0; i < 3 && valid; ++i) {
             int byte = getch();
             unsigned digits = 0;
             while (byte >= '0' && byte <= '9' && digits < 5) {
@@ -230,7 +230,7 @@ static int connectHost(const char *path, bool owo) {
     return 1;
 }
 
-static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, uint8_t *styles, size_t cap) {
+static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, u8 *styles, bytes cap) {
     return Primeagen_draw(state, owo, focused, sessionMode, busy, failed, row, styles, cap);
 }
 
@@ -346,7 +346,7 @@ int main(int argc, char **argv) {
     PrimeagenAppearanceFn appearanceView = Primeagen_setAppearance;
     PrimeagenBannerFn bannerView = Primeagen_setBanner;
     if (updatePayload != nullptr || updateChecksum != nullptr) {
-        uint32_t loaded;
+        u32 loaded;
         if (updatePayload == nullptr || updateChecksum == nullptr ||
             !MANIFEST(MANIFEST_APP_DATA, "vexgraph", "primeagen") ||
             !MANIFEST_LIBRARY("primeagen", (const char*) nullptr) || !MANIFEST_ENSURE() ||
@@ -409,8 +409,8 @@ int main(int argc, char **argv) {
     // host owns no engine arena), then hand the pixels to the view. The view
     // rasterises them into terminal cells on every render, so a resize simply
     // re-samples — the picture is never a cached bitmap.
-    uint8_t *bannerPixels = nullptr;
-    uint32_t bannerWidth = 0, bannerHeight = 0;
+    u8 *bannerPixels = nullptr;
+    u32 bannerWidth = 0, bannerHeight = 0;
     {
         char bannerPath[1200];
         const char *bannerRoot = getenv("PRIMEAGEN_ROOT");
@@ -426,8 +426,8 @@ int main(int argc, char **argv) {
         }
         FILE *bannerFile = fopen(bannerPath, "rb");
         if (bannerFile != nullptr) {
-            static uint8_t pngBytes[1u << 20];
-            size_t pngLength = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
+            static u8 pngBytes[1u << 20];
+            bytes pngLength = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
             (void) fclose(bannerFile);
             if (Png_decodeMalloc(pngBytes, pngLength, &bannerPixels, &bannerWidth, &bannerHeight) == PNG_OK)
                 (void) bannerView(bannerPixels, bannerWidth, bannerHeight);
@@ -475,14 +475,14 @@ int main(int argc, char **argv) {
     ok = ok && define_key("\033[<", TUI_MOUSE_SGR) != ERR &&
          define_key("\033[M", TUI_MOUSE_X10) != ERR && mouseReporting(!selectText);
     char *row = nullptr;
-    uint8_t *styles = nullptr;
-    size_t capacity = 0;
+    u8 *styles = nullptr;
+    bytes capacity = 0;
     bool focused = true;
     bool sessionFailed = false;
     bool updateRequested = false;
     bool turnOpen = false;
     bool workingShown = false;
-    uint32_t shownApproval = 0;
+    u32 shownApproval = 0;
     while (ok && !stopped) {
         int completed = SessionBridge_poll(&bridge);
         if (workingShown) {
@@ -531,8 +531,8 @@ int main(int argc, char **argv) {
             ok = openTurn(&state, &turnOpen) &&
                  Tui_addStyled(&state, "working...", 10, TEXT_STYLE_CODE, false) && (workingShown = true);
         if (updateRequested && !SessionBridge_isBusy(&bridge)) {
-            uint64_t before = Hot_getGeneration(hot);
-            uint32_t loaded = 0;
+            u64 before = Hot_getGeneration(hot);
+            u32 loaded = 0;
             bool updated = Primeagen_update(hot, updatePayload, updateChecksum, &loaded);
             if (Hot_requiresRecovery(hot)) {
                 ok = false; // unresolved is not success/failure resolution; stop
@@ -570,9 +570,9 @@ int main(int argc, char **argv) {
             // stale cells survive a resize.
             (void) clear();
         }
-        size_t needed = Tui_getRowCapacity(&state);
-        if ((size_t) columns + 1 > needed)
-            needed = (size_t) columns + 1;
+        bytes needed = Tui_getRowCapacity(&state);
+        if ((bytes) columns + 1 > needed)
+            needed = (bytes) columns + 1;
         if (needed > capacity) {
             char *next = realloc(row, needed);
             if (next == nullptr) {
@@ -580,7 +580,7 @@ int main(int argc, char **argv) {
                 break;
             }
             row = next;
-            uint8_t *nextStyles = realloc(styles, needed);
+            u8 *nextStyles = realloc(styles, needed);
             if (nextStyles == nullptr) {
                 ok = false;
                 break;
@@ -624,10 +624,10 @@ int main(int argc, char **argv) {
             Tui_setDirty(&state, true);
         }
         else if ((key == KEY_UP || key == KEY_DOWN) && !liveSelected) {
-            size_t rowIndex = TerminalTreeView_rowOf(tree, TerminalTreeView_getSelected(tree));
-            size_t count = TerminalTreeView_visibleCount(tree);
+            bytes rowIndex = TerminalTreeView_rowOf(tree, TerminalTreeView_getSelected(tree));
+            bytes count = TerminalTreeView_visibleCount(tree);
             if (rowIndex != TERMINAL_TREE_NO_ROW && count > 0) {
-                size_t next = key == KEY_UP ? (rowIndex == 0 ? 0 : rowIndex - 1) :
+                bytes next = key == KEY_UP ? (rowIndex == 0 ? 0 : rowIndex - 1) :
                               (rowIndex + 1 < count ? rowIndex + 1 : rowIndex);
                 TerminalTreeRow item = TerminalTreeView_rowAt(tree, next);
                 (void) TerminalTreeView_setSelected(tree, item.id);
@@ -696,7 +696,7 @@ int main(int argc, char **argv) {
                 else if (kind == TUI_MOUSE_WHEEL_DOWN)
                     (void) TerminalTreeView_scrollBy(tree, 3);
                 else if (kind == TUI_MOUSE_CLICK && y >= 1 && x < chatLeft - 1) {
-                    TerminalTreeNodeId id = TerminalTreeView_nodeAtOffset(tree, (size_t) (y - 1));
+                    TerminalTreeNodeId id = TerminalTreeView_nodeAtOffset(tree, (bytes) (y - 1));
                     if (id != TERMINAL_TREE_NO_NODE) {
                         if (TerminalTreeView_isFolder(tree, id))
                             (void) TerminalTreeView_toggle(tree, id);

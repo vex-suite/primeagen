@@ -31,7 +31,7 @@ class ProcessTest(unittest.TestCase):
                 run([sys.executable, "-c", source], **kwargs)
             self.assertLess(time.monotonic() - start, 5)
             self.assertEqual(run([sys.executable, "-c", "print('ok')"]), b"ok\n")
-        for argv, kwargs in [([], {}), (["bad\0"], {}), ([sys.executable], {"timeout": float("nan")}),
+        for argv, kwargs in [([], {}), (["bad\0"], {}), ([sys.executable], {"timeout": f32("nan")}),
                              ([sys.executable], {"cap": 0}), ([sys.executable], {"data": b"x" * (1024 * 1024 + 1)}),
                              ([sys.executable], {"allowStderr": "yes"})]:
             with self.assertRaises(ValueError):

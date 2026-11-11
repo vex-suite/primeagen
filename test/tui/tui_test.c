@@ -16,9 +16,9 @@ static bool fail(void) {
     --failAfter;
     return false;
 }
-static void *testMalloc(size_t n) { return fail() ? nullptr : malloc(n); }
-static void *testCalloc(size_t n, size_t s) { return fail() ? nullptr : calloc(n, s); }
-static void *testRealloc(void *p, size_t n) { return fail() ? nullptr : realloc(p, n); }
+static void *testMalloc(bytes n) { return fail() ? nullptr : malloc(n); }
+static void *testCalloc(bytes n, bytes s) { return fail() ? nullptr : calloc(n, s); }
+static void *testRealloc(void *p, bytes n) { return fail() ? nullptr : realloc(p, n); }
 #define malloc testMalloc
 #define calloc testCalloc
 #define realloc testRealloc
@@ -49,7 +49,7 @@ int main(void) {
         assert(Tui_add(&c, "row", 3));
     assert(Tui_getCount(&c) == 1025 && Tui_getCapacity(&c) >= 1025);
     Tui_setScroll(&c, 10);
-    size_t first = Tui_getFirstVisibleRow(&c);
+    bytes first = Tui_getFirstVisibleRow(&c);
     assert(Tui_add(&c, "next", 4));
     assert(Tui_getFirstVisibleRow(&c) == first);
     Tui_scrollBy(&c, INT64_MAX);
@@ -66,7 +66,7 @@ int main(void) {
     Tui_scrollBy(&c, -1);
     assert(Tui_getScroll(&c) == 0);
     /* The live "working..." placeholder is the trailing entry and pops alone. */
-    size_t before = Tui_getCount(&c);
+    bytes before = Tui_getCount(&c);
     assert(Tui_add(&c, "working...", 10));
     assert(Tui_getCount(&c) == before + 1);
     assert(Tui_popLast(&c) && Tui_getCount(&c) == before);
@@ -121,7 +121,7 @@ int main(void) {
     Tui_getSize(&c, nullptr, nullptr);
     Tui_inputClear(nullptr); Tui_clear(nullptr); Tui_free(nullptr);
     Tui_scrollBy(nullptr, 1); Tui_setScroll(nullptr, 1); Tui_setDirty(nullptr, true);
-    size_t count = Tui_getCount(&c);
+    bytes count = Tui_getCount(&c);
     failAfter = 0;
     assert(!Tui_add(&c, "preserve", 8) && Tui_getCount(&c) == count);
     assert(!Tui_setInput(&c, "preserve", 8) && Tui_getInputLength(&c) == 0);
@@ -133,7 +133,7 @@ int main(void) {
     failAfter = -1;
     assert(Tui_add(&c, "recovered", 9));
     Tui_clear(&c);
-    uint8_t styles[4096];
+    u8 styles[4096];
     assert(Tui_addStyled(&c, "**1234567890123456789**", 23, TEXT_STYLE_ASSISTANT, true));
     assert(Tui_getVisualRowCount(&c) == 2);
     assert(Tui_copyStyledRow(&c, 1, output, styles, sizeof(output), &cut));

@@ -21,7 +21,7 @@ static int failures = 0;
         }                                                              \
     } while (0)
 
-static void writeFile(const char *path, const void *data, size_t length) {
+static void writeFile(const char *path, const void *data, bytes length) {
     FILE *file = fopen(path, "wb");
     if (file == nullptr) {
         failures++;
@@ -83,7 +83,7 @@ int main(void) {
         "no-assignment",
         "ANTHROPIC_API_KEY=fake-secret\nOPENAI_API_KEY=\"multi\nline\"",
     };
-    for (size_t i = 0; i < sizeof bad / sizeof bad[0]; ++i) {
+    for (bytes i = 0; i < sizeof bad / sizeof bad[0]; ++i) {
         unsetenv("OPENAI_API_KEY");
         unsetenv("ANTHROPIC_API_KEY");
         setenv("UNCHANGED", "sentinel", 1);

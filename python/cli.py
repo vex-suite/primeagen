@@ -65,7 +65,7 @@ def main():
     parser.add_argument("--func", type=Path)
     parser.add_argument("--websearch-tool", type=Path, help="trusted search executable accepting one query argument")
     parser.add_argument("--tool-byte-cap", type=int, default=128 * 1024)
-    parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--timeout", type=f32, default=60.0)
     parser.add_argument("--max-steps", type=int, default=16)
     args = parser.parse_args()
     if args.command == "doctor":

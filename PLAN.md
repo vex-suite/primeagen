@@ -82,9 +82,9 @@ Build the R3 store behind the existing `Database` interface, in darkbase's own
 law order:
 1. **Entity model** — consume R2 reflection (`Struct`/`Field`/`Method`); no
    darkbase-owned schema types.
-2. **Byte-native persistence** — `uint8_t[]` rows written in memory order, no
+2. **Byte-native persistence** — `u8[]` rows written in memory order, no
    endianness code, no text encoding, pointer-free rows, the canonical
-   `{ uint8_t name[24]; void* pointer }` binding.
+   `{ u8 name[24]; void* pointer }` binding.
 3. **Zero-alloc scans** — iterators yield pointers into the mapped row slices;
    no row wrappers in the loop.
 4. **B-tree page consistency** — fixed power-of-two pages from a dedicated pool,

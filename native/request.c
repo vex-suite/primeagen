@@ -61,9 +61,9 @@ int main(int argc, char **argv) {
         return 1;
     }
     const char *instructions = Owo_instructions(argc == 5);
-    size_t prefix = strlen(instructions);
+    bytes prefix = strlen(instructions);
     char *input = malloc(INPUT_CAP + prefix + 1);
-    size_t bodyCap = INPUT_CAP * 6u + ENVELOPE_CAP;
+    bytes bodyCap = INPUT_CAP * 6u + ENVELOPE_CAP;
     char *body = malloc(bodyCap);
     if (input == nullptr || body == nullptr) {
         free(input);
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     memcpy(input, instructions, prefix);
-    size_t length = fread(input + prefix, 1, INPUT_CAP, stdin);
+    bytes length = fread(input + prefix, 1, INPUT_CAP, stdin);
     bool ok = length != 0 && !ferror(stdin) && fgetc(stdin) == EOF && memchr(input + prefix, 0, length) == nullptr;
     length += prefix;
     input[length] = '\0';

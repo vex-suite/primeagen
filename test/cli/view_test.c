@@ -54,7 +54,7 @@ int main(void) {
     assert(Tui_add(&state, "live chat", 9));
     assert(Tui_setInput(&state, "draft", 5));
     char row[256];
-    uint8_t styles[256];
+    u8 styles[256];
     assert(Primeagen_drawPanels(&state, false, true, false, false, false, 0, 0, 32, row, styles, sizeof row));
     int caretY, caretX;
     getyx(stdscr, caretY, caretX);
@@ -113,7 +113,7 @@ int main(void) {
     assert(Primeagen_drawTreePanels(&state, tree, false, true, false, false, false,
                                     PRIMEAGEN_PANEL_PEOPLE, 0, 32, row, styles, sizeof row));
     assert((mvinch(2, left + 2) & A_CHARTEXT) == 'l');
-    size_t scroll = Tui_getScroll(&state);
+    bytes scroll = Tui_getScroll(&state);
     assert(Primeagen_drawPanels(&state, false, true, false, false, false, PRIMEAGEN_PANEL_PEOPLE, 1, 32, row, styles, sizeof row));
     assert(Tui_getScroll(&state) == scroll);
     assert((mvinch(2, left + 1) & A_CHARTEXT) == 'u');
@@ -147,7 +147,7 @@ int main(void) {
     assert(getcchar(&cell, text, &attr, &pair, nullptr) == OK);
     assert(text[0] == L'e' && text[1] == (wchar_t) 0x301);
     const int widths[] = {20, 40, 63, 64, 80, 100, 200};
-    for (size_t i = 0; i < sizeof widths / sizeof widths[0]; ++i) {
+    for (bytes i = 0; i < sizeof widths / sizeof widths[0]; ++i) {
         int columns = widths[i];
         assert(resizeterm(10, columns) != ERR);
         left = Primeagen_chatLeft(columns, 32);

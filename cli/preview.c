@@ -54,11 +54,11 @@ int main(void) {
         (void) snprintf(bannerPath, sizeof bannerPath, "resources/w.png");
     FILE *bannerFile = fopen(bannerPath, "rb");
     if (bannerFile != nullptr) {
-        static uint8_t pngBytes[1u << 20];
-        size_t length = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
+        static u8 pngBytes[1u << 20];
+        bytes length = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
         (void) fclose(bannerFile);
-        uint8_t *rgba = nullptr;
-        uint32_t bannerWidth = 0, bannerHeight = 0;
+        u8 *rgba = nullptr;
+        u32 bannerWidth = 0, bannerHeight = 0;
         if (Png_decodeMalloc(pngBytes, length, &rgba, &bannerWidth, &bannerHeight) == PNG_OK)
             PrimeagenScreen_setBanner(rgba, bannerWidth, bannerHeight);
     }
@@ -95,13 +95,13 @@ int main(void) {
     int running = 1;
     int focusPanel = 0;
     int paint = 1;
-    size_t lastRows = 0, lastColumns = 0;
+    bytes lastRows = 0, lastColumns = 0;
     while (running) {
         int rows = 0, columns = 0;
         getmaxyx(stdscr, rows, columns);
         // A zoom, fullscreen or drag is a SIZE CHANGE, and it is revalidated here —
         // before painting — rather than trusting a KEY_RESIZE that may never come.
-        bool resized = (size_t) rows != lastRows || (size_t) columns != lastColumns;
+        bool resized = (bytes) rows != lastRows || (bytes) columns != lastColumns;
         (void) PrimeagenScreen_revalidate(&screen, rows, columns);
         if (!PrimeagenScreen_isBound(&screen))
             break;
@@ -123,8 +123,8 @@ int main(void) {
                 break;
             paint = 0;
         }
-        lastRows = (size_t) rows;
-        lastColumns = (size_t) columns;
+        lastRows = (bytes) rows;
+        lastColumns = (bytes) columns;
         int key = getch();
         if (key == ERR)
             continue;           // idle tick: re-check the size, paint nothing

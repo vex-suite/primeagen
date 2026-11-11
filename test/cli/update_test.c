@@ -14,7 +14,7 @@ static void render(HotModule *hot, Tui *state, char expected) {
     PrimeagenDrawFn fn = (PrimeagenDrawFn) Hot_getSymbol(hot, "Primeagen_draw");
     assert(fn);
     char row[128];
-    uint8_t styles[128];
+    u8 styles[128];
     assert(fn(state, false, true, false, false, false, row, styles, sizeof(row)));
     assert((mvinch(0, 11) & A_CHARTEXT) == (chtype) expected);
     assert((mvinch(18, 2) & A_CHARTEXT) == 'd');
@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     assert(MANIFEST_REFLECT("primeagen", argv[2]));
     HotModule *hot = Hot_init("primeagen");
     assert(hot);
-    uint32_t loaded;
+    u32 loaded;
     assert(Primeagen_update(hot, argv[2], argv[3], &loaded) && loaded == 1);
     FILE *input = tmpfile(), *output = tmpfile();
     assert(input && output);
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     assert(Tui_setInput(&state, "draft", 5));
     assert(Tui_add(&state, "history", 7));
     render(hot, &state, 'A');
-    uint64_t generation = Hot_getGeneration(hot);
+    u64 generation = Hot_getGeneration(hot);
     assert(Primeagen_update(hot, argv[4], argv[5], &loaded));
     assert(Hot_getGeneration(hot) == generation + 1);
     render(hot, &state, 'B');

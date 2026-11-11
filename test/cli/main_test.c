@@ -6,7 +6,7 @@
 #include <assert.h>
 
 static bool mouseSuffix(int key, const char *suffix, int *x, int *y, TuiMouseKind *kind) {
-    size_t length = strlen(suffix);
+    bytes length = strlen(suffix);
     while (length > 0)
         assert(ungetch((unsigned char) suffix[--length]) == OK);
     return readMouse(key, x, y, kind);
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     assert(Tui_add(&state, "visible", 7));
     assert(Tui_setInput(&state, "fixed", 5));
     char row[128];
-    uint8_t styles[128];
+    u8 styles[128];
     assert(draw(&state, true, true, false, false, false, row, styles, sizeof(row)));
     assert((mvinch(2, 1) & A_CHARTEXT) == 'v');
     assert((mvinch(18, 2) & A_CHARTEXT) == 'f');
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
     assert(command(&state, false) == TUI_COMMAND_CONNECT);
     assert(command(&state, true) == TUI_COMMAND_MESSAGE);
     assert(Tui_setInput(&state, "/server add", 11));
-    size_t before = Tui_getCount(&state);
+    bytes before = Tui_getCount(&state);
     assert(command(&state, true) == TUI_COMMAND_MESSAGE);
     assert(Tui_getCount(&state) == before + 1);
     assert(Tui_setInput(&state, "/quit", 5));
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     assert(mouseKind == TUI_MOUSE_WHEEL_DOWN); // modifier plus wheel
     assert(mouseSuffix(TUI_MOUSE_X10, "aR$", &mouseX, &mouseY, &mouseKind));
     assert(mouseKind == TUI_MOUSE_WHEEL_DOWN && mouseX == 49 && mouseY == 3);
-    for (size_t i = 0; i < 4; ++i) {
+    for (bytes i = 0; i < 4; ++i) {
         const char *bad[] = {"65;0;4M", "65;99999;4M", "65;50;4m", "32;50;4M"};
         assert(!mouseSuffix(TUI_MOUSE_SGR, bad[i], &mouseX, &mouseY, &mouseKind));
         assert(mouseX == 49 && mouseY == 3);
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
     assert((mvinch(18, 0) & A_CHARTEXT) == 'A');
     // The speaker label is opened once per turn, then reused for notes/answers.
     bool open = false;
-    size_t mark = Tui_getCount(&state);
+    bytes mark = Tui_getCount(&state);
     assert(openTurn(&state, &open) && open && Tui_getCount(&state) == mark + 1);
     assert(openTurn(&state, &open) && Tui_getCount(&state) == mark + 1);
     assert(Tui_setInput(&state, "ordinary text", 13));
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < 30; ++i)
         assert(Tui_add(&state, "extra", 5));
     Tui_scrollBy(&state, 10);
-    size_t scrollBefore = Tui_getScroll(&state);
+    bytes scrollBefore = Tui_getScroll(&state);
     assert(mouseSuffix(TUI_MOUSE_SGR, "65;2;4M", &mouseX, &mouseY, &mouseKind));
     TuiMouse_dispatch(&state, mouseX, mouseY, mouseKind);
     assert(Tui_getScroll(&state) < scrollBefore);
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
     assert((mvinch(13, 5) & A_CHARTEXT) == '#'); // the tree has one channel
     assert((mvinch(0, left + 1) & A_CHARTEXT) == 'O');
     assert((mvinch(22, left + 2) & A_CHARTEXT) == 'f');
-    size_t retainedCount = Tui_getCount(&state);
+    bytes retainedCount = Tui_getCount(&state);
     assert(Primeagen_panelsClick(8, 9, 24, 100, 32, panel, selected, &panel, &selected));
     assert(selected == 1);
     assert(Primeagen_drawPanels(&state, false, true, true, false, false, panel, selected, 32, row, styles, sizeof row));

@@ -307,7 +307,7 @@ Wheel-up/down and Up/Down scroll the transcript; End returns to the tail.
 The frame's horizontal rules are drawn by the **R3 Determinant toolkit** rather
 than a bare ncurses line: the look is a named `TerminalAppearance` preset
 (`ascii-solid`, `ascii-striped`, `ascii-dashed`, `unicode-light`,
-`unicode-emdash`, `unicode-double`) persisted as `appearance=` in the settings
+`unicode-emdash`, `unicode-d64`) persisted as `appearance=` in the settings
 record and applied through the same reload seam as the draw/command pointers, so
 a hot-swapped view adopts the same look without re-acquiring the terminal. Only
 the rules are migrated so far — the rest of the view still paints ncurses

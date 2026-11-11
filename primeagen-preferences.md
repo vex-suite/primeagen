@@ -2,53 +2,48 @@
 
 ## Constitution Link
 
-The complete [workspace constitution](https://gist.github.com/vex-graph/4132a6c45cb6d3797c3e8eff2e94035a)
-governs this project. The binding law list is `gist.md`
-(`../../metadata/gists/preferences/gist.md`); `../../../metadata/gists/preferences/PREFERENCES.md` is its full
-rationale and is never ingested whole. Read the law first, then this document, the proof
-lawbook `../../../tests/test-preferences.md` (slice one law with
-`./tools/prefs test "<title>"`), the evidence ledger
-`../../../metadata/gists/test-checklist.md`, and actual implementation.
+gist.md (`../../metadata/gists/preferences/gist.md`) is the compressed law list; all universal laws bind this repository. Read one on demand: `./tools/prefs law "<title>"`. Universal laws are inherited, never restated.
 
-## Law Index (Binding Matrix)
+Tier: app (R5). Owns: personal agent CLI/TUI frontend, ncurses view, consent policy. Borrows: Vexspoke JSON string writer (consumed, not duplicated), Harness Message and API Haven request envelopes via C23 binding.
+
+## Exclusive Laws
 
 | Law Title | Scope | Enforcement |
-| :--- | :--- | :--- |
-| Personal Agent Boundary Law | Standalone R5 app and dependencies | No reverse includes, implicit fetches or duplicate ecosystem owners |
-| Explicit Tool Consent Law | Read/build/run and model output | Offline denial, malformed-action and bounded child tests |
+| **Personal Agent Boundary Law** | Standalone R5 app and dependencies | Mandatory for `primeagen` |
+| **Explicit Tool Consent Law** | Read/build/run and model output | Mandatory for `primeagen` |
 
 ### Personal Agent Boundary Law
 
-Primeagen lives outside the ecosystem tree, checkout anywhere — personal R5 consumer, not a replacement R4 Harness or R3 connector. Python: cold CLI/policy/host adapter; a C23 binding consumes real Harness Message and API Haven request envelopes. Dependencies come via source-root options; Func is an independent bounded tool invocation, never included. Standalone host supplies HTTPS transport (native send API lacks TLS) — a scoped consumer-adapter exception (Conflict Triage Law) moving no transport ownership or reverse dependencies. No GUI/window/memory subsystem.
-
-Native direction: a C23 ncurses frontend in `cli` over the independently owned `tui` model and `tui/event/` normalized terminal-cell events — an offline preview (launcher default). `/connect` restores the terminal, then invokes the existing Python session host on the expressly selected Go Flash model, reusing OpenCode login; no key entry/auth copying or extra tool approvals; unsupported slash commands stay local. A transitional connected frontend, not a completed C runtime or server/channel runtime. Personality `personality/owo.c` owns canonical AI speech-style instructions, never consent or tool policy; explicit chat --owo selects native prompt injection, offline TUI greeting/status only reflect that mode. Vexspoke's JSON string writer consumed, not duplicated; display buffers cold growable C storage, no realtime/backend-trust claim.
-
-Terminal navigation: the live ncurses view uses a Semicolon-style collapsible workspace tree in a filled, borderless explorer panel beside the right-side chat interface; a small breathing gap replaces a drawn divider. Rows use two-cell depth steps, folder/file and semantic Nerd Font icons, and a full-width selection rectangle. The tree contains exactly four top-level folders—chats, users, servers, private chat—with one `#general` channel under one example server. Intended Nerd Font glyphs require a Nerd Font-capable terminal font. Tree rows fold and expand, scrolling honors the tree viewport, and Ctrl-B hides/restores the explorer without changing selected chat; selection changes chat context, not pane type. Only Users/OpenCode is connected; all other entries are mock data, never send, persist, or show/scroll the live draft/history. Server behavior, model controls, tree/chat persistence and private-chat saving remain unimplemented. Navigation passes by value to the reloadable view; the resident Tui and tree remain host-owned. The toolkit-backed `cli/screen.c` is still not wired to the live app. Ctrl-T/--select-text returns drag selection to the terminal, disabling mouse reporting and temporarily painting the chat full-width without navigation text in multiline selections; terminal owns highlighting/copy — no clipboard mutation, application selection buffer or physical-terminal proof.
-
-Host replies: strict UTF-8 JSON, not ASCII-escaped surrogate halves; Python decodes provider JSON UTF-16 pairs before encoding native wire bytes; isolated surrogates fail. Transcript admission preserves safe UTF-8, escaping malformed bytes/terminal controls/bidi overrides; row projection never splits a scalar; wide ncurses output measures wcwidth under stable host LC_CTYPE, not byte counts. Input stays ASCII; grapheme/ZWJ shaping, font-width agreement and BMP-only escapes are gaps. install-command.sh links the real shell launcher into a per-user bin directory, keeping unrelated commands, shell config and caller cwd. Terminal Markdown: a Primeagen presentation adapter, not a guessed Vexspoke API — Tui sanitizes controls before parsing and owns parallel visible-byte style flags; ncurses maps only host-defined flags, never model ANSI. Flat subset and emphasis fallback imply no CommonMark/full Unicode shaping or appearance acceptance.
-
-The default `session --engine opencode` terminal selects `src/controlled_session.py`: OpenCode's official text-only `/api/experimental/generate` supplies strict JSON proposals without remote tools. The Agent/Tools loop validates each action and stalls before native child creation. Workspace read/list inspection is automatic except `.env` and `.env.*`; every other available action asks. Yes approves once; Always yes remembers exact tool/arguments for this process only; No retains denial and continues. Model content cannot supply human decisions. Malformed control is fatal; EOF cancels queued work without execution. No remote session prompt, shell or permission-reply endpoint is used; search is unconfigured and rejects, not a remote-tool fallback. Default local gate owner tests prove native disposal/denial. Availability, provider breadth and visual acceptance remain gaps.
-
-The paragraph below is legacy diagnostic scope, not the public terminal default; its consent failure is retained, never promoted away. It consumes API Haven's EngineProvider and Harness_run/poll/cancel contracts through a native SessionBridge; Python host invokes installed OpenCode V2's official API CLI as a bounded tool (OpenCode owns authentication, provider/model selection, remote agent execution). New dedicated sessions request the default policy (inspection automatic; edits, shell, web fetch/search, external directories and `.env` reads wait for an explicit terminal decision; everything else denied), verify the echoed rules before each turn and answer approvals only from the terminal. The native adapter forwards the human's once/always/reject reply and owns no rule itself; OpenCode enforces the decision and owns any saved project approval, so a configured deny always wins.
-
-A turn streams (legacy scope): bounded `{note:...}` lines arrive one frame per poll through `SessionBridge_takeNote`; terminal shows one per-turn speaker label, popping the live trailing `working...` placeholder before real output; newest assistant prose is held back as the turn's conclusion under `answer:`. Notes: bounded display text derived from remote content (a `-`/`+` diff list for edits), never commands or local re-execution. Every official API invocation pins x-opencode-directory to the caller cwd Location of the created chat. Policy echo did not prove Location alignment or approval enforcement: the live Go consent owner still observed Bash complete without a pending request, one prior ask/reject success not repeatable — the consent gate remains unresolved. General tool enforcement and saved-always behavior remain unproved.
-
-Timing: an idle watchdog, not a total budget — Python host restarts its window whenever the newest remote message changes, bridge its own every consumed frame; a multi-tool turn is bounded by remote silence, not work duration; human approval wait is excluded from both. Pending approvals are polled the whole turn. A slow newest-message read is retried, not fatal (own bounded budget); a failed turn prints one classified `session error: ...` line. Cold projections redact transcript buffers and summarize the borrowed Haven driver (no bounded projection yet) — never dump prompt/response values. Tool execution happens inside OpenCode under the enforced policy; local `../../tools` C adapters are a separate `chat` path, unreachable from this session — not a native-agent replacement or sandbox.
-
-Chat may read checkout-root Git-ignored `.env` for OPENAI_API_KEY and ANTHROPIC_API_KEY only; parsing is bounded, literal, failure-preserving, no execution/interpolation or content-bearing diagnostic. Existing environment wins; doctor/build/offline TUI do not load it. It stays local plaintext, never uploaded by default, no secure store or hostile-directory sandbox.
+* Primeagen lives outside the ecosystem tree, checkout anywhere — personal R5 consumer, not a replacement R4 Harness or R3 connector.
+* No reverse includes, implicit fetches or duplicate ecosystem owners.
+* Python: cold CLI/policy/host adapter; a C23 binding consumes real Harness Message and API Haven request envelopes.
+* Dependencies come via source-root options; Func is an independent bounded tool invocation, never included.
+* Standalone host supplies HTTPS transport (native send API lacks TLS) — a scoped consumer-adapter exception moving no transport ownership or reverse dependencies.
+* No GUI/window/memory subsystem.
+* Model output is untrusted data, never authorization; every tool needs separate host/user approval.
 
 ### Explicit Tool Consent Law
 
-The terminal's explicit `/update` consumes Hotcwap `Hot_updateCold` with trusted local build SHA256 references. Only view/command code is reloadable; terminal, Tui/session pipes, approvals, remote permission configuration stay resident. New prompts pause until the existing turn and candidate admission resolve. Failure retains running code/state; unresolved disk rollback stops the host. Native candidates/constructors and stable parent directories are trusted, never model-authorized code. No network download, broad native agent update, server/role implementation, crash recovery or sandbox. Named offline owner `../../tests/primeagen/cli/update_test.py`; appearance and live remote session policy are separate proof.
+* The terminal's explicit `/update` consumes Hotcwap `Hot_updateCold` with trusted local build SHA256 references.
+* Only view/command code is reloadable; terminal, Tui/session pipes, approvals, remote permission configuration stay resident.
+* New prompts pause until the existing turn and candidate admission resolve.
+* Failure retains running code/state; unresolved disk rollback stops the host.
+* Native candidates/constructors and stable parent directories are trusted, never model-authorized code.
+* No network download, broad native agent update, server/role implementation, crash recovery or sandbox.
+* The exact JSON tool tags are read, list, write, edit, create, delete, bash and websearch, plus the existing Func build/run tags.
+* File paths are canonical and workspace-relative; parents must exist; symlink/hardlink/nonregular aliases reject.
+* Create admits an absent file (0600); write replaces an existing file via staged rename; edit replaces exactly one nonempty match; delete unlinks one regular file without recursion/undo.
+* Bash is a separately approved `/bin/bash --noprofile --norc -c` action, inheriting host environment/privileges; file confinement does not sandbox Bash.
+* Search requires a host-selected trusted executable receiving one literal query argument, authorized APIs; no scraper, implicit install or guessed provider.
+* Build is not run permission; func run still requires a session-created artifact.
 
-Model output is untrusted data, never authorization; every tool needs separate host/user approval. The exact JSON tool tags are read, list, write, edit, create, delete, bash and websearch, plus the existing Func build/run tags. Their cold C23 file/exec adapters live in `tools/<name>.{c,h}` with shared fs admission, a private CLI entry; Python remains the consent/provider/whole-child-budget adapter. The connected OpenCode session runs its own approval bridge under that default policy — OpenCode's remote policy, separate from these local C adapters.
+## Repo-Local Extensions
 
-Denial never spawns a tool child or mutates files. File paths are canonical and workspace-relative; parents must exist, symlink/hardlink/nonregular aliases reject. Create admits an absent file (0600), write replaces an existing file via staged rename, edit replaces exactly one nonempty match, delete unlinks one regular file without recursion/undo. Replacement changes inode, may lose ACL/xattr/ownership metadata; preserves permission bits, not general metadata or crash durability. Stable trusted tree/external serialization required; hostile concurrent writers outside contract. Cancellation after publication does not roll it back; SIGKILL may leave a staging file. These remain partial consumer adapters, not trusted production persistence backends with complete fault/leak/platform proof.
+* None — no managed exceptions to universal laws.
 
-Bash is a separately approved /bin/bash --noprofile --norc -c action, inheriting host environment/privileges, able to escape the workspace, read secrets, mutate files and contact networks — file confinement does not sandbox Bash. Search requires a host-selected trusted executable receiving one literal query argument, authorized APIs; no scraper, implicit install or guessed provider. Both replace the supervised child via exec, never system() or unbounded wait. Host bounds output/time and attempts group cancellation/reap; group signalling refusal is observable, an unresolved descendant-cleanup gap.
+## Readiness Cross-Reference
 
-Build is not run permission. Func run still requires a session-created artifact; no model-selected search executable or auto-approve surface is offered. Stable trusted workspace and compiler inputs are required; path checks are not a sandbox. Child execution has an overall deadline, simultaneous bounded output and kill/reap cleanup; each retained result reports failure or truncation explicitly. History has a caller-selected safety budget; growth is not secretly capped by the initial collection capacity. No concurrency or persistent session identity is claimed.
-
-## Proof
-
-Mirrored offline owners live in `../../tests/primeagen`. Test output/readiness must distinguish real native envelope and Func artifact execution from fake model responses; live providers, OS/platform gaps and GUI approval remain separate. Live answer smoke is opt-in only, using the user's selected `opencode-go/deepseek-v4.1-flash`, never a fallback paid model. A passed arithmetic answer proves that narrow route, not general competence or remote sandbox policy.
+* Feature readiness: primeagen readiness gist.
+* Open blockers: ecosystem blockers gist.
+* Proof lawbook: `tests/test-preferences.md` — `./tools/prefs test "<title>"`.
+* Evidence ledger: `metadata/gists/test-checklist.md` — `python3 tools/test_checklist.py check`.

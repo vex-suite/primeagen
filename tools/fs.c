@@ -21,12 +21,12 @@
  * MODULE: tool filesystem admission (tools/fs.c)
  * OWNED STATE: no persistent state; each operation owns local descriptors/buffers.
  * FUNCTION REGISTRY:
- *   bool ToolFs_parent(int root,const char *path,int *outParent,char *name,size_t cap)
+ *   bool ToolFs_parent(int root,const char *path,int *outParent,char *name,bytes cap)
  *     Canonical relative path; final name + owned parent fd. Outputs on success only.
- *   bool ToolFs_read(int root,const char *path,size_t cap,char **dest,size_t *outLength)
+ *   bool ToolFs_read(int root,const char *path,bytes cap,char **dest,bytes *outLength)
  *     Whole bounded regular-file bytes, heap output transferred only on success.
- *   bool ToolFs_input(size_t cap,char **dest,size_t *outLength): bounded stdin bytes.
- *   bool ToolFs_publish(int root,const char *path,const char *text,size_t length,bool create)
+ *   bool ToolFs_input(bytes cap,char **dest,bytes *outLength): bounded stdin bytes.
+ *   bool ToolFs_publish(int root,const char *path,const char *text,bytes length,bool create)
  *     Create-new by link admission or atomic existing-file replacement by rename.
  * PRIVATE: failure(reason): one cold diagnostic and false; readFd(fd,cap,dest,len)
  *     allocates cap+1, drains until EOF, rejects overflow, preserves output pointers.
@@ -41,7 +41,7 @@ static bool failure(const char *reason) {
     return false;
 }
 
-bool ToolFs_parent(int root, const char *path, int *outParent, char *name, size_t cap) {
+bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes cap) {
     if (root < 0 || path == nullptr || outParent == nullptr || name == nullptr || cap == 0 ||
         *path == '\0' || *path == '/' || strlen(path) >= PATH_MAX)
         return failure("invalid relative path");
@@ -80,25 +80,25 @@ bool ToolFs_parent(int root, const char *path, int *outParent, char *name, size_
     }
 }
 
-static bool readFd(int fd, size_t cap, char **dest, size_t *outLength) {
+static bool readFd(int fd, bytes cap, char **dest, bytes *outLength) {
     if (cap == 0 || cap > TOOL_BYTES_MAX || dest == nullptr || outLength == nullptr)
         return failure("invalid byte capacity");
     char *bytes = malloc(cap + 1);
     if (bytes == nullptr)
         return failure("read allocation refused");
-    size_t length = 0;
+    bytes length = 0;
     while (true) {
         ssize_t count = read(fd, bytes + length, cap + 1 - length);
         if (count < 0 && errno == EINTR)
             continue;
-        if (count < 0 || (size_t) count > cap - length) {
+        if (count < 0 || (bytes) count > cap - length) {
             free(bytes);
             THROW("tool fs: read failed or would truncate (byte bound %zu)", cap);
             return false;
         }
         if (count == 0)
             break;
-        length += (size_t) count;
+        length += (bytes) count;
     }
     bytes[length] = '\0';
     *dest = bytes;
@@ -106,11 +106,11 @@ static bool readFd(int fd, size_t cap, char **dest, size_t *outLength) {
     return true;
 }
 
-bool ToolFs_input(size_t cap, char **dest, size_t *outLength) {
+bool ToolFs_input(bytes cap, char **dest, bytes *outLength) {
     return readFd(STDIN_FILENO, cap, dest, outLength);
 }
 
-bool ToolFs_read(int root, const char *path, size_t cap, char **dest, size_t *outLength) {
+bool ToolFs_read(int root, const char *path, bytes cap, char **dest, bytes *outLength) {
     if (dest == nullptr || outLength == nullptr || cap == 0 || cap > TOOL_BYTES_MAX)
         return failure("invalid read outputs or byte capacity");
     int parent;
@@ -126,7 +126,7 @@ bool ToolFs_read(int root, const char *path, size_t cap, char **dest, size_t *ou
         return failure("read requires regular single-link file");
     }
     char *bytes = nullptr;
-    size_t length = 0;
+    bytes length = 0;
     bool ok = readFd(fd, cap, &bytes, &length);
     if (close(fd) != 0 && ok) {
         free(bytes);
@@ -139,7 +139,7 @@ bool ToolFs_read(int root, const char *path, size_t cap, char **dest, size_t *ou
     return ok;
 }
 
-bool ToolFs_publish(int root, const char *path, const char *text, size_t length, bool create) {
+bool ToolFs_publish(int root, const char *path, const char *text, bytes length, bool create) {
     if (text == nullptr || length > TOOL_BYTES_MAX)
         return failure("invalid write span");
     int parent;
@@ -163,7 +163,7 @@ bool ToolFs_publish(int root, const char *path, const char *text, size_t length,
     bool ok = true;
     if (!create && fchmod(fd, info.st_mode & 0777) != 0)
         ok = false;
-    size_t offset = 0;
+    bytes offset = 0;
     while (ok && offset < length) {
         ssize_t count = write(fd, text + offset, length - offset);
         if (count < 0 && errno == EINTR)
@@ -171,7 +171,7 @@ bool ToolFs_publish(int root, const char *path, const char *text, size_t length,
         if (count <= 0)
             ok = false;
         else
-            offset += (size_t) count;
+            offset += (bytes) count;
     }
     if (close(fd) != 0)
         ok = false;

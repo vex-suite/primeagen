@@ -18,8 +18,8 @@
  * MODULE: list tool (tools/list.c)
  * OWNED STATE: local directory stream and growable flat string-pointer directory;
  * each copied name reclaimed before return. Successful output ownership transfers.
- * FUNCTION REGISTRY: bool ToolList_execute(int root,const char *path,size_t cap,
- *                                         char **dest,size_t *outLength)
+ * FUNCTION REGISTRY: bool ToolList_execute(int root,const char *path,bytes cap,
+ *                                         char **dest,bytes *outLength)
  * PRIVATE: compare(left,right): qsort byte-order oracle, no locale dependency.
  * CONTRACT: '.' is root; other paths are canonical no-symlink directories. JSON
  * array of names excludes '.'/'..'; no partial successful listing on cap/OOM/IO
@@ -34,7 +34,7 @@ static int compare(const void *left, const void *right) {
     return strcmp(a, b);
 }
 
-bool ToolList_execute(int root, const char *path, size_t cap, char **dest, size_t *outLength) {
+bool ToolList_execute(int root, const char *path, bytes cap, char **dest, bytes *outLength) {
     if (root < 0 || path == nullptr || dest == nullptr || outLength == nullptr || cap < 2 || cap > TOOL_BYTES_MAX) {
         THROW("list: invalid arguments or capacity");
         return false;
@@ -58,7 +58,7 @@ bool ToolList_execute(int root, const char *path, size_t cap, char **dest, size_
         return false;
     }
     char **names = nullptr;
-    size_t count = 0, capacity = 0, bytes = 0;
+    bytes count = 0, capacity = 0, bytes = 0;
     bool ok = true;
     while (ok) {
         errno = 0;
@@ -70,14 +70,14 @@ bool ToolList_execute(int root, const char *path, size_t cap, char **dest, size_
         const char *name = (*entry).d_name;
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
             continue;
-        size_t length = strlen(name);
+        bytes length = strlen(name);
         if (length + 1 > cap - bytes) {
             ok = false;
             break;
         }
         bytes += length + 1;
         if (count == capacity) {
-            size_t next = capacity == 0 ? TOOL_LIST_CAPACITY_DEFAULT : capacity * 2;
+            bytes next = capacity == 0 ? TOOL_LIST_CAPACITY_DEFAULT : capacity * 2;
             char **grown = realloc(names, next * sizeof(*names));
             if (grown == nullptr) {
                 ok = false;
@@ -98,19 +98,19 @@ bool ToolList_execute(int root, const char *path, size_t cap, char **dest, size_
     char *output = ok ? malloc(cap + 1) : nullptr;
     if (output == nullptr)
         ok = false;
-    size_t used = 0;
+    bytes used = 0;
     if (ok) {
         if (count > 1)
             qsort(names, count, sizeof(*names), compare);
     JsonWriter writer = JsonWriter(output, cap + 1);
         Json_beginArray(&writer);
-        for (size_t i = 0; i < count; ++i)
+        for (bytes i = 0; i < count; ++i)
             Json_stringVal(&writer, names[i]);
         Json_endArray(&writer);
         ok = JsonWriter_ok(&writer);
         used = JsonWriter_used(&writer);
     }
-    for (size_t i = 0; i < count; ++i)
+    for (bytes i = 0; i < count; ++i)
         free(names[i]);
     free(names);
     if (!ok) {

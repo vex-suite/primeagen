@@ -13,13 +13,13 @@
  * TuiUtf8_safe excludes terminal controls and bidi direction overrides/isolates;
  * malformed/unsafe bytes are escaped by Tui, not passed to the terminal.
  * Bounds below are fixed Unicode/UTF-8 encoding constants, not user settings. */
-static inline size_t TuiUtf8_decode(const char *text, size_t length, uint32_t *outScalar) {
+static inline bytes TuiUtf8_decode(const char *text, bytes length, u32 *outScalar) {
     if (text == nullptr || length == 0 || outScalar == nullptr)
         return 0;
     const unsigned char *bytes = (const unsigned char*) text;
-    uint32_t scalar = bytes[0];
-    size_t count;
-    uint32_t minimum;
+    u32 scalar = bytes[0];
+    bytes count;
+    u32 minimum;
     if (scalar < 0x80) {
         *outScalar = scalar;
         return 1;
@@ -33,7 +33,7 @@ static inline size_t TuiUtf8_decode(const char *text, size_t length, uint32_t *o
         return 0;
     if (count > length)
         return 0;
-    for (size_t i = 1; i < count; ++i) {
+    for (bytes i = 1; i < count; ++i) {
         if ((bytes[i] & 0xc0) != 0x80)
             return 0;
         scalar = (scalar << 6) | (bytes[i] & 0x3f);
@@ -44,15 +44,15 @@ static inline size_t TuiUtf8_decode(const char *text, size_t length, uint32_t *o
     return count;
 }
 
-static inline bool TuiUtf8_safe(uint32_t scalar) {
+static inline bool TuiUtf8_safe(u32 scalar) {
     return scalar == '\n' || (scalar >= 0x20 && scalar != 0x7f &&
         !(scalar >= 0x80 && scalar <= 0x9f) &&
         !(scalar >= 0x202a && scalar <= 0x202e) &&
         !(scalar >= 0x2066 && scalar <= 0x2069));
 }
 
-static inline size_t TuiUtf8_width(uint32_t scalar) {
+static inline bytes TuiUtf8_width(u32 scalar) {
     int width = wcwidth((wchar_t) scalar);
-    return width < 0 ? 1 : (size_t) width;
+    return width < 0 ? 1 : (bytes) width;
 }
 #endif

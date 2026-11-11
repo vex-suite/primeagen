@@ -51,7 +51,7 @@
 bool JsonAdmit_depthOk(const char *text) {
     if (text == nullptr)
         return false;
-    uint32_t depth = 0;
+    u32 depth = 0;
     bool quoted = false;
     bool escaped = false;
     for (const char *cursor = text; *cursor != '\0'; ++cursor) {
@@ -82,13 +82,13 @@ static bool memberKeysUnique(const JsonDoc *doc, JsonRef objectRef) {
     JsonNode *object = &(*doc).nodes[objectRef];
     for (JsonRef a = (*object).child; a >= 0; ) {
         JsonNode *nodeA = &(*doc).nodes[a];
-        uint32_t aLen = 0;
+        u32 aLen = 0;
         const char *aKey = Json_key(doc, a, &aLen);
         if (aKey == nullptr)
             return false;
         for (JsonRef b = (*nodeA).next; b >= 0; ) {
             JsonNode *nodeB = &(*doc).nodes[b];
-            uint32_t bLen = 0;
+            u32 bLen = 0;
             const char *bKey = Json_key(doc, b, &bLen);
             if (bKey == nullptr)
                 return false;
@@ -105,7 +105,7 @@ static bool memberKeysUnique(const JsonDoc *doc, JsonRef objectRef) {
 bool JsonAdmit_noDuplicateKeys(const JsonDoc *doc) {
     if (doc == nullptr || !(*doc).ok)
         return false;
-    for (uint32_t i = 0; i < (*doc).nodeCount; ++i) {
+    for (u32 i = 0; i < (*doc).nodeCount; ++i) {
         JsonNode *node = &(*doc).nodes[i];
         if ((*node).type != JSON_OBJECT)
             continue;
@@ -116,8 +116,8 @@ bool JsonAdmit_noDuplicateKeys(const JsonDoc *doc) {
 }
 
 /** Depth scan, parse, then duplicate-key scan. false + one THROW per failure. */
-bool JsonAdmit_parse(JsonDoc *doc, JsonNode *nodes, uint32_t nodeCap,
-                     char *scratch, uint32_t scratchCap, const char *text) {
+bool JsonAdmit_parse(JsonDoc *doc, JsonNode *nodes, u32 nodeCap,
+                     char *scratch, u32 scratchCap, const char *text) {
     if (doc == nullptr || nodes == nullptr || scratch == nullptr || text == nullptr) {
         THROW("json admit: null admission argument");
         return false;

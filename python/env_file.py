@@ -18,7 +18,7 @@ Public admission:
       Existing environment entries (including empty entries) take precedence.
 
 CONTRACT:
-  Optional single/double quotes delimit one literal value; no multiline values,
+  Optional single/d64 quotes delimit one literal value; no multiline values,
   export statements, interpolation, backslash decoding or inline comments. Empty
   values are valid placeholders. Blank lines and full-line comments are ignored.
   The byte cap is an explicit credential-file safety bound, not a history limit.

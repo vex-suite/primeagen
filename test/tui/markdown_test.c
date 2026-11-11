@@ -9,8 +9,8 @@
 
 static void check(const char *source, const char *expected) {
     char dest[256];
-    uint8_t styles[256];
-    size_t length = 99;
+    u8 styles[256];
+    bytes length = 99;
     bool truncated = true;
     assert(Markdown_render(source, strlen(source), dest, styles, sizeof(dest), &length, &truncated));
     assert(strcmp(dest, expected) == 0 && length == strlen(expected) && !truncated);
@@ -31,8 +31,8 @@ int main(void) {
     check("**👋 café 中文**", "👋 café 中文");
     check("`é`", "é");
     char dest[256];
-    uint8_t styles[256];
-    size_t length;
+    u8 styles[256];
+    bytes length;
     const char *source = "# Title\n**bold** *soft* `code`";
     assert(Markdown_render(source, strlen(source), dest, styles, sizeof(dest), &length, nullptr));
     assert(styles[0] == (TEXT_STYLE_HEADING | TEXT_STYLE_BOLD));
@@ -55,10 +55,10 @@ int main(void) {
     assert(strcmp(dest, "keep") == 0);
     assert(!Markdown_render("\xed\xa0\xbd", 3, dest, styles, sizeof(dest), &length, nullptr));
     assert(strcmp(dest, "keep") == 0);
-    const size_t pressure = 65536;
+    const bytes pressure = 65536;
     char *input = malloc(pressure + 1);
     char *output = malloc(pressure + 1);
-    uint8_t *flags = malloc(pressure + 1);
+    u8 *flags = malloc(pressure + 1);
     assert(input != nullptr && output != nullptr && flags != nullptr);
     memset(input, '`', pressure);
     assert(Markdown_render(input, pressure, output, flags, pressure + 1, &length, nullptr));

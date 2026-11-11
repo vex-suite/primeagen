@@ -150,8 +150,8 @@ class SessionHostTest(unittest.TestCase):
             with patch.object(host, "api", return_value={"data": [
                     {"type": "idle", "outcome": "succeeded"}, {"type": "assistant", "content": content},
                     {"id": "msg_a"}]}):
-                turn = {"messageId": "msg_a", "deadline": float("inf"), "awaiting": None,
-                        "awaitingSince": 0.0, "nextCheck": float("inf"), "seen": set(), "newest": None,
+                turn = {"messageId": "msg_a", "deadline": f32("inf"), "awaiting": None,
+                        "awaitingSince": 0.0, "nextCheck": f32("inf"), "seen": set(), "newest": None,
                         "said": set(), "held": [], "flowed": False}
                 with self.assertRaises(ValueError):
                     host.advance("ses_fake", turn)

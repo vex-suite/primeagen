@@ -42,17 +42,17 @@
  *   int readFd : borrowed nonblocking host response pipe; -1 unbound.
  *   int writeFd : borrowed nonblocking host request pipe; -1 unbound.
  *   bool owo : selects canonical Owo_instructions for subsequent turns.
- *   uint32_t jobId : current Haven job; zero means idle.
- *   uint64_t startedMs : monotonic clock of the last observed progress.
+ *   u32 jobId : current Haven job; zero means idle.
+ *   u64 startedMs : monotonic clock of the last observed progress.
  *   char request[SESSION_REQUEST_CAP] : bounded outbound JSON frame queue.
- *   size_t requestLength : queued frame bytes, including newline.
- *   size_t requestOffset : bytes already accepted by the pipe.
+ *   bytes requestLength : queued frame bytes, including newline.
+ *   bytes requestOffset : bytes already accepted by the pipe.
  *   char response[SESSION_RESPONSE_CAP] : inbound newline JSON frame.
- *   size_t responseLength : accumulated bytes; preserves partial frames.
+ *   bytes responseLength : accumulated bytes; preserves partial frames.
  *   char text[SESSION_RESPONSE_CAP] : copied answer or safe generic error.
  *   bool failed : permanent poisoned-wire latch until host relaunch.
  *   bool awaiting : an approval frame is displayed and unanswered.
- *   uint32_t approvalSerial : increments per approval frame; display identity.
+ *   u32 approvalSerial : increments per approval frame; display identity.
  *   char approvalId[SESSION_APPROVAL_ID_CAP] : remote permission identity.
  *   char approvalLabel[SESSION_APPROVAL_LABEL_CAP] : bounded display text.
  *   char note[SESSION_NOTE_CAP] : newest streamed activity line.
@@ -68,18 +68,18 @@
  *   bool SessionBridge_isBusy(const SessionBridge *), const char *SessionBridge_getText(const SessionBridge *)
  *   bool SessionBridge_isAwaiting(const SessionBridge *)
  *   const char *SessionBridge_getApprovalLabel(const SessionBridge *)
- *   uint32_t SessionBridge_getApprovalSerial(const SessionBridge *)
+ *   u32 SessionBridge_getApprovalSerial(const SessionBridge *)
  *   const char *SessionBridge_takeNote(SessionBridge *) : borrow one note, clear it.
  *   bool SessionBridge_decide(SessionBridge *, const char *) : queue once/always/reject.
- *   bool SessionBridge_setTimeout(SessionBridge *, uint64_t), uint64_t SessionBridge_getTimeout(const SessionBridge *) : validated cold current watchdog, 1..120000ms.
- *   bool SessionBridge_toString(const SessionBridge *, char *, size_t, bool *) : bounded value.
- *   bool SessionBridge_toStringStruct(const SessionBridge *, char *, size_t, bool *) : bounded redacted fields.
+ *   bool SessionBridge_setTimeout(SessionBridge *, u64), u64 SessionBridge_getTimeout(const SessionBridge *) : validated cold current watchdog, 1..120000ms.
+ *   bool SessionBridge_toString(const SessionBridge *, char *, bytes, bool *) : bounded value.
+ *   bool SessionBridge_toStringStruct(const SessionBridge *, char *, bytes, bool *) : bounded redacted fields.
  * Private static helpers:
- *   uint64_t nowMs(void) : monotonic clock, zero on clock failure.
+ *   u64 nowMs(void) : monotonic clock, zero on clock failure.
  *   bool queueText(SessionBridge *, const char *, const char *) : one-field frame.
- *   bool spawn(void *, const EngineProviderSlot *, const char *, size_t, uint64_t, void **) : queue JSON.
+ *   bool spawn(void *, const EngineProviderSlot *, const char *, bytes, u64, void **) : queue JSON.
  *   HarnessStatus handleFrame(SessionBridge *, JsonDoc *) : classify one reply frame.
- *   HarnessStatus pollJob(void *, void *, uint64_t) : progress pipes, one frame per call.
+ *   HarnessStatus pollJob(void *, void *, u64) : progress pipes, one frame per call.
  *   void cancel(void *, void *) : clear pending IO, poison wire.
  * CONTRACT: trusted live pipes, valid owner address, serialized calls only.
  * Null/default safe, busy rejection preserves current turn; no arbitrary pointer
@@ -92,11 +92,11 @@
  * or secrets.
  * ============================================================================ */
 ;;INTENTION("derived wire identity/buffers mutate only through admission/decide/poll/free; projections redact transcript buffers and summarize the borrowed Haven driver (which has no bounded projection), preserving privacy under the Conflict Triage Law")
-static uint64_t nowMs(void) {
+static u64 nowMs(void) {
     struct timespec stamp;
     if (clock_gettime(CLOCK_MONOTONIC, &stamp) != 0)
         return 0;
-    return (uint64_t) stamp.tv_sec * 1000u + (uint64_t) stamp.tv_nsec / 1000000u;
+    return (u64) stamp.tv_sec * 1000u + (u64) stamp.tv_nsec / 1000000u;
 }
 ;;WHAT("SessionBridge")
 static bool queueText(SessionBridge *self, const char *key, const char *value) {
@@ -114,7 +114,7 @@ static bool queueText(SessionBridge *self, const char *key, const char *value) {
 }
 ;;WHAT("SessionBridge")
 static bool spawn(void *context, const EngineProviderSlot *engine, const char *prompt,
-                  size_t length, uint64_t timeoutMs, void **outHandle) {
+                  bytes length, u64 timeoutMs, void **outHandle) {
     (void) engine;
     (void) length;
     (void) timeoutMs;
@@ -154,7 +154,7 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
         if (Json_count(doc, ask) != 2 || Json_type(doc, identity) != JSON_STRING ||
             Json_type(doc, label) != JSON_STRING)
             return HARNESS_STATUS_TIMEOUT;
-        uint32_t idLength, labelLength;
+        u32 idLength, labelLength;
         const char *idValue = Json_string(doc, identity, &idLength);
         const char *labelValue = Json_string(doc, label, &labelLength);
         JsonStringView id = Json_getString(doc, identity);
@@ -174,7 +174,7 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
     }
     if (Json_count(doc, root) == 1 && Json_type(doc, note) == JSON_STRING) {
         /* A decoded NUL byte would truncate the display line; reject it instead. */
-        uint32_t noteLength;
+        u32 noteLength;
         const char *noteValue = Json_string(doc, note, &noteLength);
         JsonStringView noteText = Json_getString(doc, note);
         if (!noteValue || noteLength == 0 || memchr(noteValue, '\0', noteLength) ||
@@ -191,7 +191,7 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
         (Json_type(doc, success) != JSON_TRUE && Json_type(doc, success) != JSON_FALSE) ||
         Json_type(doc, text) != JSON_STRING)
         return HARNESS_STATUS_TIMEOUT;
-    uint32_t textLength;
+    u32 textLength;
     const char *value = Json_string(doc, text, &textLength);
     JsonStringView textValue = Json_getString(doc, text);
     if (!value || memchr(value, '\0', textLength) || !Json_bool(doc, success) ||
@@ -202,7 +202,7 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
     return HARNESS_STATUS_DONE;
 }
 ;;WHAT("SessionBridge")
-static HarnessStatus pollJob(void *context, void *handle, uint64_t timeoutMs) {
+static HarnessStatus pollJob(void *context, void *handle, u64 timeoutMs) {
     (void) handle;
     SessionBridge *self = context;
     if ((*self).failed)
@@ -211,7 +211,7 @@ static HarnessStatus pollJob(void *context, void *handle, uint64_t timeoutMs) {
         ssize_t sent = write((*self).writeFd, (*self).request + (*self).requestOffset,
                              (*self).requestLength - (*self).requestOffset);
         if (sent > 0)
-            (*self).requestOffset += (size_t) sent;
+            (*self).requestOffset += (bytes) sent;
         else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
             goto fail;
     }
@@ -225,7 +225,7 @@ static HarnessStatus pollJob(void *context, void *handle, uint64_t timeoutMs) {
          * submission. Otherwise it measures silence since the last frame, not the
          * turn's total duration, so tool-using turns may run for minutes. */
         if (!(*self).awaiting) {
-            uint64_t now = nowMs();
+            u64 now = nowMs();
             if (!now || now < (*self).startedMs || now - (*self).startedMs >= timeoutMs)
                 goto fail;
         }
@@ -240,15 +240,15 @@ static HarnessStatus pollJob(void *context, void *handle, uint64_t timeoutMs) {
                 return HARNESS_STATUS_RUNNING;
             goto fail;
         }
-        if (memchr((*self).response + (*self).responseLength, '\0', (size_t) n))
+        if (memchr((*self).response + (*self).responseLength, '\0', (bytes) n))
             goto fail;
-        (*self).responseLength += (size_t) n;
+        (*self).responseLength += (bytes) n;
         (*self).response[(*self).responseLength] = '\0';
         newline = memchr((*self).response, '\n', (*self).responseLength);
         if (newline == nullptr)
             return HARNESS_STATUS_RUNNING;
     }
-    size_t frame = (size_t) (newline - (*self).response);
+    bytes frame = (bytes) (newline - (*self).response);
     *newline = '\0';
     JsonDoc doc;
     JsonNode nodes[8];
@@ -256,7 +256,7 @@ static HarnessStatus pollJob(void *context, void *handle, uint64_t timeoutMs) {
     if (!Json_parse(&doc, nodes, 8, scratch, sizeof(scratch), (*self).response))
         goto fail;
     HarnessStatus status = handleFrame(self, &doc);
-    size_t remaining = (*self).responseLength - frame - 1;
+    bytes remaining = (*self).responseLength - frame - 1;
     memmove((*self).response, newline + 1, remaining);
     (*self).responseLength = remaining;
     if (status == HARNESS_STATUS_TIMEOUT)
@@ -344,7 +344,7 @@ bool SessionBridge_isOwo(const SessionBridge *self) { return self && (*self).owo
 bool SessionBridge_isBusy(const SessionBridge *self) { return self && (*self).jobId; }
 bool SessionBridge_isAwaiting(const SessionBridge *self) { return self && (*self).awaiting; }
 const char *SessionBridge_getApprovalLabel(const SessionBridge *self) { return self ? (*self).approvalLabel : ""; }
-uint32_t SessionBridge_getApprovalSerial(const SessionBridge *self) { return self ? (*self).approvalSerial : 0; }
+u32 SessionBridge_getApprovalSerial(const SessionBridge *self) { return self ? (*self).approvalSerial : 0; }
 const char *SessionBridge_takeNote(SessionBridge *self) {
     if (self == nullptr || !(*self).notePending)
         return nullptr;
@@ -370,7 +370,7 @@ bool SessionBridge_decide(SessionBridge *self, const char *decision) {
     (*self).startedMs = nowMs();
     return (*self).startedMs != 0;
 }
-bool SessionBridge_setTimeout(SessionBridge *self, uint64_t timeoutMs) {
+bool SessionBridge_setTimeout(SessionBridge *self, u64 timeoutMs) {
     if (!self || !timeoutMs || timeoutMs > SESSION_TIMEOUT_MS_MAX || (*self).jobId) {
         THROW("session timeout rejected: null, busy or out of safety range");
         return false;
@@ -378,23 +378,23 @@ bool SessionBridge_setTimeout(SessionBridge *self, uint64_t timeoutMs) {
     Harness_setTimeout(&(*self).harness, timeoutMs);
     return true;
 }
-uint64_t SessionBridge_getTimeout(const SessionBridge *self) {
+u64 SessionBridge_getTimeout(const SessionBridge *self) {
     return self ? Harness_getTimeout(&(*self).harness) : 0;
 }
 const char *SessionBridge_getText(const SessionBridge *self) { return self ? (*self).text : ""; }
-bool SessionBridge_toString(const SessionBridge *self, char *dest, size_t cap, bool *outTruncated) {
+bool SessionBridge_toString(const SessionBridge *self, char *dest, bytes cap, bool *outTruncated) {
     if (outTruncated)
         *outTruncated = false;
     if (!dest || !cap)
         return false;
     int n = snprintf(dest, cap, "%s", !self ? "nullptr" : SessionBridge_isAwaiting(self) ? "OpenCode approval pending"
                      : SessionBridge_isBusy(self) ? "OpenCode pending" : "OpenCode idle");
-    bool cut = n < 0 || (size_t) n >= cap;
+    bool cut = n < 0 || (bytes) n >= cap;
     if (outTruncated)
         *outTruncated = cut;
     return !cut;
 }
-bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, size_t cap, bool *outTruncated) {
+bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, bytes cap, bool *outTruncated) {
     if (!self)
         return SessionBridge_toString(self, dest, cap, outTruncated);
     if (outTruncated)
@@ -406,7 +406,7 @@ bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, size_t 
                      (unsigned long long) (*self).startedMs, (*self).requestLength,
                      (*self).requestOffset, (*self).responseLength, (*self).failed,
                      (*self).awaiting, (*self).approvalSerial, (*self).notePending);
-    bool cut = n < 0 || (size_t) n >= cap;
+    bool cut = n < 0 || (bytes) n >= cap;
     if (outTruncated)
         *outTruncated = cut;
     return !cut;

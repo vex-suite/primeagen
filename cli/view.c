@@ -19,9 +19,9 @@
  * OWNED STATE: none; host owns every resource and palette.
  * FUNCTION REGISTRY:
  *   bool Primeagen_draw(Tui *, bool owo, bool focused, bool sessionMode, bool busy,
- *                       bool failed, char *row, uint8_t *styles, size_t cap)
+ *                       bool failed, char *row, u8 *styles, bytes cap)
  *       Paint the sole live Users/OpenCode context to the right-side chat pane.
- *   const void *Hot_getExports(uint32_t *count) : trusted loader exports.
+ *   const void *Hot_getExports(u32 *count) : trusted loader exports.
  *   int Primeagen_command(Tui *, bool sessionMode) : local command admission;
  *       emits display notices/actions, never executes model/provider/tools.
  * PRIVATE: attributes(style) : host-defined visible style to ncurses attributes.
@@ -36,7 +36,7 @@
  *                             int *outPanel,int *outSelection)
  *       Stateless tree-row hit admission; preserves outputs on invalid/outside input.
  *   bool Primeagen_drawPanels(Tui *,bool,bool,bool,bool,bool,int panel,int selection,
- *                             int listWidth,char *row,uint8_t *styles,size_t cap)
+ *                             int listWidth,char *row,u8 *styles,bytes cap)
  *       Legacy panel entry; retained for older resident hosts.
  *   bool Primeagen_drawTreePanels(Tui *,TerminalTreeView *,bool,bool,bool,bool,
  *                                 bool,int panel,int selection,int listWidth,...)
@@ -50,7 +50,7 @@
  * or submits the resident session. Other nodes use mock chat/composer content and
  * never display, scroll, edit, or submit the live Tui draft/history. There is no
  * server/member/rules/model implementation or private-chat persistence.
- * EXPORTED DATA: const uint64_t Hot_cold_abi : compatible cold module ABI; the
+ * EXPORTED DATA: const u64 Hot_cold_abi : compatible cold module ABI; the
  * tree renderer is an additive export, preserving the legacy panel signature.
  * SLOT RECORD: behaviorless export rows {const char *name; void *fn}.
  * CONTRACT: owner-thread, live screen/model/buffers; nullptr entry rejects;
@@ -58,7 +58,7 @@
  * Layout changes require a cold ABI bump and resident host rebuild. Module code
  * is trusted; checksum admission is not native-code sandboxing.
  * ============================================================================ */
-const uint64_t Hot_cold_abi = HOT_COLD_ABI_VERSION;
+const u64 Hot_cold_abi = HOT_COLD_ABI_VERSION;
 enum { VIEW_HEADER = 1, VIEW_ACCENT = 2, VIEW_STATUS = 3, VIEW_INPUT = 4, VIEW_CODE = 5, VIEW_ERROR = 6 };
 #ifndef PRIMEAGEN_VIEW_TITLE
 #define PRIMEAGEN_VIEW_TITLE "Primeagen"
@@ -94,7 +94,7 @@ int Primeagen_command(Tui *state, bool sessionMode) {
     return PRIMEAGEN_COMMAND_MESSAGE;
 }
 
-static chtype attributes(uint8_t style) {
+static chtype attributes(u8 style) {
     chtype value = A_NORMAL;
     if (style & TEXT_STYLE_BOLD)
         value |= A_BOLD;
@@ -112,7 +112,7 @@ static chtype attributes(uint8_t style) {
 }
 
 static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
-                       int left, int panel, int selection, char *row, uint8_t *styles, size_t cap) {
+                       int left, int panel, int selection, char *row, u8 *styles, bytes cap) {
     if (state == nullptr)
         return false;
     int rows, columns;
@@ -150,24 +150,24 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
     // The horizontal rule is a toolkit CONNECTOR run (junctions/striping), not a
     // bare ACS_HLINE; the chosen appearance decides the glyphs.
     PrimeagenAppearance_drawRule(stdscr, 1, left, columns);
-    size_t first = Tui_getFirstVisibleRow(state);
-    size_t total = Tui_getVisualRowCount(state);
-    size_t height = Tui_getViewportHeight(state);
-    for (size_t i = 0; liveConversation && i < height && first + i < total; ++i) {
+    bytes first = Tui_getFirstVisibleRow(state);
+    bytes total = Tui_getVisualRowCount(state);
+    bytes height = Tui_getViewportHeight(state);
+    for (bytes i = 0; liveConversation && i < height && first + i < total; ++i) {
         if (!Tui_copyStyledRow(state, first + i, row, styles, cap, nullptr))
             return false;
-        size_t length = strlen(row), cells = 0;
-        for (size_t at = 0; at < length;) {
-            uint32_t scalar;
-            size_t bytes = TuiUtf8_decode(row + at, length - at, &scalar);
+        bytes length = strlen(row), cells = 0;
+        for (bytes at = 0; at < length;) {
+            u32 scalar;
+            bytes bytes = TuiUtf8_decode(row + at, length - at, &scalar);
             if (bytes == 0)
                 return false;
             wchar_t text[CCHARW_MAX] = {0};
             text[0] = wcwidth((wchar_t) scalar) < 0 ? L'?' : (wchar_t) scalar;
-            size_t next = at + bytes, count = 1;
+            bytes next = at + bytes, count = 1;
             while (next < length && count < CCHARW_MAX - 1) {
-                uint32_t mark;
-                size_t markBytes = TuiUtf8_decode(row + next, length - next, &mark);
+                u32 mark;
+                bytes markBytes = TuiUtf8_decode(row + next, length - next, &mark);
                 if (markBytes == 0 || wcwidth((wchar_t) mark) != 0)
                     break;
                 text[count++] = (wchar_t) mark;
@@ -207,9 +207,9 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
     attron(COLOR_PAIR(VIEW_INPUT) | A_BOLD);
     mvaddstr(rows - 2, left, "> ");
     attroff(COLOR_PAIR(VIEW_INPUT) | A_BOLD);
-    size_t length = Tui_getInputLength(state);
-    size_t width = (size_t) columns - 3;
-    size_t offset = length > width ? length - width : 0;
+    bytes length = Tui_getInputLength(state);
+    bytes width = (bytes) columns - 3;
+    bytes offset = length > width ? length - width : 0;
     if (liveConversation)
         mvaddnstr(rows - 2, left + 2, Tui_getInput(state) + offset, (int) width);
     else
@@ -228,13 +228,13 @@ bool Primeagen_setAppearance(const char *presetName) {
     return true;
 }
 
-bool Primeagen_setBanner(const uint8_t *rgba, uint32_t width, uint32_t height) {
+bool Primeagen_setBanner(const u8 *rgba, u32 width, u32 height) {
     PrimeagenScreen_setBanner(rgba, width, height);
     return true;
 }
 
 bool Primeagen_draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
-                    char *row, uint8_t *styles, size_t cap) {
+                    char *row, u8 *styles, bytes cap) {
     erase();
     if (!drawRegion(state, owo, focused, sessionMode, busy, failed, 0, PRIMEAGEN_PANEL_PEOPLE, 0, row, styles, cap))
         return false;
@@ -295,7 +295,7 @@ bool Primeagen_panelsClick(int x, int y, int rows, int columns, int listWidth,
 
 bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
                           int panel, int selection, int listWidth,
-                          char *row, uint8_t *styles, size_t cap) {
+                          char *row, u8 *styles, bytes cap) {
     if (state == nullptr || panel < 0 || panel > PRIMEAGEN_PANEL_PRIVATE || !validNavigation(panel, selection))
         return false;
     int rows, columns;
@@ -333,7 +333,7 @@ bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, 
 
 bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool focused,
                               bool sessionMode, bool busy, bool failed, int panel, int selection,
-                              int listWidth, char *row, uint8_t *styles, size_t cap) {
+                              int listWidth, char *row, u8 *styles, bytes cap) {
     if (state == nullptr || tree == nullptr || panel < PRIMEAGEN_PANEL_PEOPLE ||
         panel > PRIMEAGEN_PANEL_PRIVATE || !validNavigation(panel, selection))
         return false;
@@ -366,11 +366,11 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
             attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_BACKGROUND) | A_DIM);
         }
 
-        size_t viewport = (size_t) (rows - 1);
+        bytes viewport = (bytes) (rows - 1);
         (void) TerminalTreeView_setViewportRows(tree, viewport);
-        size_t first = TerminalTreeView_scrollRow(tree);
-        size_t visible = TerminalTreeView_visibleCount(tree);
-        for (size_t index = 0; index < viewport && first + index < visible; ++index) {
+        bytes first = TerminalTreeView_scrollRow(tree);
+        bytes visible = TerminalTreeView_visibleCount(tree);
+        for (bytes index = 0; index < viewport && first + index < visible; ++index) {
             TerminalTreeRow item = TerminalTreeView_rowAt(tree, first + index);
             int y = (int) index + 1;
             int x = 1 + (int) item.depth * 2;
@@ -413,7 +413,7 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
     return refresh() != ERR;
 }
 
-const void *Hot_getExports(uint32_t *count) {
+const void *Hot_getExports(u32 *count) {
     static const struct { const char *name; void *fn; } exports[] = {
         {"Primeagen_draw", (void*) Primeagen_draw}, {"Primeagen_command", (void*) Primeagen_command},
         {"Primeagen_drawPanels", (void*) Primeagen_drawPanels},

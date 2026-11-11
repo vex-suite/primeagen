@@ -44,17 +44,17 @@
 #define PRIMEAGEN_SCREEN_POLL_MS 100
 
 typedef struct PrimeagenScreen {
-    uint32_t *cells;    // codepoint plane
-    uint16_t *styles;   // attribute plane (16-bit style flags)
-    uint32_t *fg;       // 0xRRGGBBAA foreground plane
-    uint32_t *bg;       // 0xRRGGBBAA background plane
-    size_t rows;
-    size_t columns;
-    size_t capacity;    // admitted rows*columns
+    u32 *cells;    // codepoint plane
+    u16 *styles;   // attribute plane (16-bit style flags)
+    u32 *fg;       // 0xRRGGBBAA foreground plane
+    u32 *bg;       // 0xRRGGBBAA background plane
+    bytes rows;
+    bytes columns;
+    bytes capacity;    // admitted rows*columns
 } PrimeagenScreen;
 
 void PrimeagenScreen_init(PrimeagenScreen *self);
-bool PrimeagenScreen_bind(PrimeagenScreen *self, size_t rows, size_t columns);
+bool PrimeagenScreen_bind(PrimeagenScreen *self, bytes rows, bytes columns);
 void PrimeagenScreen_free(PrimeagenScreen *self);
 TerminalCanvas PrimeagenScreen_canvas(PrimeagenScreen *self);
 bool PrimeagenScreen_isBound(const PrimeagenScreen *self);
@@ -98,7 +98,7 @@ typedef struct PrimeagenScreenState {
 // HOME: the BANNER first (the app's own picture across the top of the frame),
 // then `title`, then the `menu` rows — all centred. `menuSelection` highlights one.
 void PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
-                                const char *const *menu, size_t menuCount, size_t menuSelection,
+                                const char *const *menu, bytes menuCount, bytes menuSelection,
                                 const TerminalImage *banner);
 
 // CHAT: the three-column layout over the resident Tui state.
@@ -107,7 +107,7 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
 // The app's BANNER image (white paper + dark ink, e.g. resources/banner.png): the
 // host decodes its own PNG and hands the pixels here; the screen inverts the paper
 // and lets the caller's palette treat it. NULL/zero clears it.
-void PrimeagenScreen_setBanner(const uint8_t *rgba, uint32_t width, uint32_t height);
+void PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height);
 const TerminalImage *PrimeagenScreen_banner(void);
 bool PrimeagenScreen_hasBanner(void);
 

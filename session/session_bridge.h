@@ -20,17 +20,17 @@ typedef struct SessionBridge {
     int readFd;
     int writeFd;
     bool owo;
-    uint32_t jobId;
-    uint64_t startedMs;
+    u32 jobId;
+    u64 startedMs;
     char request[SESSION_REQUEST_CAP];
-    size_t requestLength;
-    size_t requestOffset;
+    bytes requestLength;
+    bytes requestOffset;
     char response[SESSION_RESPONSE_CAP];
-    size_t responseLength;
+    bytes responseLength;
     char text[SESSION_RESPONSE_CAP];
     bool failed;
     bool awaiting;
-    uint32_t approvalSerial;
+    u32 approvalSerial;
     char approvalId[SESSION_APPROVAL_ID_CAP];
     char approvalLabel[SESSION_APPROVAL_LABEL_CAP];
     char note[SESSION_NOTE_CAP];
@@ -61,7 +61,7 @@ bool SessionBridge_isBusy(const SessionBridge *self);
 /* A human decision is required before the remote turn can continue. Reads only. */
 bool SessionBridge_isAwaiting(const SessionBridge *self);
 const char *SessionBridge_getApprovalLabel(const SessionBridge *self);
-uint32_t SessionBridge_getApprovalSerial(const SessionBridge *self);
+u32 SessionBridge_getApprovalSerial(const SessionBridge *self);
 /* Borrow the newest streamed activity line once, or nullptr when none is
  * pending. The pointer is valid until the next poll/submit/free; the caller
  * copies it into its own transcript before then. */
@@ -69,9 +69,9 @@ const char *SessionBridge_takeNote(SessionBridge *self);
 /* Queue exactly one "once"/"always"/"reject" reply; false leaves the wire
  * untouched. The server owns the durable rule; a configured deny always wins. */
 bool SessionBridge_decide(SessionBridge *self, const char *decision);
-bool SessionBridge_setTimeout(SessionBridge *self, uint64_t timeoutMs);
-uint64_t SessionBridge_getTimeout(const SessionBridge *self);
+bool SessionBridge_setTimeout(SessionBridge *self, u64 timeoutMs);
+u64 SessionBridge_getTimeout(const SessionBridge *self);
 const char *SessionBridge_getText(const SessionBridge *self);
-bool SessionBridge_toString(const SessionBridge *self, char *dest, size_t cap, bool *outTruncated);
-bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, size_t cap, bool *outTruncated);
+bool SessionBridge_toString(const SessionBridge *self, char *dest, bytes cap, bool *outTruncated);
+bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, bytes cap, bool *outTruncated);
 #endif
