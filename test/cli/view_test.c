@@ -10,7 +10,7 @@
 #include <string.h>
 #include <wchar.h>
 
-int main(void) {
+int main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     FILE *in = tmpfile(), *out = tmpfile();
     assert(in && out);

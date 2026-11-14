@@ -84,7 +84,7 @@ law order:
    darkbase-owned schema types.
 2. **Byte-native persistence** — `u8[]` rows written in memory order, no
    endianness code, no text encoding, pointer-free rows, the canonical
-   `{ u8 name[24]; void* pointer }` binding.
+   `{ u8 name[24]; any pointer }` binding.
 3. **Zero-alloc scans** — iterators yield pointers into the mapped row slices;
    no row wrappers in the loop.
 4. **B-tree page consistency** — fixed power-of-two pages from a dedicated pool,

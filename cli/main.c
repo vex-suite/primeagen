@@ -45,7 +45,7 @@
  * FUNCTION REGISTRY:
  * ----------------------------------------------------------------------------
  * Private helpers:
- *   static void stop(int signalNumber) : flag shutdown; no terminal API/logging.
+ *   static fn stop(int signalNumber) : flag shutdown; no terminal API/logging.
  *   static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, u8 *styles, bytes cap)
  *     Draw per-cell styled wrapped viewport, fixed input/status and cursor.
  *     No model-supplied terminal escape sequences; unsupported italic uses underline.
@@ -54,7 +54,7 @@
  *   static bool mouseReporting(bool enabled) : own X10/SGR capture enable/restore.
  *   static bool readMouse(int key, int *x, int *y, TuiMouseKind *kind)
  *     Bounded protocol decode; coordinate outputs unchanged on malformed input.
- *   static void drawApproval(int rows, int left, int columns)
+ *   static fn drawApproval(int rows, int left, int columns)
  *     Fixed decision bar, visible even while scrolling the proposed resources.
  *   static int connectHost(const char *, bool) : exec existing adapter on Go Flash.
  * Entry:
@@ -175,8 +175,8 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
     *outKind = kind;
     return true;
 }
-static void stop(int signalNumber) {
-    (void) signalNumber;
+static fn stop(int signalNumber) {
+    (fn) signalNumber;
     stopped = 1;
 }
 
@@ -196,7 +196,7 @@ static const char *approvalReply(int key) {
     return nullptr;
 }
 
-static void drawApproval(int rows, int left, int columns) {
+static fn drawApproval(int rows, int left, int columns) {
     if (rows < TUI_MIN_ROWS || columns < TUI_MIN_COLUMNS)
         return;
     mvhline(rows - 2, left, ' ', columns - 1);
@@ -331,13 +331,13 @@ int main(int argc, char **argv) {
         Tui_free(&state);
         return 1;
     }
-    (void) TerminalTreeView_setExpanded(tree, chatsNode, true);
-    (void) TerminalTreeView_setExpanded(tree, recentNode, true);
-    (void) TerminalTreeView_setExpanded(tree, usersNode, true);
-    (void) TerminalTreeView_setExpanded(tree, serversNode, true);
-    (void) TerminalTreeView_setExpanded(tree, serverNode, true);
-    (void) TerminalTreeView_setExpanded(tree, privateNode, true);
-    (void) TerminalTreeView_setSelected(tree, openCodeNode);
+    (fn) TerminalTreeView_setExpanded(tree, chatsNode, true);
+    (fn) TerminalTreeView_setExpanded(tree, recentNode, true);
+    (fn) TerminalTreeView_setExpanded(tree, usersNode, true);
+    (fn) TerminalTreeView_setExpanded(tree, serversNode, true);
+    (fn) TerminalTreeView_setExpanded(tree, serverNode, true);
+    (fn) TerminalTreeView_setExpanded(tree, privateNode, true);
+    (fn) TerminalTreeView_setSelected(tree, openCodeNode);
     HotModule *hot = nullptr;
     PrimeagenDrawFn view = draw;
     PrimeagenPanelsFn panelsView = Primeagen_drawPanels;
@@ -398,12 +398,12 @@ int main(int argc, char **argv) {
     Settings settings = Settings_0();
     char settingsPath[600];
     if (Settings_resolvePath(settingsPath, sizeof settingsPath))
-        (void) Settings_load(&settings, settingsPath);
+        (fn) Settings_load(&settings, settingsPath);
     // Consent is loaded with the record; the C-TUI tool gate consumes it when
     // the consent prompt lands. Referencing the type keeps the read explicit.
     SettingsConsent consent = (SettingsConsent) Settings_getConsent(&settings);
-    (void) consent;
-    (void) appearanceView(Settings_getAppearance(&settings));
+    (fn) consent;
+    (fn) appearanceView(Settings_getAppearance(&settings));
 
     // The app's BANNER: decode the PNG once with a libc-backed buffer (this lean
     // host owns no engine arena), then hand the pixels to the view. The view
@@ -415,22 +415,22 @@ int main(int argc, char **argv) {
         char bannerPath[1200];
         const char *bannerRoot = getenv("PRIMEAGEN_ROOT");
         if (bannerRoot != nullptr) {
-            (void) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", bannerRoot);
+            (fn) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", bannerRoot);
         } else {
             char dir[1000];
-            (void) snprintf(dir, sizeof dir, "%s", argv[0]);
+            (fn) snprintf(dir, sizeof dir, "%s", argv[0]);
             char *slash = strrchr(dir, '/');
             if (slash != nullptr)
                 *slash = '\0';
-            (void) snprintf(bannerPath, sizeof bannerPath, "%s/../resources/w.png", dir);
+            (fn) snprintf(bannerPath, sizeof bannerPath, "%s/../resources/w.png", dir);
         }
         FILE *bannerFile = fopen(bannerPath, "rb");
         if (bannerFile != nullptr) {
             static u8 pngBytes[1u << 20];
             bytes pngLength = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
-            (void) fclose(bannerFile);
+            (fn) fclose(bannerFile);
             if (Png_decodeMalloc(pngBytes, pngLength, &bannerPixels, &bannerWidth, &bannerHeight) == PNG_OK)
-                (void) bannerView(bannerPixels, bannerWidth, bannerHeight);
+                (fn) bannerView(bannerPixels, bannerWidth, bannerHeight);
         }
     }
 
@@ -486,7 +486,7 @@ int main(int argc, char **argv) {
     while (ok && !stopped) {
         int completed = SessionBridge_poll(&bridge);
         if (workingShown) {
-            (void) Tui_popLast(&state); // always the trailing entry while shown
+            (fn) Tui_popLast(&state); // always the trailing entry while shown
             workingShown = false;
         }
         if (completed) {
@@ -514,7 +514,7 @@ int main(int argc, char **argv) {
         if (SessionBridge_isAwaiting(&bridge) && SessionBridge_getApprovalSerial(&bridge) != shownApproval) {
             shownApproval = SessionBridge_getApprovalSerial(&bridge);
             if (workingShown) {
-                (void) Tui_popLast(&state); // keep the live placeholder last: restore it below
+                (fn) Tui_popLast(&state); // keep the live placeholder last: restore it below
                 workingShown = false;
             }
             char question[SESSION_APPROVAL_LABEL_CAP + 96];
@@ -546,7 +546,7 @@ int main(int argc, char **argv) {
                 PrimeagenAppearanceFn refreshed = (PrimeagenAppearanceFn) Hot_getSymbol(hot, "Primeagen_setAppearance");
                 if (refreshed != nullptr)
                     appearanceView = refreshed;
-                (void) appearanceView(PrimeagenAppearance_name());
+                (fn) appearanceView(PrimeagenAppearance_name());
             }
             char notice[192];
             snprintf(notice, sizeof(notice), updated ? "Updated running CLI: generation %llu -> %llu. Resumed." : "Update rejected; running generation %llu retained. Resumed.",
@@ -568,7 +568,7 @@ int main(int argc, char **argv) {
             // A zoom, a fullscreen toggle or a drag changes the size; ncurses can
             // consume that change itself, so clear before repainting and never let
             // stale cells survive a resize.
-            (void) clear();
+            (fn) clear();
         }
         bytes needed = Tui_getRowCapacity(&state);
         if ((bytes) columns + 1 > needed)
@@ -630,7 +630,7 @@ int main(int argc, char **argv) {
                 bytes next = key == KEY_UP ? (rowIndex == 0 ? 0 : rowIndex - 1) :
                               (rowIndex + 1 < count ? rowIndex + 1 : rowIndex);
                 TerminalTreeRow item = TerminalTreeView_rowAt(tree, next);
-                (void) TerminalTreeView_setSelected(tree, item.id);
+                (fn) TerminalTreeView_setSelected(tree, item.id);
                 if (panel == PRIMEAGEN_PANEL_PEOPLE && item.id == openCodeNode) {
                     selection = 0;
                     focused = true;
@@ -641,7 +641,7 @@ int main(int argc, char **argv) {
         else if ((key == KEY_LEFT || key == KEY_RIGHT) && !liveSelected) {
             TerminalTreeNodeId selected = TerminalTreeView_getSelected(tree);
             if (TerminalTreeView_isFolder(tree, selected))
-                (void) TerminalTreeView_setExpanded(tree, selected, key == KEY_RIGHT);
+                (fn) TerminalTreeView_setExpanded(tree, selected, key == KEY_RIGHT);
             Tui_setDirty(&state, true);
         }
         else if (SessionBridge_isAwaiting(&bridge) && approvalReply(key) != nullptr) {
@@ -692,16 +692,16 @@ int main(int argc, char **argv) {
                 if (y == 0 && kind == TUI_MOUSE_CLICK)
                     treeVisible = false;
                 else if (kind == TUI_MOUSE_WHEEL_UP)
-                    (void) TerminalTreeView_scrollBy(tree, -3);
+                    (fn) TerminalTreeView_scrollBy(tree, -3);
                 else if (kind == TUI_MOUSE_WHEEL_DOWN)
-                    (void) TerminalTreeView_scrollBy(tree, 3);
+                    (fn) TerminalTreeView_scrollBy(tree, 3);
                 else if (kind == TUI_MOUSE_CLICK && y >= 1 && x < chatLeft - 1) {
                     TerminalTreeNodeId id = TerminalTreeView_nodeAtOffset(tree, (bytes) (y - 1));
                     if (id != TERMINAL_TREE_NO_NODE) {
                         if (TerminalTreeView_isFolder(tree, id))
-                            (void) TerminalTreeView_toggle(tree, id);
+                            (fn) TerminalTreeView_toggle(tree, id);
                         else {
-                            (void) TerminalTreeView_setSelected(tree, id);
+                            (fn) TerminalTreeView_setSelected(tree, id);
                             if (id == openCodeNode) {
                                 panel = PRIMEAGEN_PANEL_PEOPLE;
                                 selection = 0;
@@ -823,7 +823,7 @@ int main(int argc, char **argv) {
     }
     SessionBridge_free(&bridge);
     TerminalTreeView_free(tree);
-    (void) mouseReporting(false);
+    (fn) mouseReporting(false);
     endwin();
     delscreen(screen);
     free(row);

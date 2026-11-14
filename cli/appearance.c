@@ -25,9 +25,9 @@
  *   static char s_name[]                  the chosen preset name
  *   static u32 *s_cells; bytes s_cap  rule scratch (cold growth)
  * FUNCTION REGISTRY:
- *   - void PrimeagenAppearance_use(const char *presetName)
- *   - const TerminalAppearance *PrimeagenAppearance_current(void)
- *   - const char *PrimeagenAppearance_name(void)
+ *   - fn PrimeagenAppearance_use(const char *presetName)
+ *   - const TerminalAppearance *PrimeagenAppearance_current()
+ *   - const char *PrimeagenAppearance_name()
  *   - bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width)
  * CONTRACT: cold owner thread; unknown/null names adopt the toolkit default; the
  * rule blit is one pass and clips to `width`; no file, network or model access.
@@ -43,7 +43,7 @@ static u32 *s_cells = nullptr;
 static bytes s_cap = 0;
 static u16 *s_styles = nullptr;
 
-const TerminalAppearance *PrimeagenAppearance_current(void) {
+const TerminalAppearance *PrimeagenAppearance_current() {
     if (!s_loaded) {
         s_current = TerminalAppearance_0();
         s_loaded = true;
@@ -51,9 +51,9 @@ const TerminalAppearance *PrimeagenAppearance_current(void) {
     return &s_current;
 }
 
-const char *PrimeagenAppearance_name(void) { return s_name; }
+const char *PrimeagenAppearance_name() { return s_name; }
 
-void PrimeagenAppearance_use(const char *presetName) {
+fn PrimeagenAppearance_use(const char *presetName) {
     const char *wanted = (presetName != nullptr && presetName[0] != '\0') ? presetName : "ascii-striped";
     s_current = TerminalAppearance_named(wanted);
     bytes n = strlen(wanted);
@@ -92,9 +92,9 @@ bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
         wchar_t text[2] = { (wchar_t) cp, L'\0' };
         cchar_t glyph;
         if (setcchar(&glyph, text, A_DIM, 0, nullptr) == OK)
-            (void) mvadd_wch(row, left + x, &glyph);
+            (fn) mvadd_wch(row, left + x, &glyph);
         else
-            (void) mvaddch(row, left + x, (chtype) ' ' | A_DIM);
+            (fn) mvaddch(row, left + x, (chtype) ' ' | A_DIM);
     }
     return true;
 }

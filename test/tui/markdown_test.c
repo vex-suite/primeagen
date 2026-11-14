@@ -17,7 +17,7 @@ static void check(const char *source, const char *expected) {
     assert(styles[length] == 0);
 }
 
-int main(void) {
+int main() {
     check("", "");
     check("**bold** and __also__", "bold and also");
     check("*soft* _emphasis_", "soft emphasis");

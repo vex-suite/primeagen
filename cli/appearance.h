@@ -18,9 +18,9 @@
 // rules are drawn by the toolkit as a connector run instead of a bare ACS_HLINE.)
 
 // Adopt a preset by name (unknown names fall back to the toolkit default).
-void PrimeagenAppearance_use(const char *presetName);
-const TerminalAppearance *PrimeagenAppearance_current(void);
-const char *PrimeagenAppearance_name(void);
+fn PrimeagenAppearance_use(const char *presetName);
+const TerminalAppearance *PrimeagenAppearance_current();
+const char *PrimeagenAppearance_name();
 
 // Draw the configured rule across `width` cells at (row, left) into `win`,
 // in one pass. False on a null window or a non-positive width.

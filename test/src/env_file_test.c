@@ -21,7 +21,7 @@ static int failures = 0;
         }                                                              \
     } while (0)
 
-static void writeFile(const char *path, const void *data, bytes length) {
+static fn writeFile(const char *path, const_any data, bytes length) {
     FILE *file = fopen(path, "wb");
     if (file == nullptr) {
         failures++;
@@ -37,7 +37,7 @@ static bool loadAbsent(const char *path) {
     return EnvFile_load(path);
 }
 
-int main(void) {
+int main() {
     char directory[] = "/tmp/primeagen-env-XXXXXX";
     if (mkdtemp(directory) == nullptr) {
         fprintf(stderr, "FAIL: mkdtemp\n");

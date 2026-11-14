@@ -20,7 +20,7 @@ static int failures = 0;
         }                                                                  \
     } while (0)
 
-static void writeFile(const char *path, const char *text) {
+static fn writeFile(const char *path, const char *text) {
     FILE *file = fopen(path, "wb");
     if (file == nullptr) {
         failures++;
@@ -30,7 +30,7 @@ static void writeFile(const char *path, const char *text) {
     fclose(file);
 }
 
-int main(void) {
+int main() {
     char base[] = "/tmp/primeagen-settings-XXXXXX";
     if (mkdtemp(base) == nullptr) {
         fprintf(stderr, "FAIL: mkdtemp\n");

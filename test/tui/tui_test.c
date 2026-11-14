@@ -8,7 +8,7 @@
 #include <locale.h>
 
 static int failAfter = -1;
-static bool fail(void) {
+static bool fail() {
     if (failAfter < 0)
         return false;
     if (failAfter == 0)
@@ -16,9 +16,9 @@ static bool fail(void) {
     --failAfter;
     return false;
 }
-static void *testMalloc(bytes n) { return fail() ? nullptr : malloc(n); }
-static void *testCalloc(bytes n, bytes s) { return fail() ? nullptr : calloc(n, s); }
-static void *testRealloc(void *p, bytes n) { return fail() ? nullptr : realloc(p, n); }
+static any testMalloc(bytes n) { return fail() ? nullptr : malloc(n); }
+static any testCalloc(bytes n, bytes s) { return fail() ? nullptr : calloc(n, s); }
+static any testRealloc(any p, bytes n) { return fail() ? nullptr : realloc(p, n); }
 #define malloc testMalloc
 #define calloc testCalloc
 #define realloc testRealloc
@@ -27,7 +27,7 @@ static void *testRealloc(void *p, bytes n) { return fail() ? nullptr : realloc(p
 #undef calloc
 #undef realloc
 
-int main(void) {
+int main() {
     Tui a = Tui();
     Tui b = Tui(1);
     Tui c = Tui(1, 1);

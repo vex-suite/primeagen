@@ -19,7 +19,7 @@ static u8 pixels[2 * 4] = { 0, 0, 0, 255,   255, 255, 255, 255 };
 // A bright-paper banner (the other polarity).
 static u8 brightPixels[2 * 4] = { 255, 255, 255, 255,   255, 255, 255, 255 };
 
-int main(void) {
+int main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     PrimeagenScreen screen;
     PrimeagenScreen_init(&screen);

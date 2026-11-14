@@ -37,7 +37,7 @@ typedef struct SessionBridge {
     bool notePending;
     char decision[8];
 } SessionBridge;
-SessionBridge SessionBridge_0(void);
+SessionBridge SessionBridge_0();
 SessionBridge SessionBridge_2(int readFd, int writeFd);
 #define SESSION_ARITY_(_0, _1, _2, N, ...) N
 #define SESSION_ARITY(...) SESSION_ARITY_(0 __VA_OPT__(,) __VA_ARGS__, 2, 1, 0)
@@ -54,8 +54,8 @@ bool SessionBridge_submit(SessionBridge *self, const char *prompt);
  * answered through SessionBridge_decide. The human wait suspends the local
  * deadline and the restarted window begins when the decision is queued. */
 int SessionBridge_poll(SessionBridge *self);
-void SessionBridge_free(SessionBridge *self);
-void SessionBridge_setOwo(SessionBridge *self, bool enabled);
+fn SessionBridge_free(SessionBridge *self);
+fn SessionBridge_setOwo(SessionBridge *self, bool enabled);
 bool SessionBridge_isOwo(const SessionBridge *self);
 bool SessionBridge_isBusy(const SessionBridge *self);
 /* A human decision is required before the remote turn can continue. Reads only. */

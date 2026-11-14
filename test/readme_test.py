@@ -117,7 +117,7 @@ class ReadmeTest(unittest.TestCase):
         self.assertIn("\\uf544", view)
         self.assertIn("\\uf233", view)
         self.assertIn("\\uf086", view)
-        tree_view = view.split("\nbool Primeagen_drawTreePanels(", 1)[1].split("\nconst void *Hot_getExports", 1)[0]
+        tree_view = view.split("\nbool Primeagen_drawTreePanels(", 1)[1].split("\nconst any Hot_getExports", 1)[0]
         self.assertNotIn("│", tree_view)
         self.assertIn("PRIMEAGEN_PAIR_TREE_SELECTED", tree_view)
         self.assertIn("mvhline", tree_view)

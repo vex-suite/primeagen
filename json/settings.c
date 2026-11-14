@@ -72,7 +72,7 @@ static bool copyBounded(char *dest, bytes cap, const char *value) {
     return true;
 }
 
-Settings Settings_0(void) {
+Settings Settings_0() {
     Settings settings = {0};  // provider/model unset, owo off, consent = PROMPT (0)
     copyBounded(settings.appearance, SETTINGS_APPEARANCE_MAX, SETTINGS_APPEARANCE_DEFAULT);
     return settings;
@@ -100,7 +100,7 @@ bool Settings_setModel(Settings *self, const char *value) {
     return copyBounded((*self).model, SETTINGS_MODEL_MAX, value);
 }
 
-void Settings_setOwo(Settings *self, bool value) {
+fn Settings_setOwo(Settings *self, bool value) {
     if (self != nullptr)
         (*self).owo = value;
 }
@@ -128,7 +128,7 @@ u32 Settings_getConsent(const Settings *self) {
     return self == nullptr ? SETTINGS_CONSENT_PROMPT : (*self).consent;
 }
 
-static bool ensureManifest(void) {
+static bool ensureManifest() {
     static int state = 0;  // 0 = not tried, 1 = mounted, -1 = failed
     if (state == 0)
         state = MANIFEST(MANIFEST_APP_DATA, "vexgraph", "primeagen") && MANIFEST_ENSURE() ? 1 : -1;

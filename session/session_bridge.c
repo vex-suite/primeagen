@@ -59,12 +59,12 @@
  *   bool notePending : a note is waiting for the terminal to take it.
  *   char decision[8] : queued reply spelling; empty when nothing is queued.
  * FUNCTION REGISTRY:
- *   SessionBridge SessionBridge_0(void) : unbound.
+ *   SessionBridge SessionBridge_0() : unbound.
  *   SessionBridge SessionBridge_2(int readFd, int writeFd) : borrowed pipes.
  *   bool SessionBridge_submit(SessionBridge *, const char *) : cold admission.
  *   int SessionBridge_poll(SessionBridge *) : bounded IO; one frame per call.
- *   void SessionBridge_free(SessionBridge *) : cancel borrowed job, never close fd.
- *   void SessionBridge_setOwo(SessionBridge *, bool), bool SessionBridge_isOwo(const SessionBridge *)
+ *   fn SessionBridge_free(SessionBridge *) : cancel borrowed job, never close fd.
+ *   fn SessionBridge_setOwo(SessionBridge *, bool), bool SessionBridge_isOwo(const SessionBridge *)
  *   bool SessionBridge_isBusy(const SessionBridge *), const char *SessionBridge_getText(const SessionBridge *)
  *   bool SessionBridge_isAwaiting(const SessionBridge *)
  *   const char *SessionBridge_getApprovalLabel(const SessionBridge *)
@@ -75,12 +75,12 @@
  *   bool SessionBridge_toString(const SessionBridge *, char *, bytes, bool *) : bounded value.
  *   bool SessionBridge_toStringStruct(const SessionBridge *, char *, bytes, bool *) : bounded redacted fields.
  * Private static helpers:
- *   u64 nowMs(void) : monotonic clock, zero on clock failure.
+ *   u64 nowMs() : monotonic clock, zero on clock failure.
  *   bool queueText(SessionBridge *, const char *, const char *) : one-field frame.
- *   bool spawn(void *, const EngineProviderSlot *, const char *, bytes, u64, void **) : queue JSON.
+ *   bool spawn(any , const EngineProviderSlot *, const char *, bytes, u64, any *) : queue JSON.
  *   HarnessStatus handleFrame(SessionBridge *, JsonDoc *) : classify one reply frame.
- *   HarnessStatus pollJob(void *, void *, u64) : progress pipes, one frame per call.
- *   void cancel(void *, void *) : clear pending IO, poison wire.
+ *   HarnessStatus pollJob(any , any , u64) : progress pipes, one frame per call.
+ *   fn cancel(any , any ) : clear pending IO, poison wire.
  * CONTRACT: trusted live pipes, valid owner address, serialized calls only.
  * Null/default safe, busy rejection preserves current turn; no arbitrary pointer
  * validation. Prompt is printable ASCII/newline/tab, response bytes are escaped
@@ -92,7 +92,7 @@
  * or secrets.
  * ============================================================================ */
 ;;INTENTION("derived wire identity/buffers mutate only through admission/decide/poll/free; projections redact transcript buffers and summarize the borrowed Haven driver (which has no bounded projection), preserving privacy under the Conflict Triage Law")
-static u64 nowMs(void) {
+static u64 nowMs() {
     struct timespec stamp;
     if (clock_gettime(CLOCK_MONOTONIC, &stamp) != 0)
         return 0;
@@ -113,11 +113,11 @@ static bool queueText(SessionBridge *self, const char *key, const char *value) {
     return true;
 }
 ;;WHAT("SessionBridge")
-static bool spawn(void *context, const EngineProviderSlot *engine, const char *prompt,
-                  bytes length, u64 timeoutMs, void **outHandle) {
-    (void) engine;
-    (void) length;
-    (void) timeoutMs;
+static bool spawn(any context, const EngineProviderSlot *engine, const char *prompt,
+                  bytes length, u64 timeoutMs, any *outHandle) {
+    (fn) engine;
+    (fn) length;
+    (fn) timeoutMs;
     SessionBridge *self = context;
     JsonWriter writer = JsonWriter((*self).request, sizeof((*self).request) - 1);
     Json_beginObject(&writer);
@@ -202,8 +202,8 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
     return HARNESS_STATUS_DONE;
 }
 ;;WHAT("SessionBridge")
-static HarnessStatus pollJob(void *context, void *handle, u64 timeoutMs) {
-    (void) handle;
+static HarnessStatus pollJob(any context, any handle, u64 timeoutMs) {
+    (fn) handle;
     SessionBridge *self = context;
     if ((*self).failed)
         goto fail;
@@ -275,15 +275,15 @@ fail:
     return HARNESS_STATUS_TIMEOUT;
 }
 ;;WHAT("SessionBridge")
-static void cancel(void *context, void *handle) {
-    (void) handle;
+static fn cancel(any context, any handle) {
+    (fn) handle;
     SessionBridge *self = context;
     (*self).failed = true;
     (*self).awaiting = false;
     (*self).notePending = false;
     (*self).requestLength = 0;
 }
-SessionBridge SessionBridge_0(void) {
+SessionBridge SessionBridge_0() {
     SessionBridge self = {0};
     self.harness = Harness_0();
     Harness_setTimeout(&self.harness, SESSION_TIMEOUT_MS_DEFAULT);
@@ -328,7 +328,7 @@ int SessionBridge_poll(SessionBridge *self) {
     (*self).awaiting = false;
     return status == HARNESS_STATUS_DONE ? 1 : -1;
 }
-void SessionBridge_free(SessionBridge *self) {
+fn SessionBridge_free(SessionBridge *self) {
     if (!self)
         return;
     if ((*self).jobId)
@@ -336,7 +336,7 @@ void SessionBridge_free(SessionBridge *self) {
     (*self).jobId = 0;
     (*self).awaiting = false;
 }
-void SessionBridge_setOwo(SessionBridge *self, bool enabled) {
+fn SessionBridge_setOwo(SessionBridge *self, bool enabled) {
     if (self)
         (*self).owo = enabled;
 }

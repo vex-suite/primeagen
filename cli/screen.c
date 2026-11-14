@@ -54,7 +54,7 @@
  * ============================================================================
  */
 
-void PrimeagenScreen_init(PrimeagenScreen *self) {
+fn PrimeagenScreen_init(PrimeagenScreen *self) {
     if (self != nullptr)
         memset(self, 0, sizeof(*self));
 }
@@ -87,7 +87,7 @@ bool PrimeagenScreen_bind(PrimeagenScreen *self, bytes rows, bytes columns) {
     return true;
 }
 
-void PrimeagenScreen_free(PrimeagenScreen *self) {
+fn PrimeagenScreen_free(PrimeagenScreen *self) {
     if (self == nullptr)
         return;
     free((*self).cells);
@@ -113,7 +113,7 @@ static u32 s_noiseSeed = 1;
 
 // Re-scatter the banner's paper texture. Called on EVERY render, so a revalidate (which
 // re-renders) draws a fresh random field while a fixed seed stays reproducible.
-static void reshuffleBannerNoise(void) {
+static fn reshuffleBannerNoise() {
     if (!s_hasBanner)
         return;
     s_noiseSeed = s_noiseSeed * 1103515245u + 12345u;
@@ -126,7 +126,7 @@ static void reshuffleBannerNoise(void) {
 // one banner can be white-on-black and another black-on-white with no per-image
 // setting: the paper is whatever covers the frame, and it becomes the decor.
 static bool paperIsBright(const u8 *rgba, u32 width, u32 height) {
-    TerminalImage probe = TerminalImage((u8*) (uintptr_t) rgba, (bytes) width, (bytes) height);
+    TerminalImage probe = TerminalImage((u8*) (pointer) rgba, (bytes) width, (bytes) height);
     u64 sum = 0;
     bytes count = 0;
     for (bytes ly = 0; ly < 16; ++ly) {
@@ -141,29 +141,29 @@ static bool paperIsBright(const u8 *rgba, u32 width, u32 height) {
     return count == 0 ? true : (sum / count) > 128;
 }
 
-void PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height) {
+fn PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height) {
     if (rgba == nullptr || width == 0 || height == 0) {
         s_hasBanner = false;
         s_banner = TerminalImage_0();
         return;
     }
-    s_banner = TerminalImage((u8*) (uintptr_t) rgba, (bytes) width, (bytes) height);
+    s_banner = TerminalImage((u8*) (pointer) rgba, (bytes) width, (bytes) height);
     TerminalImage_setInvert(&s_banner, paperIsBright(rgba, width, height));
     TerminalImageColorRamp ramp = TerminalImage_rampPurple();
-    (void) TerminalImage_setColorRamp(&s_banner, ramp.data, ramp.count);
+    (fn) TerminalImage_setColorRamp(&s_banner, ramp.data, ramp.count);
     // Which letter reads light and which reads dark is randomized per cell, not
     // luminance-ordered — the palette's whole range (≈30% up to near-white).
     TerminalImage_setPaletteScatter(&s_banner, (u8) ramp.count);
     TerminalImage_setJitter(&s_banner, 20, 11);
     TerminalImage_setStyle(&s_banner, 0);
-    (void) TerminalImage_setNoise(&s_banner, PRIMEAGEN_SCREEN_NOISE_ALPHABET, PRIMEAGEN_SCREEN_NOISE_COLOR);
+    (fn) TerminalImage_setNoise(&s_banner, PRIMEAGEN_SCREEN_NOISE_ALPHABET, PRIMEAGEN_SCREEN_NOISE_COLOR);
     TerminalImage_setNoiseStyle(&s_banner, TERMINAL_STYLE_DIM);
     TerminalImage_setNoiseDensity(&s_banner, PRIMEAGEN_SCREEN_NOISE_DENSITY);
     s_hasBanner = true;
 }
 
-const TerminalImage *PrimeagenScreen_banner(void) { return s_hasBanner ? &s_banner : nullptr; }
-bool PrimeagenScreen_hasBanner(void) { return s_hasBanner; }
+const TerminalImage *PrimeagenScreen_banner() { return s_hasBanner ? &s_banner : nullptr; }
+bool PrimeagenScreen_hasBanner() { return s_hasBanner; }
 
 TerminalCanvas PrimeagenScreen_canvas(PrimeagenScreen *self) {
     if (!PrimeagenScreen_isBound(self))
@@ -218,12 +218,12 @@ static TerminalPen selectionPen(const TerminalAppearance *look, bool focused) {
     return TerminalPen_2(TERMINAL_STYLE_ACCENT, (*look).colorAccent);
 }
 
-static void putText(TerminalCanvas *canvas, bytes lx, bytes ly, const char *text, TerminalPen pen) {
+static fn putText(TerminalCanvas *canvas, bytes lx, bytes ly, const char *text, TerminalPen pen) {
     if (text != nullptr)
         TerminalCanvas_text(canvas, lx, ly, text, strlen(text), pen);
 }
 
-static void putCentered(TerminalCanvas *canvas, bytes ly, const char *text, TerminalPen pen) {
+static fn putCentered(TerminalCanvas *canvas, bytes ly, const char *text, TerminalPen pen) {
     if (text == nullptr)
         return;
     bytes width = TerminalCanvas_getWidth(canvas);
@@ -234,7 +234,7 @@ static void putCentered(TerminalCanvas *canvas, bytes ly, const char *text, Term
 
 // Too small to resolve: one centred notice, re-centred every render so it stays
 // anchored while the window is dragged. Word-wrapped, never split mid-word.
-static void renderTooSmall(TerminalCanvas *root, const TerminalAppearance *look) {
+static fn renderTooSmall(TerminalCanvas *root, const TerminalAppearance *look) {
     TerminalCanvas_fill(root, ' ', TerminalPen_1(TERMINAL_STYLE_NONE));
     bytes width = TerminalCanvas_getWidth(root);
     bytes height = TerminalCanvas_getHeight(root);
@@ -276,11 +276,11 @@ static void renderTooSmall(TerminalCanvas *root, const TerminalAppearance *look)
 
 // The frame's OWN box, with real corners, so the picture reads as a terminal
 // instrument set inside the window rather than content pressed against it.
-static void drawBorder(TerminalCanvas *root, const TerminalAppearance *look) {
+static fn drawBorder(TerminalCanvas *root, const TerminalAppearance *look) {
     TerminalRule_drawBox(&(*look).rule, root, lookRule(look));
 }
 
-void PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
+fn PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
                                 const char *const *menu, bytes menuCount, bytes menuSelection,
                                 const TerminalImage *banner) {
     if (!PrimeagenScreen_isBound(self))
@@ -327,7 +327,7 @@ void PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
 }
 
 // The rail's rows per panel. Static sample content; the app owns real data.
-static void navItems(int panel, const char *const **outItems, bytes *outCount) {
+static fn navItems(int panel, const char *const **outItems, bytes *outCount) {
     static const char *const people[] = {"Sola (@solasol)", "Muse Writer (@muse...)", "Vex (@vexgraph)"};
     static const char *const servers[] = {"Ecosystem", "Other Server", "Another Server"};
     static const char *const channels[] = {"# general", "# whatever-this", "# hotcwaphsdf"};
@@ -486,7 +486,7 @@ bool PrimeagenScreen_present(const PrimeagenScreen *self, WINDOW *win) {
             cchar_t glyph;
             if (setcchar(&glyph, text, attr, pair, nullptr) != OK)
                 continue;
-            (void) mvadd_wch((int) y, (int) x, &glyph);
+            (fn) mvadd_wch((int) y, (int) x, &glyph);
         }
     }
     return refresh() != ERR;

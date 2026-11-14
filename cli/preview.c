@@ -38,25 +38,25 @@
  * Keys: 1 = HOME, 2 = CHAT, r = resize, q = quit.
  *
  * FUNCTION REGISTRY:
- *   int main(void) — banner decode, terminal setup, poll/revalidate/present loop.
+ *   int main() — banner decode, terminal setup, poll/revalidate/present loop.
  * ============================================================================
  */
 
-int main(void) {
+int main() {
     setlocale(LC_CTYPE, "");
 
     // The banner: decode once with a libc buffer and hand it to the screen.
     char bannerPath[1200];
     const char *root = getenv("PRIMEAGEN_ROOT");
     if (root != nullptr)
-        (void) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", root);
+        (fn) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", root);
     else
-        (void) snprintf(bannerPath, sizeof bannerPath, "resources/w.png");
+        (fn) snprintf(bannerPath, sizeof bannerPath, "resources/w.png");
     FILE *bannerFile = fopen(bannerPath, "rb");
     if (bannerFile != nullptr) {
         static u8 pngBytes[1u << 20];
         bytes length = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
-        (void) fclose(bannerFile);
+        (fn) fclose(bannerFile);
         u8 *rgba = nullptr;
         u32 bannerWidth = 0, bannerHeight = 0;
         if (Png_decodeMalloc(pngBytes, length, &rgba, &bannerWidth, &bannerHeight) == PNG_OK)
@@ -64,28 +64,28 @@ int main(void) {
     }
 
     Tui tui = Tui();
-    (void) Tui_add(&tui, "Sola:", 5);
-    (void) Tui_add(&tui, "placeholder text", 16);
-    (void) Tui_add(&tui, "Muse Writer:", 12);
-    (void) Tui_add(&tui, "im on it sir!", 13);
-    (void) Tui_add(&tui, "[Muse Writer: read] preferences.md", 34);
-    (void) Tui_add(&tui, "[User: edit] vex/vex/filename.c  [+32][-9]", 43);
-    (void) Tui_setInput(&tui, "please tell muse to do the thing rn!", 34);
+    (fn) Tui_add(&tui, "Sola:", 5);
+    (fn) Tui_add(&tui, "placeholder text", 16);
+    (fn) Tui_add(&tui, "Muse Writer:", 12);
+    (fn) Tui_add(&tui, "im on it sir!", 13);
+    (fn) Tui_add(&tui, "[Muse Writer: read] preferences.md", 34);
+    (fn) Tui_add(&tui, "[User: edit] vex/vex/filename.c  [+32][-9]", 43);
+    (fn) Tui_setInput(&tui, "please tell muse to do the thing rn!", 34);
 
-    (void) initscr();
-    (void) cbreak();
-    (void) noecho();
-    (void) keypad(stdscr, true);
-    (void) curs_set(0);
+    (fn) initscr();
+    (fn) cbreak();
+    (fn) noecho();
+    (fn) keypad(stdscr, true);
+    (fn) curs_set(0);
     // Poll instead of waiting for a key: a zoom, a fullscreen toggle or a window
     // drag changes the terminal size, and ncurses can consume that change itself
     // (updating its internal screen) without ever handing the app a KEY_RESIZE —
     // so an app that only reacts to keys never revalidates. A 100 ms tick lets the
     // loop notice the new size and repaint; nothing is painted while it is idle.
-    (void) wtimeout(stdscr, PRIMEAGEN_SCREEN_POLL_MS);
+    (fn) wtimeout(stdscr, PRIMEAGEN_SCREEN_POLL_MS);
     if (has_colors()) {
-        (void) start_color();
-        (void) use_default_colors();
+        (fn) start_color();
+        (fn) use_default_colors();
     }
 
     static const char *menuText[] = { "People", "Servers", "Settings" };
@@ -102,11 +102,11 @@ int main(void) {
         // A zoom, fullscreen or drag is a SIZE CHANGE, and it is revalidated here —
         // before painting — rather than trusting a KEY_RESIZE that may never come.
         bool resized = (bytes) rows != lastRows || (bytes) columns != lastColumns;
-        (void) PrimeagenScreen_revalidate(&screen, rows, columns);
+        (fn) PrimeagenScreen_revalidate(&screen, rows, columns);
         if (!PrimeagenScreen_isBound(&screen))
             break;
         if (resized) {
-            (void) clear();     // nothing stale survives the change
+            (fn) clear();     // nothing stale survives the change
             paint = 1;
         }
         if (paint) {
@@ -117,7 +117,7 @@ int main(void) {
                 state.tui = &tui;
                 state.focused = true;
                 state.focusPanel = focusPanel;
-                (void) PrimeagenScreen_renderChat(&screen, &state);
+                (fn) PrimeagenScreen_renderChat(&screen, &state);
             }
             if (!PrimeagenScreen_present(&screen, stdscr))
                 break;

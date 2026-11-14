@@ -83,16 +83,16 @@ bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes
 static bool readFd(int fd, bytes cap, char **dest, bytes *outLength) {
     if (cap == 0 || cap > TOOL_BYTES_MAX || dest == nullptr || outLength == nullptr)
         return failure("invalid byte capacity");
-    char *bytes = malloc(cap + 1);
-    if (bytes == nullptr)
+    char *data = malloc(cap + 1);
+    if (data == nullptr)
         return failure("read allocation refused");
     bytes length = 0;
     while (true) {
-        ssize_t count = read(fd, bytes + length, cap + 1 - length);
+        ssize_t count = read(fd, data + length, cap + 1 - length);
         if (count < 0 && errno == EINTR)
             continue;
         if (count < 0 || (bytes) count > cap - length) {
-            free(bytes);
+            free(data);
             THROW("tool fs: read failed or would truncate (byte bound %zu)", cap);
             return false;
         }
@@ -100,8 +100,8 @@ static bool readFd(int fd, bytes cap, char **dest, bytes *outLength) {
             break;
         length += (bytes) count;
     }
-    bytes[length] = '\0';
-    *dest = bytes;
+    data[length] = '\0';
+    *dest = data;
     *outLength = length;
     return true;
 }
@@ -125,15 +125,15 @@ bool ToolFs_read(int root, const char *path, bytes cap, char **dest, bytes *outL
             close(fd);
         return failure("read requires regular single-link file");
     }
-    char *bytes = nullptr;
+    char *data = nullptr;
     bytes length = 0;
-    bool ok = readFd(fd, cap, &bytes, &length);
+    bool ok = readFd(fd, cap, &data, &length);
     if (close(fd) != 0 && ok) {
-        free(bytes);
+        free(data);
         return failure("read descriptor close failed");
     }
     if (ok) {
-        *dest = bytes;
+        *dest = data;
         *outLength = length;
     }
     return ok;

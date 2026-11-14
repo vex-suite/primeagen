@@ -16,8 +16,8 @@
 static inline bytes TuiUtf8_decode(const char *text, bytes length, u32 *outScalar) {
     if (text == nullptr || length == 0 || outScalar == nullptr)
         return 0;
-    const unsigned char *bytes = (const unsigned char*) text;
-    u32 scalar = bytes[0];
+    const unsigned char *data = (const unsigned char*) text;
+    u32 scalar = data[0];
     bytes count;
     u32 minimum;
     if (scalar < 0x80) {
@@ -34,9 +34,9 @@ static inline bytes TuiUtf8_decode(const char *text, bytes length, u32 *outScala
     if (count > length)
         return 0;
     for (bytes i = 1; i < count; ++i) {
-        if ((bytes[i] & 0xc0) != 0x80)
+        if ((data[i] & 0xc0) != 0x80)
             return 0;
-        scalar = (scalar << 6) | (bytes[i] & 0x3f);
+        scalar = (scalar << 6) | (data[i] & 0x3f);
     }
     if (scalar < minimum || scalar > 0x10ffff || (scalar >= 0xd800 && scalar <= 0xdfff))
         return 0;

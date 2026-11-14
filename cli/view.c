@@ -21,7 +21,7 @@
  *   bool Primeagen_draw(Tui *, bool owo, bool focused, bool sessionMode, bool busy,
  *                       bool failed, char *row, u8 *styles, bytes cap)
  *       Paint the sole live Users/OpenCode context to the right-side chat pane.
- *   const void *Hot_getExports(u32 *count) : trusted loader exports.
+ *   const_any Hot_getExports(u32 *count) : trusted loader exports.
  *   int Primeagen_command(Tui *, bool sessionMode) : local command admission;
  *       emits display notices/actions, never executes model/provider/tools.
  * PRIVATE: attributes(style) : host-defined visible style to ncurses attributes.
@@ -52,7 +52,7 @@
  * server/member/rules/model implementation or private-chat persistence.
  * EXPORTED DATA: const u64 Hot_cold_abi : compatible cold module ABI; the
  * tree renderer is an additive export, preserving the legacy panel signature.
- * SLOT RECORD: behaviorless export rows {const char *name; void *fn}.
+ * SLOT RECORD: behaviorless export rows {const char *name; any fn}.
  * CONTRACT: owner-thread, live screen/model/buffers; nullptr entry rejects;
  * no retained pointers, callbacks, module state or model/permission operations.
  * Layout changes require a cold ABI bump and resident host rebuild. Module code
@@ -308,7 +308,7 @@ bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, 
     getyx(stdscr, caretY, caretX);
     if (left > 0 && rows >= TUI_MIN_ROWS) {
         for (int y = 0; y < rows; ++y)
-            (void) mvaddwstr(y, left - 1, L"│");
+            (fn) mvaddwstr(y, left - 1, L"│");
         const char *tree[] = {
             "vexgraph  ~/vexgraph", "", "> chats", "  chat #1", "  chat #2", "  chat #3",
             "", "> users", "  OpenCode", "  user preview", "", "> servers",
@@ -355,8 +355,8 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
         attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_BACKGROUND));
 
         attron(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_FOLDER) | A_BOLD);
-        (void) mvaddwstr(0, 1, L"⌄");
-        (void) mvaddwstr(0, 3, L"\uf07c");
+        (fn) mvaddwstr(0, 1, L"⌄");
+        (fn) mvaddwstr(0, 3, L"\uf07c");
         if (panelWidth > 5)
             mvaddnstr(0, 5, "vexgraph", panelWidth - 5);
         attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_FOLDER) | A_BOLD);
@@ -367,7 +367,7 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
         }
 
         bytes viewport = (bytes) (rows - 1);
-        (void) TerminalTreeView_setViewportRows(tree, viewport);
+        (fn) TerminalTreeView_setViewportRows(tree, viewport);
         bytes first = TerminalTreeView_scrollRow(tree);
         bytes visible = TerminalTreeView_visibleCount(tree);
         for (bytes index = 0; index < viewport && first + index < visible; ++index) {
@@ -395,10 +395,10 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
                 iconPair = PRIMEAGEN_PAIR_TREE_CHAT;
             }
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
-            (void) mvaddwstr(y, x, arrow);
+            (fn) mvaddwstr(y, x, arrow);
             attroff(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : iconPair));
-            (void) mvaddwstr(y, x + 2, icon);
+            (fn) mvaddwstr(y, x + 2, icon);
             attroff(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : iconPair));
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
             x += 4;
@@ -413,13 +413,13 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
     return refresh() != ERR;
 }
 
-const void *Hot_getExports(u32 *count) {
-    static const struct { const char *name; void *fn; } exports[] = {
-        {"Primeagen_draw", (void*) Primeagen_draw}, {"Primeagen_command", (void*) Primeagen_command},
-        {"Primeagen_drawPanels", (void*) Primeagen_drawPanels},
-        {"Primeagen_drawTreePanels", (void*) Primeagen_drawTreePanels},
-        {"Primeagen_setAppearance", (void*) Primeagen_setAppearance},
-        {"Primeagen_setBanner", (void*) Primeagen_setBanner}
+const_any Hot_getExports(u32 *count) {
+    static const struct { const char *name; any fn; } exports[] = {
+        {"Primeagen_draw", (any) Primeagen_draw}, {"Primeagen_command", (any) Primeagen_command},
+        {"Primeagen_drawPanels", (any) Primeagen_drawPanels},
+        {"Primeagen_drawTreePanels", (any) Primeagen_drawTreePanels},
+        {"Primeagen_setAppearance", (any) Primeagen_setAppearance},
+        {"Primeagen_setBanner", (any) Primeagen_setBanner}
     };
     if (count == nullptr)
         return nullptr;

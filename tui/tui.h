@@ -36,7 +36,7 @@ typedef struct Tui {
     bool dirty;
 } Tui;
 
-Tui Tui_0(void);
+Tui Tui_0();
 Tui Tui_1(bytes inputCapacity);
 Tui Tui_2(bytes inputCapacity, bytes entryCapacity);
 #define TUI_ARITY_(_0, _1, _2, N, ...) N
@@ -60,19 +60,19 @@ bool Tui_inputReserve(Tui *self, bytes capacity);
 bool Tui_setInput(Tui *self, const char *text, bytes length);
 bool Tui_inputAddChar(Tui *self, int character);
 bool Tui_inputBackspace(Tui *self);
-void Tui_inputClear(Tui *self);
-void Tui_clear(Tui *self);
+fn Tui_inputClear(Tui *self);
+fn Tui_clear(Tui *self);
 /* Remove the newest entry and its buffers; false when the transcript is empty
  * (an ordinary no-change condition, not a rejection). Used by the live
  * "working..." placeholder, which is always the trailing entry while shown. */
 bool Tui_popLast(Tui *self);
-void Tui_free(Tui *self);
+fn Tui_free(Tui *self);
 
 bool Tui_setSize(Tui *self, int rows, int columns);
-void Tui_getSize(const Tui *self, int *outRows, int *outColumns);
-void Tui_setScroll(Tui *self, bytes rowsFromBottom);
-void Tui_scrollBy(Tui *self, int64_t delta);
-void Tui_setDirty(Tui *self, bool dirty);
+fn Tui_getSize(const Tui *self, int *outRows, int *outColumns);
+fn Tui_setScroll(Tui *self, bytes rowsFromBottom);
+fn Tui_scrollBy(Tui *self, int64_t delta);
+fn Tui_setDirty(Tui *self, bool dirty);
 
 bool Tui_isReady(const Tui *self);
 bool Tui_isDirty(const Tui *self);

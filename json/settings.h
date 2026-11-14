@@ -34,12 +34,12 @@ typedef struct Settings {
     char appearance[SETTINGS_APPEARANCE_MAX];   // TerminalAppearance preset name
 } Settings;
 
-Settings Settings_0(void);
+Settings Settings_0();
 #define Settings(...) CONSTRUCTOR_DISPATCH(Settings, __VA_ARGS__)
 
 bool Settings_setProvider(Settings *self, const char *value);
 bool Settings_setModel(Settings *self, const char *value);
-void Settings_setOwo(Settings *self, bool value);
+fn Settings_setOwo(Settings *self, bool value);
 bool Settings_setConsent(Settings *self, u32 value);
 bool Settings_setAppearance(Settings *self, const char *value);
 

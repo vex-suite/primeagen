@@ -10,20 +10,20 @@
 #include <unistd.h>
 #include <time.h>
 
-static void fixture(int *request, int *response, SessionBridge *bridge) {
+static fn fixture(int *request, int *response, SessionBridge *bridge) {
     assert(pipe(request) == 0 && pipe(response) == 0);
     assert(fcntl(request[1], F_SETFL, O_NONBLOCK) == 0);
     assert(fcntl(response[0], F_SETFL, O_NONBLOCK) == 0);
     *bridge = SessionBridge(response[0], request[1]);
 }
-static void cleanup(int *request, int *response, SessionBridge *bridge) {
+static fn cleanup(int *request, int *response, SessionBridge *bridge) {
     SessionBridge_free(bridge);
     for (int i = 0; i < 2; ++i) {
         close(request[i]);
         close(response[i]);
     }
 }
-int main(void) {
+int main() {
     SessionBridge empty = SessionBridge();
     assert(!SessionBridge_isBusy(nullptr) && !SessionBridge_isOwo(nullptr));
     assert(strcmp(SessionBridge_getText(nullptr), "") == 0);

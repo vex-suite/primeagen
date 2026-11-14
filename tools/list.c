@@ -28,7 +28,7 @@
  * snapshot, recursive traversal or hostile concurrent writer guarantee.
  * ============================================================================ */
 #define TOOL_LIST_CAPACITY_DEFAULT 16u /* Growable initial directory, not a ceiling. */
-static int compare(const void *left, const void *right) {
+static int compare(const_any left, const_any right) {
     const char *a = *(const char* const*) left;
     const char *b = *(const char* const*) right;
     return strcmp(a, b);

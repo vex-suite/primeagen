@@ -12,7 +12,7 @@
 
 static int failures = 0;
 
-static void check(bool ok, const char *message) {
+static fn check(bool ok, const char *message) {
     if (!ok) {
         fprintf(stderr, "[test] FAIL: %s\n", message);
         ++failures;
@@ -26,7 +26,7 @@ static bool admit(const char *text) {
     return JsonAdmit_parse(&doc, nodes, NODES, scratch, SCRATCH, text);
 }
 
-static void makeNested(char *out, int depth) {
+static fn makeNested(char *out, int depth) {
     int at = 0;
     for (int i = 0; i < depth; ++i)
         out[at++] = '[';
@@ -36,7 +36,7 @@ static void makeNested(char *out, int depth) {
     out[at] = '\0';
 }
 
-int main(void) {
+int main() {
     char buffer[512];
 
     makeNested(buffer, JSON_MAX_DEPTH);

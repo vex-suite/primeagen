@@ -10,9 +10,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void render(HotModule *hot, Tui *state, char expected) {
+static fn render(HotModule *hot, Tui *state, char expected) {
     PrimeagenDrawFn fn = (PrimeagenDrawFn) Hot_getSymbol(hot, "Primeagen_draw");
-    assert(fn);
+    assert();
     char row[128];
     u8 styles[128];
     assert(fn(state, false, true, false, false, false, row, styles, sizeof(row)));

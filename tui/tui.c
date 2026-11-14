@@ -67,7 +67,7 @@
  * FUNCTION REGISTRY:
  * ----------------------------------------------------------------------------
  * Constructors:
- *   - Tui Tui_0(void)
+ *   - Tui Tui_0()
  *   - Tui Tui_1(bytes inputCapacity)
  *   - Tui Tui_2(bytes inputCapacity, bytes entryCapacity)
  *   - Tui(...) / Tui_zero()
@@ -81,20 +81,20 @@
  *   - bool Tui_inputReserve(Tui *self, bytes capacity)
  *   - bool Tui_inputAddChar(Tui *self, int character)
  *   - bool Tui_inputBackspace(Tui *self)
- *   - void Tui_inputClear(Tui *self)
- *   - void Tui_clear(Tui *self)
+ *   - fn Tui_inputClear(Tui *self)
+ *   - fn Tui_clear(Tui *self)
  *   - bool Tui_popLast(Tui *self)
  *     Remove the newest entry; empty is ordinary no-change, not rejection.
  *
  * Setters:
  *   - bool Tui_setInput(Tui *self, const char *text, bytes length)
  *   - bool Tui_setSize(Tui *self, int rows, int columns)
- *   - void Tui_setScroll(Tui *self, bytes rowsFromBottom)
- *   - void Tui_scrollBy(Tui *self, int64_t delta)
- *   - void Tui_setDirty(Tui *self, bool dirty)
+ *   - fn Tui_setScroll(Tui *self, bytes rowsFromBottom)
+ *   - fn Tui_scrollBy(Tui *self, int64_t delta)
+ *   - fn Tui_setDirty(Tui *self, bool dirty)
  *
  * Getters:
- *   - void Tui_getSize(const Tui *self, int *outRows, int *outColumns)
+ *   - fn Tui_getSize(const Tui *self, int *outRows, int *outColumns)
  *   - bool Tui_isReady(const Tui *self) / Tui_isDirty(const Tui *self)
  *   - bytes Tui_getCount / getCapacity / getInputLength / getInputCapacity /
  *            getScroll / getViewportHeight / getViewportWidth /
@@ -114,7 +114,7 @@
  *                             bool *outTruncated)
  *
  * Lifecycle:
- *   - void Tui_free(Tui *self)
+ *   - fn Tui_free(Tui *self)
  *
  * Private static helpers:
  *   - reject(reason) / growth(current, needed, elementSize, dest)
@@ -180,7 +180,7 @@ Tui Tui_2(bytes inputCapacity, bytes entryCapacity) {
     return self;
 }
 
-Tui Tui_0(void) {
+Tui Tui_0() {
     return Tui_2(TUI_INPUT_CAPACITY_DEFAULT, TUI_ENTRY_CAPACITY_DEFAULT);
 }
 
@@ -342,7 +342,7 @@ bool Tui_inputBackspace(Tui *self) {
     return true;
 }
 
-void Tui_inputClear(Tui *self) {
+fn Tui_inputClear(Tui *self) {
     if (self == nullptr || (*self).input == nullptr)
         return;
     (*self).input[0] = '\0';
@@ -351,7 +351,7 @@ void Tui_inputClear(Tui *self) {
 }
 
 /* Reclaim copied entries, retain growable backing, and return to tail following. */
-void Tui_clear(Tui *self) {
+fn Tui_clear(Tui *self) {
     if (self == nullptr)
         return;
     for (bytes i = 0; i < (*self).count; ++i) {
@@ -382,7 +382,7 @@ bool Tui_popLast(Tui *self) {
     return true;
 }
 
-void Tui_free(Tui *self) {
+fn Tui_free(Tui *self) {
     if (self == nullptr)
         return;
     Tui_clear(self);
@@ -401,7 +401,7 @@ bool Tui_setSize(Tui *self, int rows, int columns) {
     return true;
 }
 
-void Tui_getSize(const Tui *self, int *outRows, int *outColumns) {
+fn Tui_getSize(const Tui *self, int *outRows, int *outColumns) {
     if (outRows != nullptr)
         *outRows = self == nullptr ? 0 : (*self).rows;
     if (outColumns != nullptr)
@@ -409,7 +409,7 @@ void Tui_getSize(const Tui *self, int *outRows, int *outColumns) {
 }
 
 /* Scroll is clamped to actual current wrapped content, not transcript entries. */
-void Tui_setScroll(Tui *self, bytes rowsFromBottom) {
+fn Tui_setScroll(Tui *self, bytes rowsFromBottom) {
     if (self == nullptr)
         return;
     bytes total = Tui_getVisualRowCount(self);
@@ -419,7 +419,7 @@ void Tui_setScroll(Tui *self, bytes rowsFromBottom) {
     (*self).dirty = true;
 }
 
-void Tui_scrollBy(Tui *self, int64_t delta) {
+fn Tui_scrollBy(Tui *self, int64_t delta) {
     if (self == nullptr)
         return;
     bytes current = (*self).scroll;
@@ -433,7 +433,7 @@ void Tui_scrollBy(Tui *self, int64_t delta) {
     }
 }
 
-void Tui_setDirty(Tui *self, bool dirty) {
+fn Tui_setDirty(Tui *self, bool dirty) {
     if (self != nullptr)
         (*self).dirty = dirty;
 }
@@ -601,7 +601,7 @@ bool Tui_toString(const Tui *self, char *dest, bytes cap, bool *outTruncated) {
 bool Tui_toStringStruct(const Tui *self, char *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)
         return format(dest, cap, outTruncated, "nullptr");
-    if (!format(dest, cap, outTruncated, "Tui{entries=%p,count=%zu,capacity=%zu,input=", (void*) (*self).entries, (*self).count, (*self).capacity))
+    if (!format(dest, cap, outTruncated, "Tui{entries=%p,count=%zu,capacity=%zu,input=", (any) (*self).entries, (*self).count, (*self).capacity))
         return false;
     bytes used = strlen(dest);
     int64_t length = Json_writeString(dest + used, cap - used, (*self).input == nullptr ? "" : (*self).input);

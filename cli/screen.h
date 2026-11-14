@@ -53,9 +53,9 @@ typedef struct PrimeagenScreen {
     bytes capacity;    // admitted rows*columns
 } PrimeagenScreen;
 
-void PrimeagenScreen_init(PrimeagenScreen *self);
+fn PrimeagenScreen_init(PrimeagenScreen *self);
 bool PrimeagenScreen_bind(PrimeagenScreen *self, bytes rows, bytes columns);
-void PrimeagenScreen_free(PrimeagenScreen *self);
+fn PrimeagenScreen_free(PrimeagenScreen *self);
 TerminalCanvas PrimeagenScreen_canvas(PrimeagenScreen *self);
 bool PrimeagenScreen_isBound(const PrimeagenScreen *self);
 
@@ -97,7 +97,7 @@ typedef struct PrimeagenScreenState {
 
 // HOME: the BANNER first (the app's own picture across the top of the frame),
 // then `title`, then the `menu` rows — all centred. `menuSelection` highlights one.
-void PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
+fn PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
                                 const char *const *menu, bytes menuCount, bytes menuSelection,
                                 const TerminalImage *banner);
 
@@ -107,9 +107,9 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
 // The app's BANNER image (white paper + dark ink, e.g. resources/banner.png): the
 // host decodes its own PNG and hands the pixels here; the screen inverts the paper
 // and lets the caller's palette treat it. NULL/zero clears it.
-void PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height);
-const TerminalImage *PrimeagenScreen_banner(void);
-bool PrimeagenScreen_hasBanner(void);
+fn PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height);
+const TerminalImage *PrimeagenScreen_banner();
+bool PrimeagenScreen_hasBanner();
 
 // Blit the grid to ncurses in ONE pass (wide cells + colour pairs).
 bool PrimeagenScreen_present(const PrimeagenScreen *self, WINDOW *win);

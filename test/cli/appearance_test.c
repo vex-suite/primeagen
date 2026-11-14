@@ -9,7 +9,7 @@
 
 #include "cli/appearance.h"
 
-int main(void) {
+int main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     FILE *in = fopen("/dev/null", "r");
     FILE *out = fopen("/dev/null", "w");
