@@ -21,11 +21,19 @@
     ],
     "includes": [
       "primeagen",
+      "api-haven",
+      "determinant",
+      "graphvex",
+      "hotcwap",
       "vexspoke",
       "re",
       "lifetime"
     ],
     "dependencies": [
+      "api-haven",
+      "determinant",
+      "graphvex",
+      "hotcwap",
       "vexspoke",
       "re",
       "lifetime"
