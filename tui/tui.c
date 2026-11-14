@@ -465,14 +465,14 @@ static bytes rowEnd(const char *text, bytes start, bytes end, bytes width) {
     bytes at = start, cells = 0;
     while (at < end) {
         u32 scalar;
-        bytes bytes = TuiUtf8_decode(text + at, end - at, &scalar);
-        if (bytes == 0)
+        bytes consumed = TuiUtf8_decode(text + at, end - at, &scalar);
+        if (consumed == 0)
             break; // cold admission guarantees valid display bytes
         bytes nextCells = TuiUtf8_width(scalar);
         if (nextCells > width - cells && at != start)
             break;
         cells += nextCells;
-        at += bytes;
+        at += consumed;
     }
     return at;
 }
