@@ -1,6 +1,8 @@
 /* Headless ncurses owner: real virtual-screen cells and injected mouse/key
  * decoding, not an interactive gallery or physical terminal acceptance. */
 #define main previewMain
+
+#include "vex.h"
 #include "cli/main.c"
 #undef main
 #include <assert.h>

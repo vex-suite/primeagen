@@ -1,3 +1,4 @@
+#include "vex.h"
 #include <stdio.h>
 
 #include "primeagen/json/json_admit.h"

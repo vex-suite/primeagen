@@ -1,6 +1,8 @@
 /* MODULE: real headless view-update owner. Hotcwap replaces executing view code
  * while the same terminal screen/Tui draft/history remain resident. No provider,
  * interactive appearance, general migration or permission-enforcement claim. */
+
+#include "vex.h"
 #include "cli/update.h"
 #include "cli/view.h"
 #include "hotcwap/manifest.h"

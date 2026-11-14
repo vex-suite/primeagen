@@ -1,6 +1,5 @@
+#include "vex.h"
 #include "tools/edit.h"
-#include "exception/throw.h"
-#include "annotation/annotation.h"
 #include <stdlib.h>
 #include <string.h>
 ;;DEFINITION

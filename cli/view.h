@@ -1,5 +1,7 @@
 #ifndef PRIMEAGEN_CLI_VIEW_H
 #define PRIMEAGEN_CLI_VIEW_H
+
+#include "vex.h"
 #include "tui/tui.h"
 #include "ui/tree/terminal_tree_view.h"
 // Cold reload contract: resident host owns Tui, ncurses and borrowed session

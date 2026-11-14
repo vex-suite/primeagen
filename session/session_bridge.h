@@ -1,8 +1,8 @@
 #ifndef PRIMEAGEN_SESSION_BRIDGE_H
 #define PRIMEAGEN_SESSION_BRIDGE_H
+
+#include "vex.h"
 #include "harness/harness.h"
-#include <stddef.h>
-#include <stdint.h>
 
 /* Explicit per-turn wire safety bounds, not history or session-count limits. */
 #define SESSION_REQUEST_CAP 16384u

@@ -1,4 +1,6 @@
 #define _XOPEN_SOURCE_EXTENDED 1
+
+#include "vex.h"
 #include "cli/appearance.h"
 
 #include <stdlib.h>
@@ -6,7 +8,6 @@
 
 #include "ui/surface/terminal_canvas.h"
 #include "format/terminal_style.h"
-#include "annotation/annotation.h"
 
 ;;DEFINITION
 /** The app's chosen look and its rule drawing. The choice is a preset NAME

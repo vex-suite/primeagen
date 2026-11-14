@@ -1,6 +1,8 @@
 /* Tui owner: flat growth, retained contents, wrap/scroll/input, projections,
  * failure preservation and repeated reclamation. Owner-thread-only: racing
  * mutation/free is outside contract. No hardware appearance or backend trust. */
+
+#include "vex.h"
 #include "tui/tui.h"
 #include <assert.h>
 #include <stdlib.h>

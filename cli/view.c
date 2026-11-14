@@ -1,10 +1,11 @@
 #define _XOPEN_SOURCE_EXTENDED 1
+
+#include "vex.h"
 #include "cli/view.h"
 #include "cli/appearance.h"
 #include "cli/screen.h"
 #include "tui/utf8.h"
 #include "hotcwap/hot.h"
-#include "annotation/annotation.h"
 #include <curses.h>
 #include <string.h>
 #include <wchar.h>

@@ -1,6 +1,8 @@
 /* Headless native answer client: real SessionBridge/Haven admission into caller
  * supplied host pipes. No ncurses/gallery; answer printed as bounded JSON only.
  * Registered Python owner runs fake CLI by default; live mode is explicit. */
+
+#include "vex.h"
 #include "session/session_bridge.h"
 #include "net/json.h"
 #include <assert.h>

@@ -1,7 +1,7 @@
 #ifndef PRIMEAGEN_ENV_FILE_H
 #define PRIMEAGEN_ENV_FILE_H
 
-#include <stdbool.h>
+#include "vex.h"
 
 // src/env_file.h — literal admission of the checkout-root private key file.
 //

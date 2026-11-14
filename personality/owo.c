@@ -1,5 +1,5 @@
+#include "vex.h"
 #include "personality/owo.h"
-#include "annotation/annotation.h"
 
 ;;DEFINITION
 /* OwO owns the optional AI style instructions of Primeagen. The request adapter

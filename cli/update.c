@@ -1,6 +1,5 @@
+#include "vex.h"
 #include "cli/update.h"
-#include "annotation/annotation.h"
-#include "exception/throw.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/stat.h>

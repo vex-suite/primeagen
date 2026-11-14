@@ -4,6 +4,8 @@
 // owns the terminal, decodes resources/w.png with a libc-backed buffer (this
 // host has no engine arena), and re-renders on every resize so the "always
 // revalidate" behaviour is visible. Keys: 1 = HOME, 2 = CHAT, r = resize, q = quit.
+
+#include "vex.h"
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +14,6 @@
 
 #include "cli/screen.h"
 #include "decode/png.h"
-#include "annotation/annotation.h"
 
 ;;DEFINITION
 /** A development preview, not the product: it exists so the frame can be looked

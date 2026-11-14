@@ -1,6 +1,7 @@
 #ifndef PRIMEAGEN_TOOLS_FS_H
 #define PRIMEAGEN_TOOLS_FS_H
-#include <stddef.h>
+
+#include "vex.h"
 #include <sys/types.h>
 /* Cold POSIX consumer adapter, not an ecosystem filesystem driver. Caller owns
  * root directory fd and output buffers. Stable trusted directory tree required;

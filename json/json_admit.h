@@ -1,10 +1,7 @@
 #ifndef PRIMEAGEN_JSON_ADMIT_H
 #define PRIMEAGEN_JSON_ADMIT_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
+#include "vex.h"
 #include "net/json.h"
 
 // src/json_admit.h — bounded JSON admission for untrusted model/provider text.

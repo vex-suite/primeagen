@@ -1,5 +1,5 @@
+#include "vex.h"
 #include "tui/event/mouse_event.h"
-#include "annotation/annotation.h"
 
 ;;DEFINITION
 /* Backend-independent cold hit testing translates terminal cell coordinates into

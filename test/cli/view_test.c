@@ -2,6 +2,8 @@
  * selects a conversation, and keeps the chat pane in place; native cells prove
  * folding, selection, divider and live-history isolation, not visual acceptance. */
 #define _XOPEN_SOURCE_EXTENDED 1
+
+#include "vex.h"
 #include "cli/view.h"
 #include <assert.h>
 #include <curses.h>

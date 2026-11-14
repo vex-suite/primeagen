@@ -1,8 +1,7 @@
 #ifndef PRIMEAGEN_MARKDOWN_H
 #define PRIMEAGEN_MARKDOWN_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include "vex.h"
 #include "tui/text_style.h"
 
 /* Cold flat Markdown subset, not CommonMark: d64-star/underscore bold,

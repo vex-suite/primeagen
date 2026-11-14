@@ -1,3 +1,4 @@
+#include "vex.h"
 #include "tools/read.h"
 #include "tools/list.h"
 #include "tools/write.h"
@@ -6,8 +7,6 @@
 #include "tools/delete.h"
 #include "tools/bash.h"
 #include "tools/websearch.h"
-#include "exception/throw.h"
-#include "annotation/annotation.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>

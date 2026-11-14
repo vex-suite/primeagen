@@ -1,6 +1,8 @@
 // Owner: PrimeagenAppearance — the chosen look and its connector rule drawing.
 // Headless ncurses; no interactive terminal.
 #define _XOPEN_SOURCE_EXTENDED 1
+
+#include "vex.h"
 #include <assert.h>
 #include <locale.h>
 #include <stdio.h>

@@ -2,12 +2,14 @@
  * compact prose, unmatched syntax, exact capacity, hostile admission and bounded
  * delimiter pressure. No CommonMark, Unicode, terminal appearance or concurrency
  * promise; pure caller-owned disjoint buffers, no resources to exhaust. */
+
+#include "vex.h"
 #include "tui/markdown.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void check(const char *source, const char *expected) {
+static fn check(const char *source, const char *expected) {
     char dest[256];
     u8 styles[256];
     bytes length = 99;

@@ -2,6 +2,8 @@
 // + banner panel), chat layout (three detached columns), focus, the frame's
 // frame's own border, one-pass present. Headless.
 #define _XOPEN_SOURCE_EXTENDED 1
+
+#include "vex.h"
 #include <assert.h>
 #include <locale.h>
 #include <stdio.h>

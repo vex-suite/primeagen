@@ -1,8 +1,10 @@
 /* Mouse owner: named cell boundaries, wheel viewport, one-action clicks;
  * normalized input only, not real terminal mouse support/appearance proof. */
+
+#include "vex.h"
 #include "tui/event/mouse_event.h"
 #include <assert.h>
-int main(void) {
+int main() {
     Tui state = Tui(1, 1);
     assert(Tui_setSize(&state, 10, 40));
     for (int i = 0; i < 20; ++i)

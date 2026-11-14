@@ -1,9 +1,7 @@
 #ifndef PRIMEAGEN_CLI_SCREEN_H
 #define PRIMEAGEN_CLI_SCREEN_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include "vex.h"
 #include <curses.h>
 
 #include "tui/tui.h"

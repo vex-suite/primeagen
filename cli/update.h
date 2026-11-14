@@ -1,5 +1,7 @@
 #ifndef PRIMEAGEN_CLI_UPDATE_H
 #define PRIMEAGEN_CLI_UPDATE_H
+
+#include "vex.h"
 #include "hotcwap/hot.h"
 // Trusted local build descriptor: exactly 64 lowercase hexadecimal SHA256 bytes
 // followed by newline/EOF. No URL/model-supplied release or remote download.

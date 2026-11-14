@@ -1,5 +1,7 @@
 #ifndef PRIMEAGEN_MOUSE_EVENT_H
 #define PRIMEAGEN_MOUSE_EVENT_H
+
+#include "vex.h"
 #include "tui/tui.h"
 
 /* Terminal cells, not native-window pixels. Backend normalizes events; no curses

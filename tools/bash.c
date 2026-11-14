@@ -1,6 +1,5 @@
+#include "vex.h"
 #include "tools/bash.h"
-#include "exception/throw.h"
-#include "annotation/annotation.h"
 #include <unistd.h>
 ;;DEFINITION
 /* Explicitly approved Bash replaces the supervised tool child, never system().

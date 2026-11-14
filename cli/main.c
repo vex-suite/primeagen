@@ -1,3 +1,4 @@
+#include "vex.h"
 #include "tui/tui.h"
 #include "tui/event/mouse_event.h"
 #include "personality/owo.h"
@@ -7,8 +8,6 @@
 #include "cli/appearance.h"
 #include "decode/png.h"
 #include "hotcwap/manifest.h"
-#include "annotation/annotation.h"
-#include "exception/throw.h"
 #include <curses.h>
 #include <signal.h>
 #include <stdio.h>

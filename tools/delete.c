@@ -1,6 +1,5 @@
+#include "vex.h"
 #include "tools/delete.h"
-#include "exception/throw.h"
-#include "annotation/annotation.h"
 #include <fcntl.h>
 #include <limits.h>
 #include <sys/stat.h>

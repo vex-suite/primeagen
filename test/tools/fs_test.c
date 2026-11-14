@@ -1,6 +1,8 @@
 /* Native shared seam owner: nullable outputs preserve state, stdin/read boundary,
  * direct public header clients and failure recovery. Real disposable owner paths
  * supplied by runner; no caller-address validation or racing filesystem promise. */
+
+#include "vex.h"
 #include "tools/fs.h"
 #include <assert.h>
 #include <fcntl.h>

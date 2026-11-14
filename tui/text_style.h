@@ -1,6 +1,8 @@
 #ifndef PRIMEAGEN_TEXT_STYLE_H
 #define PRIMEAGEN_TEXT_STYLE_H
 
+#include "vex.h"
+
 /* Terminal-independent, host-owned display attributes; never ANSI byte strings. */
 #define TEXT_STYLE_BOLD 0x01u
 #define TEXT_STYLE_ITALIC 0x02u

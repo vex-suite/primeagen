@@ -1,7 +1,7 @@
 #ifndef PRIMEAGEN_CLI_APPEARANCE_H
 #define PRIMEAGEN_CLI_APPEARANCE_H
 
-#include <stdbool.h>
+#include "vex.h"
 #include <curses.h>
 
 #include "ui/theme/terminal_appearance.h"

@@ -1,5 +1,5 @@
+#include "vex.h"
 #include "tools/write.h"
-#include "util/annotation.h"
 ;;DEFINITION
 /* Replace one existing file only after complete new bytes have staged. The host
  * approves this exact action; the operation is not crash-durable or a sandbox. */

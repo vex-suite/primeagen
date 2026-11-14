@@ -1,8 +1,7 @@
 #ifndef PRIMEAGEN_TUI_H
 #define PRIMEAGEN_TUI_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include "vex.h"
 #include "tui/text_style.h"
 
 /* Named cold allocation defaults, not permanent input/history ceilings. */

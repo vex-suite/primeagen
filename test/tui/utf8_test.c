@@ -1,11 +1,13 @@
 /* Header owner: scalar decoding boundaries and malformed admission preservation;
  * terminal width under stable UTF-8/C locales. No grapheme/font/hardware claim. */
+
+#include "vex.h"
 #include "tui/utf8.h"
 #include <assert.h>
 #include <locale.h>
 #include <string.h>
 
-int main(void) {
+int main() {
     u32 cp = 99;
     const char *valid[] = {"a", "é", "中", "👋", "\xf4\x8f\xbf\xbf"};
     const u32 scalars[] = {'a', 0xe9, 0x4e2d, 0x1f44b, 0x10ffff};

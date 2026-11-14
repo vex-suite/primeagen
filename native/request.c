@@ -1,3 +1,4 @@
+#include "vex.h"
 #include "ai/ai_chat.h"
 #include "ai/ai_chat_anthropic.h"
 #include "space/message.h"

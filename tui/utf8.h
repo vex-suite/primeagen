@@ -1,7 +1,7 @@
 #ifndef PRIMEAGEN_TUI_UTF8_H
 #define PRIMEAGEN_TUI_UTF8_H
-#include <stddef.h>
-#include <stdint.h>
+
+#include "vex.h"
 #include <wchar.h>
 
 /* MODULE: bounded UTF-8 scalar decoding and terminal-cell measurement.

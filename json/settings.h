@@ -1,11 +1,7 @@
 #ifndef PRIMEAGEN_SETTINGS_H
 #define PRIMEAGEN_SETTINGS_H
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
-#include "util/constructor.h"
+#include "vex.h"
 
 // src/settings.h — persisted C-TUI settings (provider/model/personality/consent).
 //

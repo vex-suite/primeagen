@@ -1,9 +1,11 @@
 /* Presentation mode owner: distinct immutable prose, explicit offline status,
  * no permission, transport, mutable state or input rewriting surface. */
+
+#include "vex.h"
 #include "personality/owo.h"
 #include <assert.h>
 #include <string.h>
-int main(void) {
+int main() {
     assert(strstr(Owo_greeting(true), "owo") != nullptr);
     assert(strstr(Owo_greeting(false), "offline") != nullptr);
     assert(strcmp(Owo_greeting(true), Owo_greeting(false)) != 0);

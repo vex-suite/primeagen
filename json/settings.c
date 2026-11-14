@@ -1,3 +1,4 @@
+#include "vex.h"
 #include "primeagen/json/settings.h"
 
 #include <errno.h>
@@ -8,8 +9,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "annotation/annotation.h"
-#include "exception/throw.h"
 #include "hotcwap/manifest.h"
 
 ;;DEFINITION

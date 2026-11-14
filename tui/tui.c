@@ -1,8 +1,7 @@
+#include "vex.h"
 #include "tui/tui.h"
 #include "tui/markdown.h"
 #include "tui/utf8.h"
-#include "annotation/annotation.h"
-#include "exception/throw.h"
 #include "net/json.h"
 
 #include <stdarg.h>

@@ -2,6 +2,8 @@
  * No provider or interactive terminal. Partial IO, busy preservation, rejection,
  * malformed/duplicate/trailing/overflow frames, poisoned-wire failure, teardown
  * and borrowed-fd survival. External runner bounds all cases. */
+
+#include "vex.h"
 #include "session/session_bridge.h"
 #include "personality/owo.h"
 #include <assert.h>

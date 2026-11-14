@@ -1,8 +1,7 @@
+#include "vex.h"
 #include "session/session_bridge.h"
 #include "personality/owo.h"
 #include "net/json.h"
-#include "annotation/annotation.h"
-#include "exception/throw.h"
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
