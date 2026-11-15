@@ -93,9 +93,9 @@ bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
         wchar_t text[2] = { (wchar_t) cp, L'\0' };
         cchar_t glyph;
         if (setcchar(&glyph, text, A_DIM, 0, nullptr) == OK)
-            (fn) mvadd_wch(row, left + x, &glyph);
+            (discard) mvadd_wch(row, left + x, &glyph);
         else
-            (fn) mvaddch(row, left + x, (chtype) ' ' | A_DIM);
+            (discard) mvaddch(row, left + x, (chtype) ' ' | A_DIM);
     }
     return true;
 }

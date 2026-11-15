@@ -175,7 +175,7 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
     return true;
 }
 static fn stop(int signalNumber) {
-    (fn) signalNumber;
+    (discard) signalNumber;
     stopped = 1;
 }
 
@@ -330,13 +330,13 @@ int main(int argc, char **argv) {
         Tui_free(&state);
         return 1;
     }
-    (fn) TerminalTreeView_setExpanded(tree, chatsNode, true);
-    (fn) TerminalTreeView_setExpanded(tree, recentNode, true);
-    (fn) TerminalTreeView_setExpanded(tree, usersNode, true);
-    (fn) TerminalTreeView_setExpanded(tree, serversNode, true);
-    (fn) TerminalTreeView_setExpanded(tree, serverNode, true);
-    (fn) TerminalTreeView_setExpanded(tree, privateNode, true);
-    (fn) TerminalTreeView_setSelected(tree, openCodeNode);
+    (discard) TerminalTreeView_setExpanded(tree, chatsNode, true);
+    (discard) TerminalTreeView_setExpanded(tree, recentNode, true);
+    (discard) TerminalTreeView_setExpanded(tree, usersNode, true);
+    (discard) TerminalTreeView_setExpanded(tree, serversNode, true);
+    (discard) TerminalTreeView_setExpanded(tree, serverNode, true);
+    (discard) TerminalTreeView_setExpanded(tree, privateNode, true);
+    (discard) TerminalTreeView_setSelected(tree, openCodeNode);
     HotModule *hot = nullptr;
     PrimeagenDrawFn view = draw;
     PrimeagenPanelsFn panelsView = Primeagen_drawPanels;
@@ -397,12 +397,12 @@ int main(int argc, char **argv) {
     Settings settings = Settings_0();
     char settingsPath[600];
     if (Settings_resolvePath(settingsPath, sizeof settingsPath))
-        (fn) Settings_load(&settings, settingsPath);
+        (discard) Settings_load(&settings, settingsPath);
     // Consent is loaded with the record; the C-TUI tool gate consumes it when
     // the consent prompt lands. Referencing the type keeps the read explicit.
     SettingsConsent consent = (SettingsConsent) Settings_getConsent(&settings);
-    (fn) consent;
-    (fn) appearanceView(Settings_getAppearance(&settings));
+    (discard) consent;
+    (discard) appearanceView(Settings_getAppearance(&settings));
 
     // The app's BANNER: decode the PNG once with a libc-backed buffer (this lean
     // host owns no engine arena), then hand the pixels to the view. The view
@@ -414,22 +414,22 @@ int main(int argc, char **argv) {
         char bannerPath[1200];
         const char *bannerRoot = getenv("PRIMEAGEN_ROOT");
         if (bannerRoot != nullptr) {
-            (fn) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", bannerRoot);
+            (discard) snprintf(bannerPath, sizeof bannerPath, "%s/resources/w.png", bannerRoot);
         } else {
             char dir[1000];
-            (fn) snprintf(dir, sizeof dir, "%s", argv[0]);
+            (discard) snprintf(dir, sizeof dir, "%s", argv[0]);
             char *slash = strrchr(dir, '/');
             if (slash != nullptr)
                 *slash = '\0';
-            (fn) snprintf(bannerPath, sizeof bannerPath, "%s/../resources/w.png", dir);
+            (discard) snprintf(bannerPath, sizeof bannerPath, "%s/../resources/w.png", dir);
         }
         FILE *bannerFile = fopen(bannerPath, "rb");
         if (bannerFile != nullptr) {
             static u8 pngBytes[1u << 20];
             bytes pngLength = fread(pngBytes, 1, sizeof pngBytes, bannerFile);
-            (fn) fclose(bannerFile);
+            (discard) fclose(bannerFile);
             if (Png_decodeMalloc(pngBytes, pngLength, &bannerPixels, &bannerWidth, &bannerHeight) == PNG_OK)
-                (fn) bannerView(bannerPixels, bannerWidth, bannerHeight);
+                (discard) bannerView(bannerPixels, bannerWidth, bannerHeight);
         }
     }
 
@@ -485,7 +485,7 @@ int main(int argc, char **argv) {
     while (ok && !stopped) {
         int completed = SessionBridge_poll(&bridge);
         if (workingShown) {
-            (fn) Tui_popLast(&state); // always the trailing entry while shown
+            (discard) Tui_popLast(&state); // always the trailing entry while shown
             workingShown = false;
         }
         if (completed) {
@@ -513,7 +513,7 @@ int main(int argc, char **argv) {
         if (SessionBridge_isAwaiting(&bridge) && SessionBridge_getApprovalSerial(&bridge) != shownApproval) {
             shownApproval = SessionBridge_getApprovalSerial(&bridge);
             if (workingShown) {
-                (fn) Tui_popLast(&state); // keep the live placeholder last: restore it below
+                (discard) Tui_popLast(&state); // keep the live placeholder last: restore it below
                 workingShown = false;
             }
             char question[SESSION_APPROVAL_LABEL_CAP + 96];
@@ -545,7 +545,7 @@ int main(int argc, char **argv) {
                 PrimeagenAppearanceFn refreshed = (PrimeagenAppearanceFn) Hot_getSymbol(hot, "Primeagen_setAppearance");
                 if (refreshed != nullptr)
                     appearanceView = refreshed;
-                (fn) appearanceView(PrimeagenAppearance_name());
+                (discard) appearanceView(PrimeagenAppearance_name());
             }
             char notice[192];
             snprintf(notice, sizeof(notice), updated ? "Updated running CLI: generation %llu -> %llu. Resumed." : "Update rejected; running generation %llu retained. Resumed.",
@@ -567,7 +567,7 @@ int main(int argc, char **argv) {
             // A zoom, a fullscreen toggle or a drag changes the size; ncurses can
             // consume that change itself, so clear before repainting and never let
             // stale cells survive a resize.
-            (fn) clear();
+            (discard) clear();
         }
         bytes needed = Tui_getRowCapacity(&state);
         if ((bytes) columns + 1 > needed)
@@ -629,7 +629,7 @@ int main(int argc, char **argv) {
                 bytes next = key == KEY_UP ? (rowIndex == 0 ? 0 : rowIndex - 1) :
                               (rowIndex + 1 < count ? rowIndex + 1 : rowIndex);
                 TerminalTreeRow item = TerminalTreeView_rowAt(tree, next);
-                (fn) TerminalTreeView_setSelected(tree, item.id);
+                (discard) TerminalTreeView_setSelected(tree, item.id);
                 if (panel == PRIMEAGEN_PANEL_PEOPLE && item.id == openCodeNode) {
                     selection = 0;
                     focused = true;
@@ -640,7 +640,7 @@ int main(int argc, char **argv) {
         else if ((key == KEY_LEFT || key == KEY_RIGHT) && !liveSelected) {
             TerminalTreeNodeId selected = TerminalTreeView_getSelected(tree);
             if (TerminalTreeView_isFolder(tree, selected))
-                (fn) TerminalTreeView_setExpanded(tree, selected, key == KEY_RIGHT);
+                (discard) TerminalTreeView_setExpanded(tree, selected, key == KEY_RIGHT);
             Tui_setDirty(&state, true);
         }
         else if (SessionBridge_isAwaiting(&bridge) && approvalReply(key) != nullptr) {
@@ -691,16 +691,16 @@ int main(int argc, char **argv) {
                 if (y == 0 && kind == TUI_MOUSE_CLICK)
                     treeVisible = false;
                 else if (kind == TUI_MOUSE_WHEEL_UP)
-                    (fn) TerminalTreeView_scrollBy(tree, -3);
+                    (discard) TerminalTreeView_scrollBy(tree, -3);
                 else if (kind == TUI_MOUSE_WHEEL_DOWN)
-                    (fn) TerminalTreeView_scrollBy(tree, 3);
+                    (discard) TerminalTreeView_scrollBy(tree, 3);
                 else if (kind == TUI_MOUSE_CLICK && y >= 1 && x < chatLeft - 1) {
                     TerminalTreeNodeId id = TerminalTreeView_nodeAtOffset(tree, (bytes) (y - 1));
                     if (id != TERMINAL_TREE_NO_NODE) {
                         if (TerminalTreeView_isFolder(tree, id))
-                            (fn) TerminalTreeView_toggle(tree, id);
+                            (discard) TerminalTreeView_toggle(tree, id);
                         else {
-                            (fn) TerminalTreeView_setSelected(tree, id);
+                            (discard) TerminalTreeView_setSelected(tree, id);
                             if (id == openCodeNode) {
                                 panel = PRIMEAGEN_PANEL_PEOPLE;
                                 selection = 0;
@@ -822,7 +822,7 @@ int main(int argc, char **argv) {
     }
     SessionBridge_free(&bridge);
     TerminalTreeView_free(tree);
-    (fn) mouseReporting(false);
+    (discard) mouseReporting(false);
     endwin();
     delscreen(screen);
     free(row);

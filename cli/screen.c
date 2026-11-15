@@ -151,13 +151,13 @@ fn PrimeagenScreen_setBanner(const u8 *rgba, u32 width, u32 height) {
     s_banner = TerminalImage((u8*) (pointer) rgba, (bytes) width, (bytes) height);
     TerminalImage_setInvert(&s_banner, paperIsBright(rgba, width, height));
     TerminalImageColorRamp ramp = TerminalImage_rampPurple();
-    (fn) TerminalImage_setColorRamp(&s_banner, ramp.data, ramp.count);
+    (discard) TerminalImage_setColorRamp(&s_banner, ramp.data, ramp.count);
     // Which letter reads light and which reads dark is randomized per cell, not
     // luminance-ordered — the palette's whole range (≈30% up to near-white).
     TerminalImage_setPaletteScatter(&s_banner, (u8) ramp.count);
     TerminalImage_setJitter(&s_banner, 20, 11);
     TerminalImage_setStyle(&s_banner, 0);
-    (fn) TerminalImage_setNoise(&s_banner, PRIMEAGEN_SCREEN_NOISE_ALPHABET, PRIMEAGEN_SCREEN_NOISE_COLOR);
+    (discard) TerminalImage_setNoise(&s_banner, PRIMEAGEN_SCREEN_NOISE_ALPHABET, PRIMEAGEN_SCREEN_NOISE_COLOR);
     TerminalImage_setNoiseStyle(&s_banner, TERMINAL_STYLE_DIM);
     TerminalImage_setNoiseDensity(&s_banner, PRIMEAGEN_SCREEN_NOISE_DENSITY);
     s_hasBanner = true;
@@ -487,7 +487,7 @@ bool PrimeagenScreen_present(const PrimeagenScreen *self, WINDOW *win) {
             cchar_t glyph;
             if (setcchar(&glyph, text, attr, pair, nullptr) != OK)
                 continue;
-            (fn) mvadd_wch((int) y, (int) x, &glyph);
+            (discard) mvadd_wch((int) y, (int) x, &glyph);
         }
     }
     return refresh() != ERR;

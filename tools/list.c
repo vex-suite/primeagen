@@ -57,7 +57,7 @@ bool ToolList_execute(int root, const char *path, bytes cap, char **dest, bytes 
         return false;
     }
     char **names = nullptr;
-    bytes count = 0, capacity = 0, bytes = 0;
+    bytes count = 0, capacity = 0, written = 0;
     bool ok = true;
     while (ok) {
         errno = 0;
@@ -70,11 +70,11 @@ bool ToolList_execute(int root, const char *path, bytes cap, char **dest, bytes 
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
             continue;
         bytes length = strlen(name);
-        if (length + 1 > cap - bytes) {
+        if (length + 1 > cap - written) {
             ok = false;
             break;
         }
-        bytes += length + 1;
+        written += length + 1;
         if (count == capacity) {
             bytes next = capacity == 0 ? TOOL_LIST_CAPACITY_DEFAULT : capacity * 2;
             char **grown = realloc(names, next * sizeof(*names));

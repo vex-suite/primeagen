@@ -114,9 +114,9 @@ static bool queueText(SessionBridge *self, const char *key, const char *value) {
 ;;WHAT("SessionBridge")
 static bool spawn(any context, const EngineProviderSlot *engine, const char *prompt,
                   bytes length, u64 timeoutMs, any *outHandle) {
-    (fn) engine;
-    (fn) length;
-    (fn) timeoutMs;
+    (discard) engine;
+    (discard) length;
+    (discard) timeoutMs;
     SessionBridge *self = context;
     JsonWriter writer = JsonWriter((*self).request, sizeof((*self).request) - 1);
     Json_beginObject(&writer);
@@ -202,7 +202,7 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
 }
 ;;WHAT("SessionBridge")
 static HarnessStatus pollJob(any context, any handle, u64 timeoutMs) {
-    (fn) handle;
+    (discard) handle;
     SessionBridge *self = context;
     if ((*self).failed)
         goto fail;
@@ -275,7 +275,7 @@ fail:
 }
 ;;WHAT("SessionBridge")
 static fn cancel(any context, any handle) {
-    (fn) handle;
+    (discard) handle;
     SessionBridge *self = context;
     (*self).failed = true;
     (*self).awaiting = false;

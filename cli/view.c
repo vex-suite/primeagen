@@ -160,12 +160,12 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
         bytes length = strlen(row), cells = 0;
         for (bytes at = 0; at < length;) {
             u32 scalar;
-            bytes bytes = TuiUtf8_decode(row + at, length - at, &scalar);
-            if (bytes == 0)
+            bytes byteCount = TuiUtf8_decode(row + at, length - at, &scalar);
+            if (byteCount == 0)
                 return false;
             wchar_t text[CCHARW_MAX] = {0};
             text[0] = wcwidth((wchar_t) scalar) < 0 ? L'?' : (wchar_t) scalar;
-            bytes next = at + bytes, count = 1;
+            bytes next = at + byteCount, count = 1;
             while (next < length && count < CCHARW_MAX - 1) {
                 u32 mark;
                 bytes markBytes = TuiUtf8_decode(row + next, length - next, &mark);
@@ -309,7 +309,7 @@ bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, 
     getyx(stdscr, caretY, caretX);
     if (left > 0 && rows >= TUI_MIN_ROWS) {
         for (int y = 0; y < rows; ++y)
-            (fn) mvaddwstr(y, left - 1, L"│");
+            (discard) mvaddwstr(y, left - 1, L"│");
         const char *tree[] = {
             "vexgraph  ~/vexgraph", "", "> chats", "  chat #1", "  chat #2", "  chat #3",
             "", "> users", "  OpenCode", "  user preview", "", "> servers",
@@ -356,8 +356,8 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
         attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_BACKGROUND));
 
         attron(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_FOLDER) | A_BOLD);
-        (fn) mvaddwstr(0, 1, L"⌄");
-        (fn) mvaddwstr(0, 3, L"\uf07c");
+        (discard) mvaddwstr(0, 1, L"⌄");
+        (discard) mvaddwstr(0, 3, L"\uf07c");
         if (panelWidth > 5)
             mvaddnstr(0, 5, "vexgraph", panelWidth - 5);
         attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_FOLDER) | A_BOLD);
@@ -368,7 +368,7 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
         }
 
         bytes viewport = (bytes) (rows - 1);
-        (fn) TerminalTreeView_setViewportRows(tree, viewport);
+        (discard) TerminalTreeView_setViewportRows(tree, viewport);
         bytes first = TerminalTreeView_scrollRow(tree);
         bytes visible = TerminalTreeView_visibleCount(tree);
         for (bytes index = 0; index < viewport && first + index < visible; ++index) {
@@ -396,10 +396,10 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
                 iconPair = PRIMEAGEN_PAIR_TREE_CHAT;
             }
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
-            (fn) mvaddwstr(y, x, arrow);
+            (discard) mvaddwstr(y, x, arrow);
             attroff(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : iconPair));
-            (fn) mvaddwstr(y, x + 2, icon);
+            (discard) mvaddwstr(y, x + 2, icon);
             attroff(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : iconPair));
             attron(COLOR_PAIR(item.selected ? PRIMEAGEN_PAIR_TREE_SELECTED : PRIMEAGEN_PAIR_TREE_BACKGROUND));
             x += 4;
