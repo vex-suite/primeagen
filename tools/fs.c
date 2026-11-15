@@ -153,7 +153,7 @@ bool ToolFs_publish(i32 root, const char *path, const char *text, bytes length, 
         return failure("create requires absent path; write requires regular single-link file");
     }
     char stage[NAME_MAX + 1];
-    snprintf(stage, sizeof(stage), ".primeagen-%ld-%08x", (i64) getpid(), arc4random());
+    snprintf(stage, sizeof(stage), ".primeagen-%lld-%08x", (i64) getpid(), arc4random());
     i32 fd = openat(parent, stage, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
     if (fd < 0) {
         close(parent);
