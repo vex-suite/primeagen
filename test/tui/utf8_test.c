@@ -7,7 +7,7 @@
 #include <locale.h>
 #include <string.h>
 
-int main() {
+i32 main() {
     u32 cp = 99;
     const char *valid[] = {"a", "é", "中", "👋", "\xf4\x8f\xbf\xbf"};
     const u32 scalars[] = {'a', 0xe9, 0x4e2d, 0x1f44b, 0x10ffff};

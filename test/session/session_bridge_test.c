@@ -12,20 +12,20 @@
 #include <unistd.h>
 #include <time.h>
 
-static fn fixture(int *request, int *response, SessionBridge *bridge) {
+static fn fixture(i32 *request, i32 *response, SessionBridge *bridge) {
     assert(pipe(request) == 0 && pipe(response) == 0);
     assert(fcntl(request[1], F_SETFL, O_NONBLOCK) == 0);
     assert(fcntl(response[0], F_SETFL, O_NONBLOCK) == 0);
     *bridge = SessionBridge(response[0], request[1]);
 }
-static fn cleanup(int *request, int *response, SessionBridge *bridge) {
+static fn cleanup(i32 *request, i32 *response, SessionBridge *bridge) {
     SessionBridge_free(bridge);
-    for (int i = 0; i < 2; ++i) {
+    for (i32 i = 0; i < 2; ++i) {
         close(request[i]);
         close(response[i]);
     }
 }
-int main() {
+i32 main() {
     SessionBridge empty = SessionBridge();
     assert(!SessionBridge_isBusy(nullptr) && !SessionBridge_isOwo(nullptr));
     assert(strcmp(SessionBridge_getText(nullptr), "") == 0);
@@ -47,7 +47,7 @@ int main() {
     assert(!SessionBridge_toString(&empty, projection, 1, &cut) && cut);
     assert(!SessionBridge_toStringStruct(&empty, nullptr, 0, nullptr));
     assert(SessionBridge_toStringStruct(nullptr, projection, sizeof(projection), nullptr));
-    int request[2], response[2]; SessionBridge bridge;
+    i32 request[2], response[2]; SessionBridge bridge;
     fixture(request, response, &bridge);
     SessionBridge_setOwo(&bridge, true);
     assert(SessionBridge_isOwo(&bridge));
@@ -206,7 +206,7 @@ int main() {
     nanosleep(&pause, nullptr);
     assert(SessionBridge_poll(&bridge) == 0);
     assert(strcmp(SessionBridge_takeNote(&bridge), "first") == 0);
-    /* Any consumed frame restarts the idle watchdog, so a long tool-using turn is
+    /* Any consumed frame restarts the idle watchdog, so a i64 tool-using turn is
      * bounded by remote silence rather than by its total duration. */
     assert(bridge.startedMs > admitted);
     /* With nothing buffered and the watchdog expired, the turn now fails. */

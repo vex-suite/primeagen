@@ -17,8 +17,8 @@
  * setters. No copies of live instances; no provider tokens or socket ownership. */
 typedef struct SessionBridge {
     Harness harness;
-    int readFd;
-    int writeFd;
+    i32 readFd;
+    i32 writeFd;
     bool owo;
     u32 jobId;
     u64 startedMs;
@@ -38,7 +38,7 @@ typedef struct SessionBridge {
     char decision[8];
 } SessionBridge;
 SessionBridge SessionBridge_0();
-SessionBridge SessionBridge_2(int readFd, int writeFd);
+SessionBridge SessionBridge_2(i32 readFd, i32 writeFd);
 #define SESSION_ARITY_(_0, _1, _2, N, ...) N
 #define SESSION_ARITY(...) SESSION_ARITY_(0 __VA_OPT__(,) __VA_ARGS__, 2, 1, 0)
 #define SESSION_JOIN_(a, b) a##b
@@ -53,7 +53,7 @@ bool SessionBridge_submit(SessionBridge *self, const char *prompt);
  * An approval request is a pending poll: it keeps the turn running and is
  * answered through SessionBridge_decide. The human wait suspends the local
  * deadline and the restarted window begins when the decision is queued. */
-int SessionBridge_poll(SessionBridge *self);
+i32 SessionBridge_poll(SessionBridge *self);
 fn SessionBridge_free(SessionBridge *self);
 fn SessionBridge_setOwo(SessionBridge *self, bool enabled);
 bool SessionBridge_isOwo(const SessionBridge *self);

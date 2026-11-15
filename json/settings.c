@@ -128,7 +128,7 @@ u32 Settings_getConsent(const Settings *self) {
 }
 
 static bool ensureManifest() {
-    static int state = 0;  // 0 = not tried, 1 = mounted, -1 = failed
+    static i32 state = 0;  // 0 = not tried, 1 = mounted, -1 = failed
     if (state == 0)
         state = MANIFEST(MANIFEST_APP_DATA, "vexgraph", "primeagen") && MANIFEST_ENSURE() ? 1 : -1;
     return state == 1;
@@ -140,7 +140,7 @@ bool Settings_resolvePath(char *dest, bytes cap) {
     const char *root = MANIFEST_ROOT();
     if (root == nullptr)
         return false;
-    int written = snprintf(dest, cap, "%s/settings", root);
+    i32 written = snprintf(dest, cap, "%s/settings", root);
     return written > 0 && (bytes) written < cap;
 }
 
@@ -176,7 +176,7 @@ static bool applyLine(Settings *parsed, const char *name, bytes nameLength, cons
 bool Settings_load(Settings *self, const char *path) {
     if (self == nullptr || path == nullptr || path[0] == '\0')
         return false;
-    int descriptor = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
+    i32 descriptor = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
     if (descriptor < 0) {
         if (errno == ENOENT)
             return true;  // no file: keep defaults
@@ -248,16 +248,16 @@ bool Settings_save(const Settings *self, const char *path) {
     if (self == nullptr || path == nullptr || path[0] == '\0')
         return false;
     char temporary[600];
-    int written = snprintf(temporary, sizeof temporary, "%s.tmp", path);
+    i32 written = snprintf(temporary, sizeof temporary, "%s.tmp", path);
     if (written <= 0 || (bytes) written >= sizeof temporary)
         return false;
-    int descriptor = open(temporary, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW, 0600);
+    i32 descriptor = open(temporary, O_WRONLY | O_CREAT | O_TRUNC | O_NOFOLLOW, 0600);
     if (descriptor < 0) {
         THROW("settings: cannot open temporary file");
         return false;
     }
     char body[SETTINGS_BYTES_MAX];
-    int length = snprintf(body, sizeof body, "provider=%s\nmodel=%s\nowo=%d\nconsent=%s\nappearance=%s\n",
+    i32 length = snprintf(body, sizeof body, "provider=%s\nmodel=%s\nowo=%d\nconsent=%s\nappearance=%s\n",
                           (*self).provider, (*self).model, (*self).owo ? 1 : 0,
                           (*self).consent == SETTINGS_CONSENT_DENY ? "deny" : "prompt",
                           Settings_getAppearance(self));

@@ -13,5 +13,5 @@ typedef enum TuiMouseAction {
 typedef enum TuiMouseKind {
     TUI_MOUSE_CLICK, TUI_MOUSE_WHEEL_UP, TUI_MOUSE_WHEEL_DOWN
 } TuiMouseKind;
-TuiMouseAction TuiMouse_dispatch(Tui *self, int x, int y, TuiMouseKind kind);
+TuiMouseAction TuiMouse_dispatch(Tui *self, i32 x, i32 y, TuiMouseKind kind);
 #endif

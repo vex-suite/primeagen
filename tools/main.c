@@ -22,7 +22,7 @@
  * MODULE: native tool entry (tools/main.c)
  * OWNED STATE: root directory fd and per-invocation data/output, freed on return;
  * successful bash/websearch exec transfers child lifetime to external supervisor.
- * FUNCTION REGISTRY: int main(int argc,char **argv)
+ * FUNCTION REGISTRY: i32 main(i32 argc,char **argv)
  *   Internal argv: tools ROOT BYTE_CAP TAG ARG...; write/create bytes via stdin.
  *   Exact tags: read/list/write/create/edit/delete/bash/websearch. Strict arities;
  *   output only after successful whole operation. Cold failures diagnose/nonzero.
@@ -31,18 +31,18 @@
  * exec. External host owns overall deadline and process-group cleanup; filesystem
  * calls are not realtime. No stdout on rejection, no recursive writes/deletes.
  * ============================================================================ */
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     if (argc < 5) {
         THROW("tools: expected root, byte capacity, tag and arguments");
         return 1;
     }
     char *end;
-    unsigned long budget = strtoul(argv[2], &end, 10);
+    u64 budget = strtoul(argv[2], &end, 10);
     if (*argv[2] == '\0' || *end || budget == 0 || budget > TOOL_BYTES_MAX) {
         THROW("tools: invalid byte capacity");
         return 1;
     }
-    int root = open(argv[1], O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+    i32 root = open(argv[1], O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
     if (root < 0) {
         THROW("tools: workspace directory admission failed");
         return 1;

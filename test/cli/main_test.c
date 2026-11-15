@@ -7,14 +7,14 @@
 #undef main
 #include <assert.h>
 
-static bool mouseSuffix(int key, const char *suffix, int *x, int *y, TuiMouseKind *kind) {
+static bool mouseSuffix(i32 key, const char *suffix, i32 *x, i32 *y, TuiMouseKind *kind) {
     bytes length = strlen(suffix);
     while (length > 0)
-        assert(ungetch((unsigned char) suffix[--length]) == OK);
+        assert(ungetch((u8) suffix[--length]) == OK);
     return readMouse(key, x, y, kind);
 }
 
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     if (argc == 3 && strcmp(argv[1], "--connect-probe") == 0)
         return connectHost(argv[2], true);
     FILE *input = tmpfile(); FILE *output = tmpfile();
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     assert(strcmp(approvalReply('r'), "reject") == 0 && strcmp(approvalReply('n'), "reject") == 0);
     assert(approvalReply('x') == nullptr && approvalReply('\n') == nullptr && approvalReply(TUI_CTRL_Q) == nullptr);
     // Real protocol suffixes, not fabricated fifth-button/modifier bits.
-    int mouseX = -1, mouseY = -1;
+    i32 mouseX = -1, mouseY = -1;
     TuiMouseKind mouseKind;
     assert(mouseSuffix(TUI_MOUSE_SGR, "64;50;4M", &mouseX, &mouseY, &mouseKind));
     assert(mouseKind == TUI_MOUSE_WHEEL_UP && mouseX == 49 && mouseY == 3);
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     assert(command(&state, true) == TUI_COMMAND_MESSAGE);
     assert(Tui_getCount(&state) == 0 && Tui_getInputLength(&state) == 0);
     assert(Tui_setInput(&state, "fixed", 5));
-    for (int i = 0; i < 30; ++i)
+    for (i32 i = 0; i < 30; ++i)
         assert(Tui_add(&state, "extra", 5));
     Tui_scrollBy(&state, 10);
     bytes scrollBefore = Tui_getScroll(&state);
@@ -124,13 +124,13 @@ int main(int argc, char **argv) {
     // The four-type browser paints only OpenCode's resident chat; local examples
     // keep its draft/history private from users, servers, saved chats and DMs.
     assert(resizeterm(24, 100) != ERR);
-    int left = Primeagen_chatLeft(100, PRIMEAGEN_LIST_WIDTH_DEFAULT);
+    i32 left = Primeagen_chatLeft(100, PRIMEAGEN_LIST_WIDTH_DEFAULT);
     assert(left == 32);
     assert(Primeagen_chatLeft(40, 32) == 0);
     assert(Primeagen_chatLeft(100, -1) == 0);
     assert(Primeagen_chatLeft(100, 1000) == 50);
     assert(Tui_setSize(&state, 24, 100 - left));
-    int panel = PRIMEAGEN_PANEL_PEOPLE, selected = 0;
+    i32 panel = PRIMEAGEN_PANEL_PEOPLE, selected = 0;
     assert(Primeagen_drawPanels(&state, false, true, true, false, false, panel, selected, 32, row, styles, sizeof row));
     assert((mvinch(0, 1) & A_CHARTEXT) == 'v');
     assert((mvinch(2, 1) & A_CHARTEXT) == '>');

@@ -16,7 +16,7 @@
  * FUNCTION REGISTRY:
  * ----------------------------------------------------------------------------
  * Public dispatch:
- *   TuiMouseAction TuiMouse_dispatch(Tui *self, int x, int y, TuiMouseKind kind)
+ *   TuiMouseAction TuiMouse_dispatch(Tui *self, i32 x, i32 y, TuiMouseKind kind)
  *     Wheel +/- one row inside transcript; click Clear/Quit header or input.
  * Contracts:
  *   Null, negative, outside, unsupported kind or undersized screen => NONE.
@@ -25,8 +25,8 @@
  *   One normalized click produces one action; backend excludes release events.
  * ============================================================================
  */
-TuiMouseAction TuiMouse_dispatch(Tui *self, int x, int y, TuiMouseKind kind) {
-    int rows, columns;
+TuiMouseAction TuiMouse_dispatch(Tui *self, i32 x, i32 y, TuiMouseKind kind) {
+    i32 rows, columns;
     Tui_getSize(self, &rows, &columns);
     if (rows < TUI_MIN_ROWS || columns < TUI_MIN_COLUMNS || x < 0 || y < 0 || x >= columns || y >= rows)
         return TUI_MOUSE_NONE;

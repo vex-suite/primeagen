@@ -9,11 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     assert(argc == 2);
-    int root = open(argv[1], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    i32 root = open(argv[1], O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     assert(root >= 0);
-    int parent = -1;
+    i32 parent = -1;
     char name[256] = "keep";
     assert(!ToolFs_parent(root, nullptr, &parent, name, sizeof(name)));
     assert(parent == -1 && strcmp(name, "keep") == 0);

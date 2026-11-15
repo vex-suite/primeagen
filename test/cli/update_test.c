@@ -28,7 +28,7 @@ static fn render(HotModule *hot, Tui *state, char expected) {
     assert(command(nullptr, true) == -1);
 }
 
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     assert(argc == 6);
     assert(setenv("VEX_MANIFEST", argv[1], 1) == 0);
     assert(setenv("HOME", argv[1], 1) == 0);

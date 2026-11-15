@@ -12,8 +12,8 @@
  * staging file; no completed mutation is rolled back after later cancellation. */
 #define TOOL_BYTES_DEFAULT (128u * 1024u)
 #define TOOL_BYTES_MAX (16u * 1024u * 1024u) /* External-input allocation safety bound. */
-bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes cap);
-bool ToolFs_read(int root, const char *path, bytes cap, char **dest, bytes *outLength);
+bool ToolFs_parent(i32 root, const char *path, i32 *outParent, char *name, bytes cap);
+bool ToolFs_read(i32 root, const char *path, bytes cap, char **dest, bytes *outLength);
 bool ToolFs_input(bytes cap, char **dest, bytes *outLength);
-bool ToolFs_publish(int root, const char *path, const char *text, bytes length, bool create);
+bool ToolFs_publish(i32 root, const char *path, const char *text, bytes length, bool create);
 #endif

@@ -23,7 +23,7 @@
  *                       bool failed, char *row, u8 *styles, bytes cap)
  *       Paint the sole live Users/OpenCode context to the right-side chat pane.
  *   const_any Hot_getExports(u32 *count) : trusted loader exports.
- *   int Primeagen_command(Tui *, bool sessionMode) : local command admission;
+ *   i32 Primeagen_command(Tui *, bool sessionMode) : local command admission;
  *       emits display notices/actions, never executes model/provider/tools.
  * PRIVATE: attributes(style) : host-defined visible style to ncurses attributes.
  *   drawRegion(...) : persistent chat pane for selected tree context; live Tui
@@ -32,15 +32,15 @@
  *     group up to CCHARW_MAX. Unsupported locale glyphs use '?'. Not full Unicode
  *     grapheme/emoji-ZWJ shaping; terminal font/width agreement remains external.
  * PUBLIC NAVIGATION SURFACE:
- *   int Primeagen_chatLeft(int columns, int listWidth) : tree width/chat origin.
+ *   i32 Primeagen_chatLeft(i32 columns, i32 listWidth) : tree width/chat origin.
  *   bool Primeagen_panelsClick(x,y,rows,columns,listWidth,panel,selection,
- *                             int *outPanel,int *outSelection)
+ *                             i32 *outPanel,i32 *outSelection)
  *       Stateless tree-row hit admission; preserves outputs on invalid/outside input.
- *   bool Primeagen_drawPanels(Tui *,bool,bool,bool,bool,bool,int panel,int selection,
- *                             int listWidth,char *row,u8 *styles,bytes cap)
+ *   bool Primeagen_drawPanels(Tui *,bool,bool,bool,bool,bool,i32 panel,i32 selection,
+ *                             i32 listWidth,char *row,u8 *styles,bytes cap)
  *       Legacy panel entry; retained for older resident hosts.
  *   bool Primeagen_drawTreePanels(Tui *,TerminalTreeView *,bool,bool,bool,bool,
- *                                 bool,int panel,int selection,int listWidth,...)
+ *                                 bool,i32 panel,i32 selection,i32 listWidth,...)
  *       Paint host-owned fold/scroll/selection state in a filled, borderless
  *       explorer panel with Semicolon-style two-cell depth steps, disclosure
  *       marks and semantic Nerd Font icons. Selection paints a full-width row
@@ -65,7 +65,7 @@ enum { VIEW_HEADER = 1, VIEW_ACCENT = 2, VIEW_STATUS = 3, VIEW_INPUT = 4, VIEW_C
 #define PRIMEAGEN_VIEW_TITLE "Primeagen"
 #endif
 
-int Primeagen_command(Tui *state, bool sessionMode) {
+i32 Primeagen_command(Tui *state, bool sessionMode) {
     if (state == nullptr)
         return -1;
     const char *input = Tui_getInput(state);
@@ -113,10 +113,10 @@ static chtype attributes(u8 style) {
 }
 
 static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
-                       int left, int panel, int selection, char *row, u8 *styles, bytes cap) {
+                       i32 left, i32 panel, i32 selection, char *row, u8 *styles, bytes cap) {
     if (state == nullptr)
         return false;
-    int rows, columns;
+    i32 rows, columns;
     Tui_getSize(state, &rows, &columns);
     if (rows < TUI_MIN_ROWS || columns < TUI_MIN_COLUMNS) {
         mvaddnstr(0, 0, "Resize terminal; Ctrl-Q exits", columns > 1 ? columns - 1 : 0);
@@ -176,9 +176,9 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
             }
             cchar_t glyph;
             chtype style = attributes(styles[at]);
-            if (setcchar(&glyph, text, (attr_t) (style & ~A_COLOR), (short) PAIR_NUMBER(style), nullptr) != OK)
+            if (setcchar(&glyph, text, (attr_t) (style & ~A_COLOR), (i16) PAIR_NUMBER(style), nullptr) != OK)
                 return false;
-            mvadd_wch((int) i + 2, left + (int) cells + 1, &glyph);
+            mvadd_wch((i32) i + 2, left + (i32) cells + 1, &glyph);
             cells += TuiUtf8_width(scalar);
             at = next;
         }
@@ -212,7 +212,7 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
     bytes width = (bytes) columns - 3;
     bytes offset = length > width ? length - width : 0;
     if (liveConversation)
-        mvaddnstr(rows - 2, left + 2, Tui_getInput(state) + offset, (int) width);
+        mvaddnstr(rows - 2, left + 2, Tui_getInput(state) + offset, (i32) width);
     else
         mvaddnstr(rows - 2, left + 2, panel == PRIMEAGEN_PANEL_SERVERS || panel == PRIMEAGEN_PANEL_CHANNELS ? "@member ..." : "message ...", columns - 15);
     const char *status = liveConversation ? (sessionMode ? (failed ? "OpenCode session closed after a failure | Ctrl-Q and relaunch" : busy ? "OpenCode working | Ctrl-Q cancels locally" : "OpenCode chat | inspect auto | edit/shell ask | Enter sends") : (owo ? "OwO | disconnected | /connect uses Go login" : "Disconnected | /connect uses Go login")) : "Local UI mock · no message sent, model called, or conversation persisted";
@@ -220,7 +220,7 @@ static bool drawRegion(Tui *state, bool owo, bool focused, bool sessionMode, boo
     mvaddnstr(rows - 1, left, liveConversation ? status : "Local UI mock | Ctrl-P Users | Ctrl-S Servers | Ctrl-G Chats | Ctrl-N Private", columns - 1);
     attroff(COLOR_PAIR(VIEW_STATUS) | A_DIM);
     curs_set(focused && liveConversation ? 1 : 0);
-    move(rows - 2, left + 2 + (int) (liveConversation ? length - offset : 0));
+    move(rows - 2, left + 2 + (i32) (liveConversation ? length - offset : 0));
     return true;
 }
 
@@ -242,14 +242,14 @@ bool Primeagen_draw(Tui *state, bool owo, bool focused, bool sessionMode, bool b
     return refresh() != ERR;
 }
 
-int Primeagen_chatLeft(int columns, int listWidth) {
+i32 Primeagen_chatLeft(i32 columns, i32 listWidth) {
     if (columns < PRIMEAGEN_PANELS_MIN_COLUMNS || listWidth < 12)
         return 0;
-    int width = listWidth < columns / 2 ? listWidth : columns / 2;
+    i32 width = listWidth < columns / 2 ? listWidth : columns / 2;
     return width;
 }
 
-static bool validNavigation(int panel, int selection) {
+static bool validNavigation(i32 panel, i32 selection) {
     if (selection < 0)
         return false;
     if (panel == PRIMEAGEN_PANEL_PEOPLE || panel == PRIMEAGEN_PANEL_CHATS)
@@ -259,9 +259,9 @@ static bool validNavigation(int panel, int selection) {
     return panel == PRIMEAGEN_PANEL_CHANNELS && selection == 3;
 }
 
-bool Primeagen_panelsClick(int x, int y, int rows, int columns, int listWidth,
-                           int panel, int selection, int *outPanel, int *outSelection) {
-    int left = Primeagen_chatLeft(columns, listWidth);
+bool Primeagen_panelsClick(i32 x, i32 y, i32 rows, i32 columns, i32 listWidth,
+                           i32 panel, i32 selection, i32 *outPanel, i32 *outSelection) {
+    i32 left = Primeagen_chatLeft(columns, listWidth);
     if (outPanel == nullptr || outSelection == nullptr || panel < 0 || panel > PRIMEAGEN_PANEL_PRIVATE ||
         !validNavigation(panel, selection) || rows < TUI_MIN_ROWS || left == 0 ||
         x < 1 || x >= left - 1 || y < 0 || y >= rows)
@@ -295,27 +295,27 @@ bool Primeagen_panelsClick(int x, int y, int rows, int columns, int listWidth,
 }
 
 bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed,
-                          int panel, int selection, int listWidth,
+                          i32 panel, i32 selection, i32 listWidth,
                           char *row, u8 *styles, bytes cap) {
     if (state == nullptr || panel < 0 || panel > PRIMEAGEN_PANEL_PRIVATE || !validNavigation(panel, selection))
         return false;
-    int rows, columns;
+    i32 rows, columns;
     getmaxyx(stdscr, rows, columns);
-    int left = Primeagen_chatLeft(columns, listWidth);
+    i32 left = Primeagen_chatLeft(columns, listWidth);
     erase();
     if (!drawRegion(state, owo, focused, sessionMode, busy, failed, left, panel, selection, row, styles, cap))
         return false;
-    int caretY, caretX;
+    i32 caretY, caretX;
     getyx(stdscr, caretY, caretX);
     if (left > 0 && rows >= TUI_MIN_ROWS) {
-        for (int y = 0; y < rows; ++y)
+        for (i32 y = 0; y < rows; ++y)
             (discard) mvaddwstr(y, left - 1, L"│");
         const char *tree[] = {
             "vexgraph  ~/vexgraph", "", "> chats", "  chat #1", "  chat #2", "  chat #3",
             "", "> users", "  OpenCode", "  user preview", "", "> servers",
             "  serverNumber1", "    #general", "", "> private chat"
         };
-        for (int y = 0; y < (int) (sizeof tree / sizeof tree[0]) && y < rows; ++y) {
+        for (i32 y = 0; y < (i32) (sizeof tree / sizeof tree[0]) && y < rows; ++y) {
             bool selected = (panel == PRIMEAGEN_PANEL_CHATS && y >= 2 && y <= 5) ||
                             (panel == PRIMEAGEN_PANEL_PEOPLE && y >= 7 && y <= 9) ||
                             (panel == PRIMEAGEN_PANEL_SERVERS && y >= 11 && y <= 12) ||
@@ -333,25 +333,25 @@ bool Primeagen_drawPanels(Tui *state, bool owo, bool focused, bool sessionMode, 
 }
 
 bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool focused,
-                              bool sessionMode, bool busy, bool failed, int panel, int selection,
-                              int listWidth, char *row, u8 *styles, bytes cap) {
+                              bool sessionMode, bool busy, bool failed, i32 panel, i32 selection,
+                              i32 listWidth, char *row, u8 *styles, bytes cap) {
     if (state == nullptr || tree == nullptr || panel < PRIMEAGEN_PANEL_PEOPLE ||
         panel > PRIMEAGEN_PANEL_PRIVATE || !validNavigation(panel, selection))
         return false;
-    int rows, columns;
+    i32 rows, columns;
     getmaxyx(stdscr, rows, columns);
-    int left = Primeagen_chatLeft(columns, listWidth);
+    i32 left = Primeagen_chatLeft(columns, listWidth);
     if (left > 0)
         ++left;
     erase();
     if (!drawRegion(state, owo, focused, sessionMode, busy, failed, left, panel, selection, row, styles, cap))
         return false;
-    int caretY, caretX;
+    i32 caretY, caretX;
     getyx(stdscr, caretY, caretX);
     if (left > 1 && rows >= TUI_MIN_ROWS) {
-        int panelWidth = left - 1;
+        i32 panelWidth = left - 1;
         attron(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_BACKGROUND));
-        for (int y = 0; y < rows; ++y)
+        for (i32 y = 0; y < rows; ++y)
             mvhline(y, 0, ' ', panelWidth);
         attroff(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_BACKGROUND));
 
@@ -373,15 +373,15 @@ bool Primeagen_drawTreePanels(Tui *state, TerminalTreeView *tree, bool owo, bool
         bytes visible = TerminalTreeView_visibleCount(tree);
         for (bytes index = 0; index < viewport && first + index < visible; ++index) {
             TerminalTreeRow item = TerminalTreeView_rowAt(tree, first + index);
-            int y = (int) index + 1;
-            int x = 1 + (int) item.depth * 2;
+            i32 y = (i32) index + 1;
+            i32 x = 1 + (i32) item.depth * 2;
             if (item.selected) {
                 attron(COLOR_PAIR(PRIMEAGEN_PAIR_TREE_SELECTED));
                 mvhline(y, 0, ' ', panelWidth);
             }
             const wchar_t *arrow = item.folder ? (item.expanded ? L"⌄" : L"›") : L" ";
             const wchar_t *icon = L"\uf15c";
-            int iconPair = PRIMEAGEN_PAIR_TREE_CHAT;
+            i32 iconPair = PRIMEAGEN_PAIR_TREE_CHAT;
             if (item.folder) {
                 icon = item.expanded ? L"\uf07c" : L"\uf07b";
                 iconPair = PRIMEAGEN_PAIR_TREE_FOLDER;

@@ -9,7 +9,7 @@
 #include <string.h>
 #include <locale.h>
 
-static int failAfter = -1;
+static i32 failAfter = -1;
 static bool fail() {
     if (failAfter < 0)
         return false;
@@ -29,7 +29,7 @@ static any testRealloc(any p, bytes n) { return fail() ? nullptr : realloc(p, n)
 #undef calloc
 #undef realloc
 
-int main() {
+i32 main() {
     Tui a = Tui();
     Tui b = Tui(1);
     Tui c = Tui(1, 1);
@@ -37,7 +37,7 @@ int main() {
     assert(Tui_isReady(&a) && Tui_isReady(&b) && Tui_isReady(&c) && Tui_isReady(&d));
     Tui_free(&a); Tui_free(&b); Tui_free(&d);
     assert(Tui_setSize(&c, 9, 20));
-    int rows, columns;
+    i32 rows, columns;
     Tui_getSize(&c, &rows, &columns);
     assert(rows == 9 && columns == 20);
     assert(Tui_getViewportHeight(&c) == 3 && Tui_getViewportWidth(&c) == 18);
@@ -47,7 +47,7 @@ int main() {
     assert(Tui_copyRow(&c, 0, output, sizeof(output), &cut) && !cut && strlen(output) == 18);
     assert(Tui_copyRow(&c, 1, output, sizeof(output), nullptr) && strcmp(output, "9") == 0);
     assert(Tui_copyRow(&c, 2, output, sizeof(output), nullptr) && output[0] == 0);
-    for (int i = 0; i < 1024; ++i)
+    for (i32 i = 0; i < 1024; ++i)
         assert(Tui_add(&c, "row", 3));
     assert(Tui_getCount(&c) == 1025 && Tui_getCapacity(&c) >= 1025);
     Tui_setScroll(&c, 10);
@@ -79,7 +79,7 @@ int main() {
     assert(Tui_toStringStruct(&c, output, sizeof(output), &cut));
     assert(strstr(output, "input=\"quote\\\"\\\\\"") != nullptr);
     assert(Tui_setInput(&c, Tui_getInput(&c) + 1, 6));
-    for (int i = 0; i < 1024; ++i)
+    for (i32 i = 0; i < 1024; ++i)
         assert(Tui_inputAddChar(&c, 'a'));
     assert(Tui_getInputLength(&c) == 1030 && Tui_getInputCapacity(&c) > 1030);
     assert(Tui_inputBackspace(&c));
@@ -150,7 +150,7 @@ int main() {
     Tui small = Tui(1, 1);
     assert(Tui_setSize(&small, 9, 20));
     assert(Tui_add(&small, "survivor", 8));
-    for (int stage = 0; stage < 4; ++stage) {
+    for (i32 stage = 0; stage < 4; ++stage) {
         failAfter = stage; /* safe copy, flags, render text, directory growth */
         assert(!Tui_addStyled(&small, "**new**", 7, 0, true));
         assert(Tui_getCount(&small) == 1);

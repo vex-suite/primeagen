@@ -29,7 +29,7 @@
  *   - fn PrimeagenAppearance_use(const char *presetName)
  *   - const TerminalAppearance *PrimeagenAppearance_current()
  *   - const char *PrimeagenAppearance_name()
- *   - bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width)
+ *   - bool PrimeagenAppearance_drawRule(WINDOW *win, i32 row, i32 left, i32 width)
  * CONTRACT: cold owner thread; unknown/null names adopt the toolkit default; the
  * rule blit is one pass and clips to `width`; no file, network or model access.
  * ============================================================================
@@ -65,7 +65,7 @@ fn PrimeagenAppearance_use(const char *presetName) {
     s_loaded = true;
 }
 
-bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
+bool PrimeagenAppearance_drawRule(WINDOW *win, i32 row, i32 left, i32 width) {
     if (win == nullptr || width <= 0 || row < 0 || left < 0)
         return false;
     if ((bytes) width > s_cap) {
@@ -86,7 +86,7 @@ bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width) {
     TerminalAppearance_drawRule(look, &canvas, 0, TerminalPen_1(TERMINAL_STYLE_DIM));
 
     // One blit: wide-cell aware, dimmed, so a box-drawing or ASCII glyph both land.
-    for (int x = 0; x < width; ++x) {
+    for (i32 x = 0; x < width; ++x) {
         u32 cp = TerminalCanvas_glyphAt(&canvas, (bytes) x, 0);
         if (cp == 0)
             continue;   // wide-glyph continuation cell: the wide cell already spans it

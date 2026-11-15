@@ -11,7 +11,7 @@
 #define NODES 512u
 #define SCRATCH 4096u
 
-static int failures = 0;
+static i32 failures = 0;
 
 static fn check(bool ok, const char *message) {
     if (!ok) {
@@ -27,17 +27,17 @@ static bool admit(const char *text) {
     return JsonAdmit_parse(&doc, nodes, NODES, scratch, SCRATCH, text);
 }
 
-static fn makeNested(char *out, int depth) {
-    int at = 0;
-    for (int i = 0; i < depth; ++i)
+static fn makeNested(char *out, i32 depth) {
+    i32 at = 0;
+    for (i32 i = 0; i < depth; ++i)
         out[at++] = '[';
     out[at++] = '0';
-    for (int i = 0; i < depth; ++i)
+    for (i32 i = 0; i < depth; ++i)
         out[at++] = ']';
     out[at] = '\0';
 }
 
-int main() {
+i32 main() {
     char buffer[512];
 
     makeNested(buffer, JSON_MAX_DEPTH);

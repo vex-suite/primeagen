@@ -11,7 +11,7 @@
 // rejection that applies nothing, and bounded-setter overflow. Uses a disposable
 // VEX_MANIFEST base; never touches the real Application Support tree.
 
-static int failures = 0;
+static i32 failures = 0;
 
 #define CHECK(cond)                                                        \
     do {                                                                   \
@@ -31,7 +31,7 @@ static fn writeFile(const char *path, const char *text) {
     fclose(file);
 }
 
-int main() {
+i32 main() {
     char base[] = "/tmp/primeagen-settings-XXXXXX";
     if (mkdtemp(base) == nullptr) {
         fprintf(stderr, "FAIL: mkdtemp\n");

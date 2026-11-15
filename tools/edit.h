@@ -3,5 +3,5 @@
 
 #include "vex.h"
 #include "tools/fs.h"
-bool ToolEdit_execute(int root, const char *path, const char *oldText, const char *newText, bytes cap);
+bool ToolEdit_execute(i32 root, const char *path, const char *oldText, const char *newText, bytes cap);
 #endif

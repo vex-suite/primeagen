@@ -72,12 +72,12 @@ typedef enum PrimeagenScreenEvent {
 } PrimeagenScreenEvent;
 
 // Classify one ncurses key. Pure: the host can decide what to do before acting.
-PrimeagenScreenEvent PrimeagenScreen_classify(int key);
+PrimeagenScreenEvent PrimeagenScreen_classify(i32 key);
 
 // Apply a size change: re-bind to the new extent and report whether the frame is
 // still renderable (>= the advertised minimum). Always honoured — never deferred
 // to a later "settle". The caller repaints afterwards.
-bool PrimeagenScreen_revalidate(PrimeagenScreen *self, int rows, int columns);
+bool PrimeagenScreen_revalidate(PrimeagenScreen *self, i32 rows, i32 columns);
 
 // Resident state the screen reads (all borrowed).
 typedef struct PrimeagenScreenState {
@@ -87,10 +87,10 @@ typedef struct PrimeagenScreenState {
     bool sessionMode;
     bool busy;
     bool failed;
-    int panel;        // PRIMEAGEN_PANEL_*
-    int selection;
-    int listWidth;
-    int focusPanel;   // which panel owns the keyboard: 0 rail, 1 centre, 2 people
+    i32 panel;        // PRIMEAGEN_PANEL_*
+    i32 selection;
+    i32 listWidth;
+    i32 focusPanel;   // which panel owns the keyboard: 0 rail, 1 centre, 2 people
 } PrimeagenScreenState;
 
 // HOME: the BANNER first (the app's own picture across the top of the frame),

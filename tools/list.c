@@ -17,7 +17,7 @@
  * MODULE: list tool (tools/list.c)
  * OWNED STATE: local directory stream and growable flat string-pointer directory;
  * each copied name reclaimed before return. Successful output ownership transfers.
- * FUNCTION REGISTRY: bool ToolList_execute(int root,const char *path,bytes cap,
+ * FUNCTION REGISTRY: bool ToolList_execute(i32 root,const char *path,bytes cap,
  *                                         char **dest,bytes *outLength)
  * PRIVATE: compare(left,right): qsort byte-order oracle, no locale dependency.
  * CONTRACT: '.' is root; other paths are canonical no-symlink directories. JSON
@@ -27,22 +27,22 @@
  * snapshot, recursive traversal or hostile concurrent writer guarantee.
  * ============================================================================ */
 #define TOOL_LIST_CAPACITY_DEFAULT 16u /* Growable initial directory, not a ceiling. */
-static int compare(const_any left, const_any right) {
+static i32 compare(const_any left, const_any right) {
     const char *a = *(const char* const*) left;
     const char *b = *(const char* const*) right;
     return strcmp(a, b);
 }
 
-bool ToolList_execute(int root, const char *path, bytes cap, char **dest, bytes *outLength) {
+bool ToolList_execute(i32 root, const char *path, bytes cap, char **dest, bytes *outLength) {
     if (root < 0 || path == nullptr || dest == nullptr || outLength == nullptr || cap < 2 || cap > TOOL_BYTES_MAX) {
         THROW("list: invalid arguments or capacity");
         return false;
     }
-    int fd;
+    i32 fd;
     if (strcmp(path, ".") == 0)
         fd = openat(root, ".", O_RDONLY | O_DIRECTORY | O_CLOEXEC);
     else {
-        int parent;
+        i32 parent;
         char name[NAME_MAX + 1];
         if (!ToolFs_parent(root, path, &parent, name, sizeof(name)))
             return false;

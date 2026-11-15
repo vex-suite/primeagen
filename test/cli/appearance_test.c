@@ -11,7 +11,7 @@
 
 #include "cli/appearance.h"
 
-int main() {
+i32 main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     FILE *in = fopen("/dev/null", "r");
     FILE *out = fopen("/dev/null", "w");
@@ -55,7 +55,7 @@ int main() {
     cchar_t cell;
     wchar_t text[8];
     attr_t gotAttr;
-    short gotPair;
+    i16 gotPair;
     assert(mvin_wch(2, 0, &cell) == OK);
     assert(getcchar(&cell, text, &gotAttr, &gotPair, nullptr) == OK);
     assert(text[0] == L'\u2500');

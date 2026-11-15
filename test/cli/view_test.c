@@ -12,7 +12,7 @@
 #include <string.h>
 #include <wchar.h>
 
-int main() {
+i32 main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     FILE *in = tmpfile(), *out = tmpfile();
     assert(in && out);
@@ -51,14 +51,14 @@ int main() {
     assert(TerminalTreeView_setExpanded(tree, server, true));
     assert(TerminalTreeView_setExpanded(tree, privateFolder, true));
     assert(TerminalTreeView_setSelected(tree, opencode));
-    int left = Primeagen_chatLeft(100, 32);
+    i32 left = Primeagen_chatLeft(100, 32);
     assert(Tui_setSize(&state, 24, 100 - left));
     assert(Tui_add(&state, "live chat", 9));
     assert(Tui_setInput(&state, "draft", 5));
     char row[256];
     u8 styles[256];
     assert(Primeagen_drawPanels(&state, false, true, false, false, false, 0, 0, 32, row, styles, sizeof row));
-    int caretY, caretX;
+    i32 caretY, caretX;
     getyx(stdscr, caretY, caretX);
     assert(caretY == 22 && caretX == left + 7);
     // The header rule is the toolkit CONNECTOR run (striped), not a bare ACS_HLINE.
@@ -68,7 +68,7 @@ int main() {
     cchar_t cell;
     wchar_t text[CCHARW_MAX];
     attr_t attr;
-    short pair;
+    i16 pair;
     assert((mvinch(0, 1) & A_CHARTEXT) == 'v');
     assert((mvinch(2, 1) & A_CHARTEXT) == '>');
     assert((mvinch(7, 1) & A_CHARTEXT) == '>');
@@ -121,7 +121,7 @@ int main() {
     assert((mvinch(2, left + 1) & A_CHARTEXT) == 'u');
     assert((mvinch(22, left + 2) & A_CHARTEXT) == 'm'); // preview prompt, never the live draft
     assert(strcmp(Tui_getInput(&state), "draft") == 0);
-    int panel = PRIMEAGEN_PANEL_PRIVATE, selected = 0;
+    i32 panel = PRIMEAGEN_PANEL_PRIVATE, selected = 0;
     assert(Primeagen_drawPanels(&state, false, true, false, false, false, panel, selected, 32, row, styles, sizeof row));
     assert((mvinch(0, left + 1) & A_CHARTEXT) == '#');
     assert((mvinch(4, left + 1) & A_CHARTEXT) == 'T');
@@ -148,9 +148,9 @@ int main() {
     assert(mvin_wch(2, left + 20, &cell) == OK);
     assert(getcchar(&cell, text, &attr, &pair, nullptr) == OK);
     assert(text[0] == L'e' && text[1] == (wchar_t) 0x301);
-    const int widths[] = {20, 40, 63, 64, 80, 100, 200};
+    const i32 widths[] = {20, 40, 63, 64, 80, 100, 200};
     for (bytes i = 0; i < sizeof widths / sizeof widths[0]; ++i) {
-        int columns = widths[i];
+        i32 columns = widths[i];
         assert(resizeterm(10, columns) != ERR);
         left = Primeagen_chatLeft(columns, 32);
         assert(left == 0 || (left >= 12 && columns - left >= TUI_MIN_COLUMNS));

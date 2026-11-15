@@ -11,13 +11,13 @@
 /* ============================================================================
  * MODULE: delete tool (tools/delete.c)
  * OWNED STATE: local parent fd closes before return; root fd borrowed.
- * FUNCTION REGISTRY: bool ToolDelete_execute(int root,const char *path)
+ * FUNCTION REGISTRY: bool ToolDelete_execute(i32 root,const char *path)
  * CONTRACT: ToolFs canonical path, existing regular single-link target, stable
  * trusted tree. Missing/directory/symlink/hardlink rejects loudly unchanged;
  * successful unlink is permanent. Admission checks are not a racing-writer guard.
  * ============================================================================ */
-bool ToolDelete_execute(int root, const char *path) {
-    int parent;
+bool ToolDelete_execute(i32 root, const char *path) {
+    i32 parent;
     char name[NAME_MAX + 1];
     if (!ToolFs_parent(root, path, &parent, name, sizeof(name)))
         return false;

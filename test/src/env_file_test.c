@@ -12,7 +12,7 @@
 // without echo, size/type boundaries, literal (no shell). Uses disposable files
 // only; never reads the real app .env.
 
-static int failures = 0;
+static i32 failures = 0;
 
 #define CHECK(cond)                                                    \
     do {                                                               \
@@ -38,7 +38,7 @@ static bool loadAbsent(const char *path) {
     return EnvFile_load(path);
 }
 
-int main() {
+i32 main() {
     char directory[] = "/tmp/primeagen-env-XXXXXX";
     if (mkdtemp(directory) == nullptr) {
         fprintf(stderr, "FAIL: mkdtemp\n");

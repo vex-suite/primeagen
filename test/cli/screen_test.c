@@ -21,7 +21,7 @@ static u8 pixels[2 * 4] = { 0, 0, 0, 255,   255, 255, 255, 255 };
 // A bright-paper banner (the other polarity).
 static u8 brightPixels[2 * 4] = { 255, 255, 255, 255,   255, 255, 255, 255 };
 
-int main() {
+i32 main() {
     assert(setlocale(LC_CTYPE, "en_US.UTF-8") != nullptr);
     PrimeagenScreen screen;
     PrimeagenScreen_init(&screen);
@@ -78,7 +78,7 @@ int main() {
     assert(AT(1, 0) == '|');                        // left edge
     // The tui.txt basics: a title rail (1..22), the separator (23), the panel.
     assert(AT(1, 7) != ' ');                        // the title
-    // Its dividers are CUT: they stop short and end in an endpoint glyph.
+    // Its dividers are CUT: they stop i16 and end in an endpoint glyph.
     assert(AT(2, 1) == ' ');                        // inset, not touching the edge
     assert(AT(2, 2) == 0x2576);                     // ╶ cut end
     assert(AT(2, 5) == '.');                        // the stripe continues inside
@@ -91,7 +91,7 @@ int main() {
     assert(TerminalCanvas_styleAt(&canvas, 9, 4) & TERMINAL_STYLE_REVERSE);
     // The picture is zoom-fit in the panel, and its decor fills the panel.
     assert(AT(1, 24) == ' ');
-    int bannerInk = 0;
+    i32 bannerInk = 0;
     for (bytes y = 0; y < ROWS; ++y)
         for (bytes x = 24; x < COLS - 1; ++x)
             if (AT(y, x) != ' ')
@@ -118,7 +118,7 @@ int main() {
         assert(PrimeagenScreen_bind(&edge, PRIMEAGEN_SCREEN_MIN_ROWS, PRIMEAGEN_SCREEN_MIN_COLUMNS - 1));
         PrimeagenScreen_renderHome(&edge, "Primeagen", menu, 3, 0, nullptr);
         // One row below the minimum: the centred notice, not a half-drawn frame.
-        int notice = 0;
+        i32 notice = 0;
         for (bytes i = 0; i < (bytes) PRIMEAGEN_SCREEN_MIN_ROWS * (PRIMEAGEN_SCREEN_MIN_COLUMNS - 1); ++i)
             if (edge.cells[i] == 'R')
                 notice = 1;
@@ -141,7 +141,7 @@ int main() {
     assert(PrimeagenScreen_renderChat(&screen, &state));
     assert(AT(0, 0) == 0x250C);                      // the frame's own corner
     assert(AT(1, 0) == '|');                         // left edge
-    assert(AT(2, 25) == 0x2576);                     // the centre divider, cut short
+    assert(AT(2, 25) == 0x2576);                     // the centre divider, cut i16
     // FOCUS: the rail HIGHLIGHTS its selected row only while it owns the keyboard;
     // when another panel has focus the same row is a COLOUR change, not a highlight.
     state.focusPanel = 0;
@@ -153,7 +153,7 @@ int main() {
     assert(TerminalCanvas_styleAt(&canvas, 3, 5) & TERMINAL_STYLE_ACCENT);
     assert(TerminalCanvas_fgAt(&canvas, 3, 5) != TERMINAL_COLOR_DEFAULT);
     // The input prompt sits on the input row; the transcript carries the text.
-    int seen = 0;
+    i32 seen = 0;
     for (bytes i = 0; i < ROWS * COLS; ++i)
         if (screen.cells[i] == 'h')
             seen = 1;
@@ -189,7 +189,7 @@ int main() {
     for (bytes x = 24; x < COLS - 2; ++x)
         paper[x] = AT(9, x);
     PrimeagenScreen_renderHome(&screen, "Primeagen", menu, 3, 0, stored);
-    int rescattered = 0;
+    i32 rescattered = 0;
     for (bytes x = 24; x < COLS - 2; ++x)
         if (AT(9, x) != paper[x])
             rescattered = 1;

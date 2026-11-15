@@ -20,12 +20,12 @@
  * MODULE: tool filesystem admission (tools/fs.c)
  * OWNED STATE: no persistent state; each operation owns local descriptors/buffers.
  * FUNCTION REGISTRY:
- *   bool ToolFs_parent(int root,const char *path,int *outParent,char *name,bytes cap)
+ *   bool ToolFs_parent(i32 root,const char *path,i32 *outParent,char *name,bytes cap)
  *     Canonical relative path; final name + owned parent fd. Outputs on success only.
- *   bool ToolFs_read(int root,const char *path,bytes cap,char **dest,bytes *outLength)
+ *   bool ToolFs_read(i32 root,const char *path,bytes cap,char **dest,bytes *outLength)
  *     Whole bounded regular-file bytes, heap output transferred only on success.
  *   bool ToolFs_input(bytes cap,char **dest,bytes *outLength): bounded stdin bytes.
- *   bool ToolFs_publish(int root,const char *path,const char *text,bytes length,bool create)
+ *   bool ToolFs_publish(i32 root,const char *path,const char *text,bytes length,bool create)
  *     Create-new by link admission or atomic existing-file replacement by rename.
  * PRIVATE: failure(reason): one cold diagnostic and false; readFd(fd,cap,dest,len)
  *     allocates cap+1, drains until EOF, rejects overflow, preserves output pointers.
@@ -40,16 +40,16 @@ static bool failure(const char *reason) {
     return false;
 }
 
-bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes cap) {
+bool ToolFs_parent(i32 root, const char *path, i32 *outParent, char *name, bytes cap) {
     if (root < 0 || path == nullptr || outParent == nullptr || name == nullptr || cap == 0 ||
         *path == '\0' || *path == '/' || strlen(path) >= PATH_MAX)
         return failure("invalid relative path");
-    for (const unsigned char *at = (const unsigned char*) path; *at; ++at)
+    for (const u8 *at = (const u8*) path; *at; ++at)
         if (*at < 32 || *at == 127)
             return failure("control byte in path");
     char copy[PATH_MAX];
     strcpy(copy, path);
-    int parent = dup(root);
+    i32 parent = dup(root);
     if (parent < 0)
         return failure("directory descriptor refused");
     char *part = copy;
@@ -70,7 +70,7 @@ bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes
             *outParent = parent;
             return true;
         }
-        int next = openat(parent, part, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+        i32 next = openat(parent, part, O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
         close(parent);
         if (next < 0)
             return failure("parent missing or symlink refused");
@@ -79,7 +79,7 @@ bool ToolFs_parent(int root, const char *path, int *outParent, char *name, bytes
     }
 }
 
-static bool readFd(int fd, bytes cap, char **dest, bytes *outLength) {
+static bool readFd(i32 fd, bytes cap, char **dest, bytes *outLength) {
     if (cap == 0 || cap > TOOL_BYTES_MAX || dest == nullptr || outLength == nullptr)
         return failure("invalid byte capacity");
     char *data = malloc(cap + 1);
@@ -109,14 +109,14 @@ bool ToolFs_input(bytes cap, char **dest, bytes *outLength) {
     return readFd(STDIN_FILENO, cap, dest, outLength);
 }
 
-bool ToolFs_read(int root, const char *path, bytes cap, char **dest, bytes *outLength) {
+bool ToolFs_read(i32 root, const char *path, bytes cap, char **dest, bytes *outLength) {
     if (dest == nullptr || outLength == nullptr || cap == 0 || cap > TOOL_BYTES_MAX)
         return failure("invalid read outputs or byte capacity");
-    int parent;
+    i32 parent;
     char name[NAME_MAX + 1];
     if (!ToolFs_parent(root, path, &parent, name, sizeof(name)))
         return false;
-    int fd = openat(parent, name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
+    i32 fd = openat(parent, name, O_RDONLY | O_NOFOLLOW | O_NONBLOCK | O_CLOEXEC);
     close(parent);
     struct stat info;
     if (fd < 0 || fstat(fd, &info) != 0 || !S_ISREG(info.st_mode) || info.st_nlink != 1) {
@@ -138,23 +138,23 @@ bool ToolFs_read(int root, const char *path, bytes cap, char **dest, bytes *outL
     return ok;
 }
 
-bool ToolFs_publish(int root, const char *path, const char *text, bytes length, bool create) {
+bool ToolFs_publish(i32 root, const char *path, const char *text, bytes length, bool create) {
     if (text == nullptr || length > TOOL_BYTES_MAX)
         return failure("invalid write span");
-    int parent;
+    i32 parent;
     char name[NAME_MAX + 1];
     if (!ToolFs_parent(root, path, &parent, name, sizeof(name)))
         return false;
     struct stat info;
-    int found = fstatat(parent, name, &info, AT_SYMLINK_NOFOLLOW);
+    i32 found = fstatat(parent, name, &info, AT_SYMLINK_NOFOLLOW);
     if ((create && (found == 0 || errno != ENOENT)) ||
         (!create && (found != 0 || !S_ISREG(info.st_mode) || info.st_nlink != 1))) {
         close(parent);
         return failure("create requires absent path; write requires regular single-link file");
     }
     char stage[NAME_MAX + 1];
-    snprintf(stage, sizeof(stage), ".primeagen-%ld-%08x", (long) getpid(), arc4random());
-    int fd = openat(parent, stage, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
+    snprintf(stage, sizeof(stage), ".primeagen-%ld-%08x", (i64) getpid(), arc4random());
+    i32 fd = openat(parent, stage, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, 0600);
     if (fd < 0) {
         close(parent);
         return failure("staging file admission refused");

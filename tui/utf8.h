@@ -16,7 +16,7 @@
 static inline bytes TuiUtf8_decode(const char *text, bytes length, u32 *outScalar) {
     if (text == nullptr || length == 0 || outScalar == nullptr)
         return 0;
-    const unsigned char *data = (const unsigned char*) text;
+    const u8 *data = (const u8*) text;
     u32 scalar = data[0];
     bytes count;
     u32 minimum;
@@ -52,7 +52,7 @@ static inline bool TuiUtf8_safe(u32 scalar) {
 }
 
 static inline bytes TuiUtf8_width(u32 scalar) {
-    int width = wcwidth((wchar_t) scalar);
+    i32 width = wcwidth((wchar_t) scalar);
     return width < 0 ? 1 : (bytes) width;
 }
 #endif

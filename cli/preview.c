@@ -39,11 +39,11 @@
  * Keys: 1 = HOME, 2 = CHAT, r = resize, q = quit.
  *
  * FUNCTION REGISTRY:
- *   int main() — banner decode, terminal setup, poll/revalidate/present loop.
+ *   i32 main() — banner decode, terminal setup, poll/revalidate/present loop.
  * ============================================================================
  */
 
-int main() {
+i32 main() {
     setlocale(LC_CTYPE, "");
 
     // The banner: decode once with a libc buffer and hand it to the screen.
@@ -92,13 +92,13 @@ int main() {
     static const char *menuText[] = { "People", "Servers", "Settings" };
     PrimeagenScreen screen;
     PrimeagenScreen_init(&screen);
-    int home = 1;
-    int running = 1;
-    int focusPanel = 0;
-    int paint = 1;
+    i32 home = 1;
+    i32 running = 1;
+    i32 focusPanel = 0;
+    i32 paint = 1;
     bytes lastRows = 0, lastColumns = 0;
     while (running) {
-        int rows = 0, columns = 0;
+        i32 rows = 0, columns = 0;
         getmaxyx(stdscr, rows, columns);
         // A zoom, fullscreen or drag is a SIZE CHANGE, and it is revalidated here —
         // before painting — rather than trusting a KEY_RESIZE that may never come.
@@ -126,7 +126,7 @@ int main() {
         }
         lastRows = (bytes) rows;
         lastColumns = (bytes) columns;
-        int key = getch();
+        i32 key = getch();
         if (key == ERR)
             continue;           // idle tick: re-check the size, paint nothing
         paint = 1;

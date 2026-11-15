@@ -38,8 +38,8 @@
  * CLASS: SessionBridge (session/session_bridge)
  * STRUCT FIELDS (Mirroring session/session_bridge.h):
  *   Harness harness : API Haven owner of admitted single in-flight job.
- *   int readFd : borrowed nonblocking host response pipe; -1 unbound.
- *   int writeFd : borrowed nonblocking host request pipe; -1 unbound.
+ *   i32 readFd : borrowed nonblocking host response pipe; -1 unbound.
+ *   i32 writeFd : borrowed nonblocking host request pipe; -1 unbound.
  *   bool owo : selects canonical Owo_instructions for subsequent turns.
  *   u32 jobId : current Haven job; zero means idle.
  *   u64 startedMs : monotonic clock of the last observed progress.
@@ -59,9 +59,9 @@
  *   char decision[8] : queued reply spelling; empty when nothing is queued.
  * FUNCTION REGISTRY:
  *   SessionBridge SessionBridge_0() : unbound.
- *   SessionBridge SessionBridge_2(int readFd, int writeFd) : borrowed pipes.
+ *   SessionBridge SessionBridge_2(i32 readFd, i32 writeFd) : borrowed pipes.
  *   bool SessionBridge_submit(SessionBridge *, const char *) : cold admission.
- *   int SessionBridge_poll(SessionBridge *) : bounded IO; one frame per call.
+ *   i32 SessionBridge_poll(SessionBridge *) : bounded IO; one frame per call.
  *   fn SessionBridge_free(SessionBridge *) : cancel borrowed job, never close fd.
  *   fn SessionBridge_setOwo(SessionBridge *, bool), bool SessionBridge_isOwo(const SessionBridge *)
  *   bool SessionBridge_isBusy(const SessionBridge *), const char *SessionBridge_getText(const SessionBridge *)
@@ -261,7 +261,7 @@ static HarnessStatus pollJob(any context, any handle, u64 timeoutMs) {
     if (status == HARNESS_STATUS_TIMEOUT)
         goto fail;
     /* Any frame is progress: the watchdog measures remote silence, not total
-     * duration, so a long multi-tool turn is not killed for taking minutes. */
+     * duration, so a i64 multi-tool turn is not killed for taking minutes. */
     (*self).startedMs = nowMs();
     if (!(*self).startedMs)
         goto fail;
@@ -290,7 +290,7 @@ SessionBridge SessionBridge_0() {
     self.writeFd = -1;
     return self;
 }
-SessionBridge SessionBridge_2(int readFd, int writeFd) {
+SessionBridge SessionBridge_2(i32 readFd, i32 writeFd) {
     SessionBridge self = SessionBridge_0();
     self.readFd = readFd;
     self.writeFd = writeFd;
@@ -304,7 +304,7 @@ bool SessionBridge_submit(SessionBridge *self, const char *prompt) {
         THROW("session turn rejected: empty, oversized, busy or unbound wire");
         return false;
     }
-    for (const unsigned char *p = (const unsigned char*) prompt; *p; ++p)
+    for (const u8 *p = (const u8*) prompt; *p; ++p)
         if ((*p < ' ' && *p != '\n' && *p != '\t') || *p > '~') {
             THROW("session prompt must use printable ASCII, newline or tab");
             return false;
@@ -317,7 +317,7 @@ bool SessionBridge_submit(SessionBridge *self, const char *prompt) {
         THROW("session request exceeds wire capacity");
     return ok;
 }
-int SessionBridge_poll(SessionBridge *self) {
+i32 SessionBridge_poll(SessionBridge *self) {
     if (!self || !(*self).jobId)
         return 0;
     HarnessStatus status = Harness_poll(&(*self).harness, (*self).jobId);
@@ -386,7 +386,7 @@ bool SessionBridge_toString(const SessionBridge *self, char *dest, bytes cap, bo
         *outTruncated = false;
     if (!dest || !cap)
         return false;
-    int n = snprintf(dest, cap, "%s", !self ? "nullptr" : SessionBridge_isAwaiting(self) ? "OpenCode approval pending"
+    i32 n = snprintf(dest, cap, "%s", !self ? "nullptr" : SessionBridge_isAwaiting(self) ? "OpenCode approval pending"
                      : SessionBridge_isBusy(self) ? "OpenCode pending" : "OpenCode idle");
     bool cut = n < 0 || (bytes) n >= cap;
     if (outTruncated)
@@ -400,9 +400,9 @@ bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, bytes c
         *outTruncated = false;
     if (!dest || !cap)
         return false;
-    int n = snprintf(dest, cap, "{harness:borrowed-driver,readFd:%d,writeFd:%d,owo:%d,jobId:%u,startedMs:%llu,request:redacted,requestLength:%zu,requestOffset:%zu,response:redacted,responseLength:%zu,text:redacted,failed:%d,awaiting:%d,approvalSerial:%u,approvalId:redacted,approvalLabel:redacted,note:redacted,notePending:%d,decision:redacted}",
+    i32 n = snprintf(dest, cap, "{harness:borrowed-driver,readFd:%d,writeFd:%d,owo:%d,jobId:%u,startedMs:%llu,request:redacted,requestLength:%zu,requestOffset:%zu,response:redacted,responseLength:%zu,text:redacted,failed:%d,awaiting:%d,approvalSerial:%u,approvalId:redacted,approvalLabel:redacted,note:redacted,notePending:%d,decision:redacted}",
                      (*self).readFd, (*self).writeFd, (*self).owo, (*self).jobId,
-                     (unsigned long long) (*self).startedMs, (*self).requestLength,
+                     (u64) (*self).startedMs, (*self).requestLength,
                      (*self).requestOffset, (*self).responseLength, (*self).failed,
                      (*self).awaiting, (*self).approvalSerial, (*self).notePending);
     bool cut = n < 0 || (bytes) n >= cap;

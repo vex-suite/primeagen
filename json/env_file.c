@@ -63,7 +63,7 @@ static bool isKeyName(const char *name, bytes length) {
 
 static bool valueCharsValid(const char *value, bytes length) {
     for (bytes i = 0; i < length; ++i) {
-        unsigned char c = (unsigned char) value[i];
+        u8 c = (u8) value[i];
         if (c < 33 || c > 126 || c == '"' || c == '\'')
             return false;
     }
@@ -87,7 +87,7 @@ static bool stripQuotes(const char **value, bytes *length) {
  * Validate the whole file into `out`. Mutates only the owned buffer (NUL
  * termination). Returns the number of keys, or -1 on any rejection.
  */
-static int parseAll(char *buffer, bytes length, PendingKey *out, bytes cap) {
+static i32 parseAll(char *buffer, bytes length, PendingKey *out, bytes cap) {
     bytes count = 0;
     bytes at = 0;
     while (at < length) {
@@ -145,13 +145,13 @@ static int parseAll(char *buffer, bytes length, PendingKey *out, bytes cap) {
         out[count].value = valueCopy;
         ++count;
     }
-    return (int) count;
+    return (i32) count;
 }
 
 bool EnvFile_load(const char *path) {
     if (path == nullptr || path[0] == '\0')
         return false;
-    int descriptor = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
+    i32 descriptor = open(path, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
     if (descriptor < 0) {
         if (errno == ENOENT)
             return true;                            // missing file: no-op
@@ -185,12 +185,12 @@ bool EnvFile_load(const char *path) {
     buffer[total] = '\0';
 
     PendingKey pending[ENV_FILE_KEYS_MAX];
-    int count = parseAll(buffer, total, pending, ENV_FILE_KEYS_MAX);
+    i32 count = parseAll(buffer, total, pending, ENV_FILE_KEYS_MAX);
     if (count < 0) {
         THROW("env file: invalid or duplicate key assignment");
         return false;
     }
-    for (int i = 0; i < count; ++i) {
+    for (i32 i = 0; i < count; ++i) {
         if (getenv(pending[i].name) == nullptr)     // existing environment wins
             setenv(pending[i].name, pending[i].value, 1);
     }

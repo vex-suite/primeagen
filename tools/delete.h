@@ -3,5 +3,5 @@
 
 #include "vex.h"
 #include "tools/fs.h"
-bool ToolDelete_execute(int root, const char *path);
+bool ToolDelete_execute(i32 root, const char *path);
 #endif

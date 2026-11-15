@@ -5,7 +5,7 @@
 #include "personality/owo.h"
 #include <assert.h>
 #include <string.h>
-int main() {
+i32 main() {
     assert(strstr(Owo_greeting(true), "owo") != nullptr);
     assert(strstr(Owo_greeting(false), "offline") != nullptr);
     assert(strcmp(Owo_greeting(true), Owo_greeting(false)) != 0);

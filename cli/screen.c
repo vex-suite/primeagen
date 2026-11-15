@@ -175,7 +175,7 @@ TerminalCanvas PrimeagenScreen_canvas(PrimeagenScreen *self) {
                             (*self).columns, (*self).rows);
 }
 
-PrimeagenScreenEvent PrimeagenScreen_classify(int key) {
+PrimeagenScreenEvent PrimeagenScreen_classify(i32 key) {
     switch (key) {
         case KEY_RESIZE: return PRIMEAGEN_SCREEN_EVENT_RESIZE;
         case '1':        return PRIMEAGEN_SCREEN_EVENT_HOME;
@@ -187,7 +187,7 @@ PrimeagenScreenEvent PrimeagenScreen_classify(int key) {
     }
 }
 
-bool PrimeagenScreen_revalidate(PrimeagenScreen *self, int rows, int columns) {
+bool PrimeagenScreen_revalidate(PrimeagenScreen *self, i32 rows, i32 columns) {
     if (rows <= 0 || columns <= 0)
         return false;
     if (!PrimeagenScreen_bind(self, (bytes) rows, (bytes) columns))
@@ -328,7 +328,7 @@ fn PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
 }
 
 // The rail's rows per panel. Static sample content; the app owns real data.
-static fn navItems(int panel, const char *const **outItems, bytes *outCount) {
+static fn navItems(i32 panel, const char *const **outItems, bytes *outCount) {
     static const char *const people[] = {"Sola (@solasol)", "Muse Writer (@muse...)", "Vex (@vexgraph)"};
     static const char *const servers[] = {"Ecosystem", "Other Server", "Another Server"};
     static const char *const channels[] = {"# general", "# whatever-this", "# hotcwaphsdf"};
@@ -370,7 +370,7 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
     bytes itemCount = 0;
     navItems((*state).panel, &items, &itemCount);
     for (bytes i = 0; i < itemCount && i + 4 < TerminalCanvas_getHeight(&rail); ++i) {
-        bool selected = (int) i == (*state).selection;
+        bool selected = (i32) i == (*state).selection;
         TerminalPen pen = selected ? selectionPen(look, (*state).focusPanel == 0) : lookText(look);
         if (selected)
             putText(&rail, 0, i + 4, (*state).focusPanel == 0 ? "> " : "* ", pen);
@@ -423,7 +423,7 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
         putCentered(&people, 0, "Users", lookText(look));
         TerminalRule_drawCut(&(*look).rule, &people, 1, 1, lookRule(look));
         for (bytes i = 0; i < itemCount && i + 2 < TerminalCanvas_getHeight(&people); ++i) {
-            bool selected = (int) i == (*state).selection;
+            bool selected = (i32) i == (*state).selection;
             TerminalPen pen = selected ? selectionPen(look, (*state).focusPanel == 2) : lookMuted(look);
             putText(&people, 1, i + 2, items[i], pen);
         }
@@ -435,30 +435,30 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
 // the terminal's palette and cached. TERMINAL_COLOR_DEFAULT keeps pair 0 (the
 // host default). This is what makes a colour change distinguishable from
 // reverse-video highlighting.
-static short pairFor(u32 rgb) {
+static i16 pairFor(u32 rgb) {
     static u32 keys[512];
-    static short pairs[512];
-    static int count = 0;
+    static i16 pairs[512];
+    static i32 count = 0;
     if (rgb == TERMINAL_COLOR_DEFAULT || !has_colors())
         return 0;
-    for (int i = 0; i < count; ++i)
+    for (i32 i = 0; i < count; ++i)
         if (keys[i] == rgb)
             return pairs[i];
     if (count >= 511 || COLORS < 8)
         return 0;
-    int colour;
+    i32 colour;
     if (COLORS >= 256) {
-        int r = TERMINAL_COLOR_RED(rgb) * 5 / 255;
-        int g = TERMINAL_COLOR_GREEN(rgb) * 5 / 255;
-        int b = TERMINAL_COLOR_BLUE(rgb) * 5 / 255;
+        i32 r = TERMINAL_COLOR_RED(rgb) * 5 / 255;
+        i32 g = TERMINAL_COLOR_GREEN(rgb) * 5 / 255;
+        i32 b = TERMINAL_COLOR_BLUE(rgb) * 5 / 255;
         colour = 16 + 36 * r + 6 * g + b;
     } else {
         colour = (TERMINAL_COLOR_RED(rgb) > 127 ? 1 : 0)
                | (TERMINAL_COLOR_GREEN(rgb) > 127 ? 2 : 0)
                | (TERMINAL_COLOR_BLUE(rgb) > 127 ? 4 : 0);
     }
-    short pair = (short) (count + 1);
-    if (init_pair(pair, (short) colour, -1) != OK)
+    i16 pair = (i16) (count + 1);
+    if (init_pair(pair, (i16) colour, -1) != OK)
         return 0;
     keys[count] = rgb;
     pairs[count] = pair;
@@ -482,12 +482,12 @@ bool PrimeagenScreen_present(const PrimeagenScreen *self, WINDOW *win) {
             if (style & TERMINAL_STYLE_REVERSE) attr |= A_REVERSE;
             if (style & TERMINAL_STYLE_MUTED) attr |= A_DIM;
             if (style & TERMINAL_STYLE_ACCENT) attr |= A_BOLD;
-            short pair = pairFor((*self).fg[index]);
+            i16 pair = pairFor((*self).fg[index]);
             wchar_t text[2] = { (wchar_t) cp, L'\0' };
             cchar_t glyph;
             if (setcchar(&glyph, text, attr, pair, nullptr) != OK)
                 continue;
-            (discard) mvadd_wch((int) y, (int) x, &glyph);
+            (discard) mvadd_wch((i32) y, (i32) x, &glyph);
         }
     }
     return refresh() != ERR;

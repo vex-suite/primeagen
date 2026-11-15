@@ -44,20 +44,20 @@
  * FUNCTION REGISTRY:
  * ----------------------------------------------------------------------------
  * Private helpers:
- *   static fn stop(int signalNumber) : flag shutdown; no terminal API/logging.
+ *   static fn stop(i32 signalNumber) : flag shutdown; no terminal API/logging.
  *   static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy, bool failed, char *row, u8 *styles, bytes cap)
  *     Draw per-cell styled wrapped viewport, fixed input/status and cursor.
  *     No model-supplied terminal escape sequences; unsupported italic uses underline.
- *   static int command(Tui *, bool) : local slash dispatch; connect/quit actions.
- *   static const char *approvalReply(int key) : once/always/reject key mapping.
+ *   static i32 command(Tui *, bool) : local slash dispatch; connect/quit actions.
+ *   static const char *approvalReply(i32 key) : once/always/reject key mapping.
  *   static bool mouseReporting(bool enabled) : own X10/SGR capture enable/restore.
- *   static bool readMouse(int key, int *x, int *y, TuiMouseKind *kind)
+ *   static bool readMouse(i32 key, i32 *x, i32 *y, TuiMouseKind *kind)
  *     Bounded protocol decode; coordinate outputs unchanged on malformed input.
- *   static fn drawApproval(int rows, int left, int columns)
+ *   static fn drawApproval(i32 rows, i32 left, i32 columns)
  *     Fixed decision bar, visible even while scrolling the proposed resources.
- *   static int connectHost(const char *, bool) : exec existing adapter on Go Flash.
+ *   static i32 connectHost(const char *, bool) : exec existing adapter on Go Flash.
  * Entry:
- *   int main(int argc, char **argv)
+ *   i32 main(i32 argc, char **argv)
  *     --owo / --help / --session-host / paired host --bridge-read/write fd admission;
  *     paired --update-payload/--update-checksum enable trusted local cold updates.
  *     Builds exactly four top-level tree folders and their mock children. Tree row
@@ -126,25 +126,25 @@ static bool mouseReporting(bool enabled) {
 /* Prefixes are recognized by ncurses' key trie; only their bounded suffix is
  * read here. SGR supports large coordinates; legacy X10 is a fallback. No raw
  * mouse byte is entered into the user's draft. Releases/motion are ignored. */
-static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
-    unsigned fields[3] = {0};
+static bool readMouse(i32 key, i32 *outX, i32 *outY, TuiMouseKind *outKind) {
+    u32 fields[3] = {0};
     bool valid = true, pressed = true;
     timeout(TUI_MOUSE_READ_MS);
     if (key == TUI_MOUSE_X10) {
         for (bytes i = 0; i < 3; ++i) {
-            int byte = getch();
+            i32 byte = getch();
             if (byte < 32 || byte > 255) {
                 valid = false;
                 break;
             }
-            fields[i] = (unsigned) byte - 32;
+            fields[i] = (u32) byte - 32;
         }
     } else if (key == TUI_MOUSE_SGR) {
         for (bytes i = 0; i < 3 && valid; ++i) {
-            int byte = getch();
-            unsigned digits = 0;
+            i32 byte = getch();
+            u32 digits = 0;
             while (byte >= '0' && byte <= '9' && digits < 5) {
-                fields[i] = fields[i] * 10 + (unsigned) (byte - '0');
+                fields[i] = fields[i] * 10 + (u32) (byte - '0');
                 ++digits;
                 byte = getch();
             }
@@ -159,7 +159,7 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
     timeout(TUI_POLL_MS);
     if (!valid || !pressed || fields[1] == 0 || fields[2] == 0)
         return false;
-    unsigned button = fields[0] & ~(4u | 8u | 16u); // modifier flags only
+    u32 button = fields[0] & ~(4u | 8u | 16u); // modifier flags only
     TuiMouseKind kind;
     if (button == 64)
         kind = TUI_MOUSE_WHEEL_UP;
@@ -169,23 +169,23 @@ static bool readMouse(int key, int *outX, int *outY, TuiMouseKind *outKind) {
         kind = TUI_MOUSE_CLICK;
     else
         return false;
-    *outX = (int) fields[1] - 1;
-    *outY = (int) fields[2] - 1;
+    *outX = (i32) fields[1] - 1;
+    *outY = (i32) fields[2] - 1;
     *outKind = kind;
     return true;
 }
-static fn stop(int signalNumber) {
+static fn stop(i32 signalNumber) {
     (discard) signalNumber;
     stopped = 1;
 }
 
 /* Slash input is local; unimplemented commands are never model prompts. */
-static int command(Tui *state, bool sessionMode) {
+static i32 command(Tui *state, bool sessionMode) {
     return Primeagen_command(state, sessionMode);
 }
 
 /* One pending question at a time: o/y approve once, a always, r/n reject. */
-static const char *approvalReply(int key) {
+static const char *approvalReply(i32 key) {
     if (key == 'o' || key == 'y')
         return "once";
     if (key == 'a')
@@ -195,7 +195,7 @@ static const char *approvalReply(int key) {
     return nullptr;
 }
 
-static fn drawApproval(int rows, int left, int columns) {
+static fn drawApproval(i32 rows, i32 left, i32 columns) {
     if (rows < TUI_MIN_ROWS || columns < TUI_MIN_COLUMNS)
         return;
     mvhline(rows - 2, left, ' ', columns - 1);
@@ -216,7 +216,7 @@ static bool openTurn(Tui *state, bool *open) {
 }
 
 /* Terminal must be restored first. Never transfer keys or copy auth files. */
-static int connectHost(const char *path, bool owo) {
+static i32 connectHost(const char *path, bool owo) {
     if (path == nullptr || *path == '\0') {
         THROW("connect requires the primeagen launcher; run ./primeagen tui");
         return 1;
@@ -233,17 +233,17 @@ static bool draw(Tui *state, bool owo, bool focused, bool sessionMode, bool busy
     return Primeagen_draw(state, owo, focused, sessionMode, busy, failed, row, styles, cap);
 }
 
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     bool owo = false;
     bool selectText = false;
     const char *sessionHost = nullptr;
     const char *updatePayload = nullptr, *updateChecksum = nullptr;
     bool connectRequested = false;
-    int panel = PRIMEAGEN_PANEL_PEOPLE, selection = 0;
-    int listWidth = PRIMEAGEN_LIST_WIDTH_DEFAULT;
+    i32 panel = PRIMEAGEN_PANEL_PEOPLE, selection = 0;
+    i32 listWidth = PRIMEAGEN_LIST_WIDTH_DEFAULT;
     bool treeVisible = true;
-    int readFd = -1, writeFd = -1;
-    for (int i = 1; i < argc; ++i) {
+    i32 readFd = -1, writeFd = -1;
+    for (i32 i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--owo") == 0)
             owo = true;
         else if (strcmp(argv[i], "--select-text") == 0)
@@ -256,25 +256,25 @@ int main(int argc, char **argv) {
             updateChecksum = argv[++i];
         else if (strcmp(argv[i], "--list-width") == 0 && i + 1 < argc) {
             char *end;
-            long value = strtol(argv[++i], &end, 10);
+            i64 value = strtol(argv[++i], &end, 10);
             if (*end || value < 12 || value > 4096) {
                 THROW("list width must be 12..4096 terminal cells");
                 return 1;
             }
-            listWidth = (int) value;
+            listWidth = (i32) value;
         }
         else if ((strcmp(argv[i], "--bridge-read") == 0 || strcmp(argv[i], "--bridge-write") == 0) && i + 1 < argc) {
             bool reading = strcmp(argv[i], "--bridge-read") == 0;
             char *end;
-            long value = strtol(argv[++i], &end, 10);
+            i64 value = strtol(argv[++i], &end, 10);
             if (*end || value < 3 || value > 65535) {
                 THROW("invalid host bridge descriptor");
                 return 1;
             }
             if (reading)
-                readFd = (int) value;
+                readFd = (i32) value;
             else
-                writeFd = (int) value;
+                writeFd = (i32) value;
         }
         else if (strcmp(argv[i], "--help") == 0) {
             puts("primeagen tui [--owo] [--list-width CELLS] [--select-text]: offline IDE-style workspace tree; Ctrl-B hides/restores explorer; Ctrl-T toggles native text selection; Ctrl-P Users, Ctrl-S Servers, Ctrl-G Chats, Ctrl-N Private, Ctrl-O OpenCode; /connect uses existing login; approvals use o/a/r; Ctrl-Q exits");
@@ -285,8 +285,8 @@ int main(int argc, char **argv) {
         }
     }
     bool sessionMode = readFd >= 0 && writeFd >= 0;
-    int readFlags = sessionMode ? fcntl(readFd, F_GETFL) : 0;
-    int writeFlags = sessionMode ? fcntl(writeFd, F_GETFL) : 0;
+    i32 readFlags = sessionMode ? fcntl(readFd, F_GETFL) : 0;
+    i32 writeFlags = sessionMode ? fcntl(writeFd, F_GETFL) : 0;
     if ((readFd >= 0) != (writeFd >= 0) || (sessionMode &&
         (readFd == writeFd || readFlags < 0 || writeFlags < 0 ||
          !(readFlags & O_NONBLOCK) || !(writeFlags & O_NONBLOCK)))) {
@@ -483,7 +483,7 @@ int main(int argc, char **argv) {
     bool workingShown = false;
     u32 shownApproval = 0;
     while (ok && !stopped) {
-        int completed = SessionBridge_poll(&bridge);
+        i32 completed = SessionBridge_poll(&bridge);
         if (workingShown) {
             (discard) Tui_popLast(&state); // always the trailing entry while shown
             workingShown = false;
@@ -549,18 +549,18 @@ int main(int argc, char **argv) {
             }
             char notice[192];
             snprintf(notice, sizeof(notice), updated ? "Updated running CLI: generation %llu -> %llu. Resumed." : "Update rejected; running generation %llu retained. Resumed.",
-                     (unsigned long long) before, (unsigned long long) Hot_getGeneration(hot));
+                     (u64) before, (u64) Hot_getGeneration(hot));
             ok = view != nullptr && localCommand != nullptr && panelsView != nullptr && treePanelsView != nullptr && Tui_add(&state, notice, strlen(notice));
             updateRequested = false;
             Tui_setDirty(&state, true);
         }
-        int rows, columns;
+        i32 rows, columns;
         getmaxyx(stdscr, rows, columns);
-        int chatLeft = selectText || !treeVisible ? 0 : Primeagen_chatLeft(columns, listWidth);
+        i32 chatLeft = selectText || !treeVisible ? 0 : Primeagen_chatLeft(columns, listWidth);
         if (chatLeft > 0)
             ++chatLeft; // an unruled breathing gap replaces the hard divider
-        int chatColumns = columns - chatLeft;
-        int oldRows, oldColumns;
+        i32 chatColumns = columns - chatLeft;
+        i32 oldRows, oldColumns;
         Tui_getSize(&state, &oldRows, &oldColumns);
         if (oldRows != rows || oldColumns != chatColumns) {
             ok = Tui_setSize(&state, rows, chatColumns);
@@ -591,7 +591,7 @@ int main(int argc, char **argv) {
             if (selectText) {
                 ok = view(&state, owo, focused, sessionMode, SessionBridge_isBusy(&bridge), sessionFailed, row, styles, capacity);
                 if (ok && rows >= TUI_MIN_ROWS && columns >= TUI_MIN_COLUMNS) {
-                    int caretY, caretX;
+                    i32 caretY, caretX;
                     getyx(stdscr, caretY, caretX);
                     mvhline(rows - 1, 0, ' ', columns - 1);
                     mvaddnstr(rows - 1, 0, "Select text: drag, then terminal Copy | Ctrl-T returns", columns - 1);
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
         if (!ok)
             break;
         bool liveSelected = panel == PRIMEAGEN_PANEL_PEOPLE && selection == 0;
-        int key = getch();
+        i32 key = getch();
         if (key == TUI_CTRL_Q)
             stopped = 1;
         else if (key == TUI_CTRL_T) {
@@ -676,7 +676,7 @@ int main(int argc, char **argv) {
             Tui_setDirty(&state, true);
         }
         else if (key == TUI_MOUSE_SGR || key == TUI_MOUSE_X10) {
-            int x, y;
+            i32 x, y;
             TuiMouseKind kind;
             if (!readMouse(key, &x, &y, &kind))
                 continue;
@@ -769,7 +769,7 @@ int main(int argc, char **argv) {
         else if (SessionBridge_isAwaiting(&bridge))
             continue; // scroll/navigation allowed, draft/submission stays frozen
         else if (focused && liveSelected && (key == '\n' || key == KEY_ENTER)) {
-            int action = localCommand(&state, sessionMode);
+            i32 action = localCommand(&state, sessionMode);
             if (action != 0) {
                 // The command may have appended or cleared output, so the live
                 // placeholder is no longer guaranteed to be the trailing entry.

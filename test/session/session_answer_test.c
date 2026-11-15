@@ -10,12 +10,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     assert(argc == 3);
     SessionBridge bridge = SessionBridge(atoi(argv[1]), atoi(argv[2]));
     SessionBridge_setOwo(&bridge, true);
     assert(SessionBridge_submit(&bridge, "What is 2 + 2? Reply with one short sentence containing the digit 4. Do not use tools or inspect any files."));
-    int result = 0;
+    i32 result = 0;
     while (!result) {
         result = SessionBridge_poll(&bridge);
         if (!result) {

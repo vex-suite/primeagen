@@ -4,10 +4,10 @@
 #include "vex.h"
 #include "tui/event/mouse_event.h"
 #include <assert.h>
-int main() {
+i32 main() {
     Tui state = Tui(1, 1);
     assert(Tui_setSize(&state, 10, 40));
-    for (int i = 0; i < 20; ++i)
+    for (i32 i = 0; i < 20; ++i)
         assert(Tui_add(&state, "line", 4));
     assert(TuiMouse_dispatch(&state, 2, 2, TUI_MOUSE_WHEEL_UP) == TUI_MOUSE_NONE);
     assert(Tui_getScroll(&state) == 1);

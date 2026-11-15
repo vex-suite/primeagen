@@ -7,12 +7,12 @@
 /* ============================================================================
  * MODULE: read tool (tools/read.c)
  * OWNED STATE: none. Root directory fd borrowed; successful bytes transferred.
- * FUNCTION REGISTRY: bool ToolRead_execute(int root,const char *path,bytes cap,
+ * FUNCTION REGISTRY: bool ToolRead_execute(i32 root,const char *path,bytes cap,
  *                                         char **dest,bytes *outLength)
  * CONTRACT: regular/single-link/no-symlink canonical relative path; bounded whole
  * file or loud rejection, never success with truncation. ToolFs owns validation
  * and descriptor cleanup; caller excludes writers and frees successful bytes.
  * ============================================================================ */
-bool ToolRead_execute(int root, const char *path, bytes cap, char **dest, bytes *outLength) {
+bool ToolRead_execute(i32 root, const char *path, bytes cap, char **dest, bytes *outLength) {
     return ToolFs_read(root, path, cap, dest, outLength);
 }

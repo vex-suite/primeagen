@@ -30,8 +30,8 @@ typedef struct Tui {
     bytes inputLength;
     bytes inputCapacity;
     bytes scroll;
-    int rows;
-    int columns;
+    i32 rows;
+    i32 columns;
     bool dirty;
 } Tui;
 
@@ -57,7 +57,7 @@ bool Tui_addStyled(Tui *self, const char *text, bytes length, u8 baseStyle, bool
 bool Tui_entriesReserve(Tui *self, bytes capacity);
 bool Tui_inputReserve(Tui *self, bytes capacity);
 bool Tui_setInput(Tui *self, const char *text, bytes length);
-bool Tui_inputAddChar(Tui *self, int character);
+bool Tui_inputAddChar(Tui *self, i32 character);
 bool Tui_inputBackspace(Tui *self);
 fn Tui_inputClear(Tui *self);
 fn Tui_clear(Tui *self);
@@ -67,10 +67,10 @@ fn Tui_clear(Tui *self);
 bool Tui_popLast(Tui *self);
 fn Tui_free(Tui *self);
 
-bool Tui_setSize(Tui *self, int rows, int columns);
-fn Tui_getSize(const Tui *self, int *outRows, int *outColumns);
+bool Tui_setSize(Tui *self, i32 rows, i32 columns);
+fn Tui_getSize(const Tui *self, i32 *outRows, i32 *outColumns);
 fn Tui_setScroll(Tui *self, bytes rowsFromBottom);
-fn Tui_scrollBy(Tui *self, int64_t delta);
+fn Tui_scrollBy(Tui *self, i64 delta);
 fn Tui_setDirty(Tui *self, bool dirty);
 
 bool Tui_isReady(const Tui *self);

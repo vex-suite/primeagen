@@ -24,6 +24,6 @@ const char *PrimeagenAppearance_name();
 
 // Draw the configured rule across `width` cells at (row, left) into `win`,
 // in one pass. False on a null window or a non-positive width.
-bool PrimeagenAppearance_drawRule(WINDOW *win, int row, int left, int width);
+bool PrimeagenAppearance_drawRule(WINDOW *win, i32 row, i32 left, i32 width);
 
 #endif

@@ -9,14 +9,14 @@
 /* ============================================================================
  * MODULE: edit tool (tools/edit.c)
  * OWNED STATE: local copied old/new file buffers, reclaimed before return.
- * FUNCTION REGISTRY: bool ToolEdit_execute(int root,const char *path,
+ * FUNCTION REGISTRY: bool ToolEdit_execute(i32 root,const char *path,
  *                          const char *oldText,const char *newText,bytes cap)
  * CONTRACT: root/arguments borrowed; canonical regular single-link file, no NUL
  * bytes; exactly one old match including overlapping matches. Missing/ambiguous/
  * overflow rejects unchanged. New bytes stage through ToolFs atomic replacement.
  * Allocation failure is loud. No concurrent editor/merge, undo or metadata parity.
  * ============================================================================ */
-bool ToolEdit_execute(int root, const char *path, const char *oldText, const char *newText, bytes cap) {
+bool ToolEdit_execute(i32 root, const char *path, const char *oldText, const char *newText, bytes cap) {
     if (oldText == nullptr || newText == nullptr || *oldText == '\0' || cap == 0 || cap > TOOL_BYTES_MAX) {
         THROW("edit: invalid replacement arguments");
         return false;

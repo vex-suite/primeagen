@@ -28,9 +28,9 @@ bool Primeagen_update(HotModule *hot, const char *payload, const char *checksum,
         *loaded = 0;
     if (hot == nullptr || payload == nullptr || checksum == nullptr)
         return false;
-    int fd = open(checksum, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
+    i32 fd = open(checksum, O_RDONLY | O_NOFOLLOW | O_NONBLOCK);
     struct stat info;
-    unsigned char text[66];
+    u8 text[66];
     bytes used = 0;
     bool ok = fd >= 0 && fstat(fd, &info) == 0 && S_ISREG(info.st_mode);
     while (ok && used < sizeof(text)) {
@@ -47,8 +47,8 @@ bool Primeagen_update(HotModule *hot, const char *payload, const char *checksum,
     ok = ok && (used == 64 || (used == 65 && text[64] == '\n'));
     HotSectionDigest digest = {.filename = "cli_view.dylib"};
     for (bytes i = 0; ok && i < 64; ++i) {
-        unsigned char c = text[i];
-        int value = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : -1;
+        u8 c = text[i];
+        i32 value = c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : -1;
         if (value < 0)
             ok = false;
         else if (i % 2 == 0)

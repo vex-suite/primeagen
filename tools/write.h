@@ -3,5 +3,5 @@
 
 #include "vex.h"
 #include "tools/fs.h"
-bool ToolWrite_execute(int root, const char *path, const char *text, bytes length);
+bool ToolWrite_execute(i32 root, const char *path, const char *text, bytes length);
 #endif

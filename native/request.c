@@ -56,7 +56,7 @@
 #define ENVELOPE_CAP 8192u
 
 /* Own a bounded transcript through the duration of request rendering. */
-int main(int argc, char **argv) {
+i32 main(i32 argc, char **argv) {
     if ((argc != 4 && argc != 5) || (argc == 5 && strcmp(argv[4], "--owo") != 0) || (strcmp(argv[1], "openai") != 0 && strcmp(argv[1], "anthropic") != 0)) {
         THROW("primeagen request: invalid arguments");
         return 1;
