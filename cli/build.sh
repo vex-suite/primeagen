@@ -23,7 +23,7 @@ trap 'rm -f "$stage" "$host_stage" "$root/.build/cli_view.sha256.new" "$root/.bu
     -mmacosx-version-min=14.0 -I"$root" -I"$vex" -I"$api" -I"$hot" -I"$det" -I"$rel" \
     "$root/cli/main.c" "$root/tui/tui.c" "$root/tui/markdown.c" "$root/tui/event/mouse_event.c" \
     "$root/cli/view.c" "$root/cli/appearance.c" "$root/cli/screen.c" "$root/cli/update.c" "$root/src/settings.c" \
-    $det_src "$vex/image/png.c" "$rel/nio/mem.c" "$rel/type/type.c" "$vex/atomic/spin.c" \
+    $det_src "$vex/image/png.c" "$rel/nio/mem.c" "$rel/type/type.c" "$rel/atomic/spin_lock.c" \
     "$hot/hot/hot.c" "$hot/hot/hot_trampoline.c" "$hot/hot/hot_retire.c" "$hot/hot/manifest.c" "$hot/hot/ledger.c" "$vex/security/crypto.c" \
     "$root/personality/owo.c" "$vex/net/json.c" \
     "$root/session/session_bridge.c" "$api/harness/harness.c" "$api/harness/engine_provider.c" \
@@ -33,7 +33,7 @@ stage=$(mktemp "$root/.build/cli_view.XXXXXX")
 "${CC:-clang}" -std=gnu23 -Wall -Wextra -Werror -mcpu=apple-m1 \
     -mmacosx-version-min=14.0 -I"$root" -I"$vex" -I"$hot" -I"$det" -I"$rel" -dynamiclib \
     "$root/cli/view.c" "$root/cli/appearance.c" "$root/cli/screen.c" "$root/tui/tui.c" "$root/tui/markdown.c" "$vex/net/json.c" \
-    $det_src "$rel/nio/mem.c" "$rel/type/type.c" "$vex/atomic/spin.c" \
+    $det_src "$rel/nio/mem.c" "$rel/type/type.c" "$rel/atomic/spin_lock.c" \
     -lncurses -o "$stage"
 shasum -a 256 "$stage" > "$root/.build/cli_view.sha256.raw"
 cut -d ' ' -f 1 "$root/.build/cli_view.sha256.raw" > "$root/.build/cli_view.sha256.new"

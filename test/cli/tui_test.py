@@ -61,7 +61,7 @@ class NativeTuiTest(unittest.TestCase):
                                 argv += [str(APP / "cli/appearance.c")]
                             argv += [str(DET / source) for source in DET_SOURCES]
                         argv += [str(APP / "tui/markdown.c")]
-                        argv += [str(REL / "nio/mem.c"), str(REL / "type/type.c"), str(VEX / "atomic/spin.c")]
+                        argv += [str(REL / "nio/mem.c"), str(REL / "type/type.c"), str(REL / "atomic/spin_lock.c")]
                         argv += [str(API / "harness/harness.c"), str(API / "harness/engine_provider.c")]
                         argv += [str(VEX / "net/json.c"), "-Wl,-dead_strip", "-lncurses", "-o", str(dest)]
                         if owner == "cli/main_test.c":

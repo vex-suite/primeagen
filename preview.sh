@@ -18,7 +18,7 @@ mkdir -p "$root/.build"
     -mmacosx-version-min=14.0 -I"$root" -I"$vex" -I"$hot" -I"$det" -I"$rel" \
     "$root/cli/preview.c" "$root/cli/screen.c" "$root/cli/appearance.c" \
     "$root/tui/tui.c" "$root/tui/markdown.c" "$vex/net/json.c" \
-    "$vex/image/png.c" "$rel/nio/mem.c" "$rel/type/type.c" "$vex/atomic/spin.c" \
+    "$vex/image/png.c" "$rel/nio/mem.c" "$rel/type/type.c" "$rel/atomic/spin_lock.c" \
     "$det/ui/surface/terminal_canvas.c" "$det/ui/panel/terminal_frame.c" \
     "$det/ui/image/terminal_image.c" "$det/ui/theme/terminal_appearance.c" \
     -lncurses -lz -o "$root/.build/preview"
