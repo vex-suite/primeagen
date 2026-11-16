@@ -55,46 +55,101 @@
  * ============================================================================
  */
 
+;;GETTER
+static inline u32 *PrimeagenScreen_cells(const PrimeagenScreen *self) { return (*self).cells; }
+;;SETTER
+static inline fn PrimeagenScreen_setCells(PrimeagenScreen *self, u32 *cells) { (*self).cells = cells; }
+;;GETTER
+static inline u16 *PrimeagenScreen_styles(const PrimeagenScreen *self) { return (*self).styles; }
+;;SETTER
+static inline fn PrimeagenScreen_setStyles(PrimeagenScreen *self, u16 *styles) { (*self).styles = styles; }
+;;GETTER
+static inline u32 *PrimeagenScreen_fg(const PrimeagenScreen *self) { return (*self).fg; }
+;;SETTER
+static inline fn PrimeagenScreen_setFg(PrimeagenScreen *self, u32 *fg) { (*self).fg = fg; }
+;;GETTER
+static inline u32 *PrimeagenScreen_bg(const PrimeagenScreen *self) { return (*self).bg; }
+;;SETTER
+static inline fn PrimeagenScreen_setBg(PrimeagenScreen *self, u32 *bg) { (*self).bg = bg; }
+;;GETTER
+static inline bytes PrimeagenScreen_rows(const PrimeagenScreen *self) { return (*self).rows; }
+;;SETTER
+static inline fn PrimeagenScreen_setRows(PrimeagenScreen *self, bytes rows) { (*self).rows = rows; }
+;;GETTER
+static inline bytes PrimeagenScreen_columns(const PrimeagenScreen *self) { return (*self).columns; }
+;;SETTER
+static inline fn PrimeagenScreen_setColumns(PrimeagenScreen *self, bytes columns) { (*self).columns = columns; }
+;;GETTER
+static inline bytes PrimeagenScreen_capacity(const PrimeagenScreen *self) { return (*self).capacity; }
+;;SETTER
+static inline fn PrimeagenScreen_setCapacity(PrimeagenScreen *self, bytes capacity) { (*self).capacity = capacity; }
+
+;;GETTER
+static inline u32 TerminalAppearance_colorAccent(const TerminalAppearance *self) { return (*self).colorAccent; }
+;;GETTER
+static inline u32 TerminalAppearance_colorMuted(const TerminalAppearance *self) { return (*self).colorMuted; }
+;;GETTER
+static inline u32 TerminalAppearance_colorText(const TerminalAppearance *self) { return (*self).colorText; }
+;;GETTER
+static inline u32 TerminalAppearance_colorError(const TerminalAppearance *self) { return (*self).colorError; }
+;;GETTER
+static inline const TerminalRule *TerminalAppearance_rule(const TerminalAppearance *self) { return &(*self).rule; }
+
+;;GETTER
+static inline Tui *PrimeagenScreenState_tui(const PrimeagenScreenState *self) { return (*self).tui; }
+;;GETTER
+static inline i32 PrimeagenScreenState_panel(const PrimeagenScreenState *self) { return (*self).panel; }
+;;GETTER
+static inline i32 PrimeagenScreenState_selection(const PrimeagenScreenState *self) { return (*self).selection; }
+;;GETTER
+static inline i32 PrimeagenScreenState_focusPanel(const PrimeagenScreenState *self) { return (*self).focusPanel; }
+;;GETTER
+static inline bool PrimeagenScreenState_failed(const PrimeagenScreenState *self) { return (*self).failed; }
+;;GETTER
+static inline bool PrimeagenScreenState_busy(const PrimeagenScreenState *self) { return (*self).busy; }
+;;GETTER
+static inline bool PrimeagenScreenState_sessionMode(const PrimeagenScreenState *self) { return (*self).sessionMode; }
+
 fn PrimeagenScreen_init(PrimeagenScreen *self) {
     if (self != nullptr)
         memset(self, 0, sizeof(*self));
 }
 
 bool PrimeagenScreen_isBound(const PrimeagenScreen *self) {
-    return self != nullptr && (*self).cells != nullptr && (*self).rows > 0 && (*self).columns > 0;
+    return self != nullptr && PrimeagenScreen_cells(self) != nullptr && PrimeagenScreen_rows(self) > 0 && PrimeagenScreen_columns(self) > 0;
 }
 
 bool PrimeagenScreen_bind(PrimeagenScreen *self, bytes rows, bytes columns) {
     if (self == nullptr || rows == 0 || columns == 0 || rows > SIZE_MAX / columns)
         return false;
     bytes want = rows * columns;
-    if (want > (*self).capacity) {
-        u32 *cells = (u32*) realloc((*self).cells, want * sizeof(u32));
+    if (want > PrimeagenScreen_capacity(self)) {
+        u32 *cells = (u32*) realloc(PrimeagenScreen_cells(self), want * sizeof(u32));
         if (cells == nullptr) return false;
-        (*self).cells = cells;
-        u16 *styles = (u16*) realloc((*self).styles, want);
+        PrimeagenScreen_setCells(self, cells);
+        u16 *styles = (u16*) realloc(PrimeagenScreen_styles(self), want);
         if (styles == nullptr) return false;
-        (*self).styles = styles;
-        u32 *fg = (u32*) realloc((*self).fg, want * sizeof(u32));
+        PrimeagenScreen_setStyles(self, styles);
+        u32 *fg = (u32*) realloc(PrimeagenScreen_fg(self), want * sizeof(u32));
         if (fg == nullptr) return false;
-        (*self).fg = fg;
-        u32 *bg = (u32*) realloc((*self).bg, want * sizeof(u32));
+        PrimeagenScreen_setFg(self, fg);
+        u32 *bg = (u32*) realloc(PrimeagenScreen_bg(self), want * sizeof(u32));
         if (bg == nullptr) return false;
-        (*self).bg = bg;
-        (*self).capacity = want;
+        PrimeagenScreen_setBg(self, bg);
+        PrimeagenScreen_setCapacity(self, want);
     }
-    (*self).rows = rows;
-    (*self).columns = columns;
+    PrimeagenScreen_setRows(self, rows);
+    PrimeagenScreen_setColumns(self, columns);
     return true;
 }
 
 fn PrimeagenScreen_free(PrimeagenScreen *self) {
     if (self == nullptr)
         return;
-    free((*self).cells);
-    free((*self).styles);
-    free((*self).fg);
-    free((*self).bg);
+    free(PrimeagenScreen_cells(self));
+    free(PrimeagenScreen_styles(self));
+    free(PrimeagenScreen_fg(self));
+    free(PrimeagenScreen_bg(self));
     memset(self, 0, sizeof(*self));
 }
 
@@ -171,8 +226,9 @@ TerminalCanvas PrimeagenScreen_canvas(PrimeagenScreen *self) {
         return TerminalCanvas_0();
     // All FOUR planes: the colour planes are what make a "colour change" (an
     // unfocused panel's selection) distinguishable from a highlight.
-    return TerminalCanvas_6((*self).cells, (*self).styles, (*self).fg, (*self).bg,
-                            (*self).columns, (*self).rows);
+    return TerminalCanvas_6(PrimeagenScreen_cells(self), PrimeagenScreen_styles(self),
+                            PrimeagenScreen_fg(self), PrimeagenScreen_bg(self),
+                            PrimeagenScreen_columns(self), PrimeagenScreen_rows(self));
 }
 
 PrimeagenScreenEvent PrimeagenScreen_classify(i32 key) {
@@ -198,25 +254,25 @@ bool PrimeagenScreen_revalidate(PrimeagenScreen *self, i32 rows, i32 columns) {
 
 // --- pens -------------------------------------------------------------------
 static TerminalPen lookAccent(const TerminalAppearance *look) {
-    return TerminalPen_2(TERMINAL_STYLE_ACCENT | TERMINAL_STYLE_BOLD, (*look).colorAccent);
+    return TerminalPen_2(TERMINAL_STYLE_ACCENT | TERMINAL_STYLE_BOLD, TerminalAppearance_colorAccent(look));
 }
 static TerminalPen lookMuted(const TerminalAppearance *look) {
-    return TerminalPen_2(TERMINAL_STYLE_MUTED, (*look).colorMuted);
+    return TerminalPen_2(TERMINAL_STYLE_MUTED, TerminalAppearance_colorMuted(look));
 }
 static TerminalPen lookText(const TerminalAppearance *look) {
-    return TerminalPen_2(TERMINAL_STYLE_NONE, (*look).colorText);
+    return TerminalPen_2(TERMINAL_STYLE_NONE, TerminalAppearance_colorText(look));
 }
 static TerminalPen lookRule(const TerminalAppearance *look) {
-    return TerminalPen_2(TERMINAL_STYLE_DIM, (*look).colorMuted);
+    return TerminalPen_2(TERMINAL_STYLE_DIM, TerminalAppearance_colorMuted(look));
 }
 static TerminalPen lookError(const TerminalAppearance *look) {
-    return TerminalPen_2(TERMINAL_STYLE_ERROR | TERMINAL_STYLE_BOLD, (*look).colorError);
+    return TerminalPen_2(TERMINAL_STYLE_ERROR | TERMINAL_STYLE_BOLD, TerminalAppearance_colorError(look));
 }
 // The focused panel HIGHLIGHTS its selection; an unfocused panel only recolours it.
 static TerminalPen selectionPen(const TerminalAppearance *look, bool focused) {
     if (focused)
-        return TerminalPen_2(TERMINAL_STYLE_REVERSE | TERMINAL_STYLE_ACCENT, (*look).colorAccent);
-    return TerminalPen_2(TERMINAL_STYLE_ACCENT, (*look).colorAccent);
+        return TerminalPen_2(TERMINAL_STYLE_REVERSE | TERMINAL_STYLE_ACCENT, TerminalAppearance_colorAccent(look));
+    return TerminalPen_2(TERMINAL_STYLE_ACCENT, TerminalAppearance_colorAccent(look));
 }
 
 static fn putText(TerminalCanvas *canvas, bytes lx, bytes ly, const char *text, TerminalPen pen) {
@@ -278,7 +334,7 @@ static fn renderTooSmall(TerminalCanvas *root, const TerminalAppearance *look) {
 // The frame's OWN box, with real corners, so the picture reads as a terminal
 // instrument set inside the window rather than content pressed against it.
 static fn drawBorder(TerminalCanvas *root, const TerminalAppearance *look) {
-    TerminalRule_drawBox(&(*look).rule, root, lookRule(look));
+    TerminalRule_drawBox(TerminalAppearance_rule(look), root, lookRule(look));
 }
 
 fn PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
@@ -309,12 +365,12 @@ fn PrimeagenScreen_renderHome(PrimeagenScreen *self, const char *title,
     TerminalCanvas rail = TerminalCanvas_sub(&inner, 0, 0, left, rows);
     TerminalCanvas panel = TerminalCanvas_sub(&inner, left + 1, 0, columns - left - 1, rows);
     putCentered(&rail, 0, title, lookAccent(look));
-    TerminalRule_drawCut(&(*look).rule, &rail, 1, 1, lookRule(look));
+    TerminalRule_drawCut(TerminalAppearance_rule(look), &rail, 1, 1, lookRule(look));
     bytes row = 3;
     for (bytes i = 0; i < menuCount && row + 2 < TerminalCanvas_getHeight(&rail); ++i, row += 2) {
         TerminalPen pen = (i == menuSelection) ? selectionPen(look, true) : lookText(look);
         putCentered(&rail, row, menu[i], pen);
-        TerminalRule_drawCut(&(*look).rule, &rail, row + 1, 1, lookRule(look));
+        TerminalRule_drawCut(TerminalAppearance_rule(look), &rail, row + 1, 1, lookRule(look));
     }
     TerminalCanvas_vline(&inner, left, '|', lookRule(look));
 
@@ -340,17 +396,20 @@ static fn navItems(i32 panel, const char *const **outItems, bytes *outCount) {
 }
 
 bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenState *state) {
-    if (!PrimeagenScreen_isBound(self) || state == nullptr || (*state).tui == nullptr)
+    Tui *tui = state ? PrimeagenScreenState_tui(state) : nullptr;
+    if (!PrimeagenScreen_isBound(self) || state == nullptr || tui == nullptr)
         return false;
     TerminalCanvas root = PrimeagenScreen_canvas(self);
     TerminalCanvas_fill(&root, ' ', TerminalPen_1(TERMINAL_STYLE_NONE));
     const TerminalAppearance *look = PrimeagenAppearance_current();
-    if ((*self).columns < PRIMEAGEN_SCREEN_MIN_COLUMNS || (*self).rows < PRIMEAGEN_SCREEN_MIN_ROWS) {
+    bytes screenCols = PrimeagenScreen_columns(self);
+    bytes screenRows = PrimeagenScreen_rows(self);
+    if (screenCols < PRIMEAGEN_SCREEN_MIN_COLUMNS || screenRows < PRIMEAGEN_SCREEN_MIN_ROWS) {
         renderTooSmall(&root, look);
         return true;
     }
     drawBorder(&root, look);
-    TerminalCanvas inner = TerminalCanvas_sub(&root, 1, 1, (*self).columns - 2, (*self).rows - 2);
+    TerminalCanvas inner = TerminalCanvas_sub(&root, 1, 1, screenCols - 2, screenRows - 2);
     if (!TerminalCanvas_isValid(&inner))
         return false;
 
@@ -364,16 +423,18 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
     // Left rail: the focused list. Selection highlights only when it owns focus.
     TerminalCanvas rail = TerminalCanvas_sub(&inner, 0, 0, left, rows);
     putCentered(&rail, 0, "Primeagen", lookAccent(look));
-    TerminalRule_drawCut(&(*look).rule, &rail, 1, 1, lookRule(look));
+    TerminalRule_drawCut(TerminalAppearance_rule(look), &rail, 1, 1, lookRule(look));
     putText(&rail, 0, 2, "[<-] Back", lookMuted(look));
     const char *const *items = nullptr;
     bytes itemCount = 0;
-    navItems((*state).panel, &items, &itemCount);
+    navItems(PrimeagenScreenState_panel(state), &items, &itemCount);
+    i32 selection = PrimeagenScreenState_selection(state);
+    i32 focusPanel = PrimeagenScreenState_focusPanel(state);
     for (bytes i = 0; i < itemCount && i + 4 < TerminalCanvas_getHeight(&rail); ++i) {
-        bool selected = (i32) i == (*state).selection;
-        TerminalPen pen = selected ? selectionPen(look, (*state).focusPanel == 0) : lookText(look);
+        bool selected = (i32) i == selection;
+        TerminalPen pen = selected ? selectionPen(look, focusPanel == 0) : lookText(look);
         if (selected)
-            putText(&rail, 0, i + 4, (*state).focusPanel == 0 ? "> " : "* ", pen);
+            putText(&rail, 0, i + 4, focusPanel == 0 ? "> " : "* ", pen);
         putText(&rail, 2, i + 4, items[i], pen);
     }
     if (TerminalCanvas_getHeight(&rail) > 0)
@@ -384,7 +445,7 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
     bytes centreWidth = right > 0 ? columns - left - right - 2 : columns - left - 1;
     TerminalCanvas centre = TerminalCanvas_sub(&inner, left + 1, 0, centreWidth, rows);
     putText(&centre, 1, 0, "Ecosystem > #general", lookText(look));
-    TerminalRule_drawCut(&(*look).rule, &centre, 1, 1, lookRule(look));
+    TerminalRule_drawCut(TerminalAppearance_rule(look), &centre, 1, 1, lookRule(look));
 
     bytes statusRow = rows > 0 ? rows - 1 : 0;
     bytes inputRow = rows > 1 ? rows - 2 : 0;
@@ -392,13 +453,13 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
     bytes chatHeight = sepInput > 2 ? sepInput - 2 : 0;
     TerminalCanvas chat = TerminalCanvas_sub(&centre, 0, 2, centreWidth, chatHeight);
     if (TerminalCanvas_isValid(&chat)) {
-        bytes first = Tui_getFirstVisibleRow((*state).tui);
-        bytes total = Tui_getVisualRowCount((*state).tui);
+        bytes first = Tui_getFirstVisibleRow(tui);
+        bytes total = Tui_getVisualRowCount(tui);
         bytes height = TerminalCanvas_getHeight(&chat);
         char line[512];
         u8 styles[512];
         for (bytes i = 0; i < height && first + i < total; ++i) {
-            if (!Tui_copyStyledRow((*state).tui, first + i, line, styles, sizeof line, nullptr))
+            if (!Tui_copyStyledRow(tui, first + i, line, styles, sizeof line, nullptr))
                 break;
             TerminalPen pen = lookText(look);
             if (styles[0] & TEXT_STYLE_USER) pen.style |= TERMINAL_STYLE_BOLD;
@@ -407,12 +468,12 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
             putText(&chat, 0, i, line, pen);
         }
     }
-    TerminalRule_drawCut(&(*look).rule, &centre, sepInput, 1, lookRule(look));
+    TerminalRule_drawCut(TerminalAppearance_rule(look), &centre, sepInput, 1, lookRule(look));
     putText(&centre, 0, inputRow, "> ", lookAccent(look));
-    putText(&centre, 2, inputRow, Tui_getInput((*state).tui), lookText(look));
-    const char *status = (*state).failed ? "session closed | Ctrl-Q and relaunch"
-                       : (*state).busy ? "working | Ctrl-Q cancels locally"
-                       : (*state).sessionMode ? "OpenCode chat | inspect auto | edit/shell ask"
+    putText(&centre, 2, inputRow, Tui_getInput(tui), lookText(look));
+    const char *status = PrimeagenScreenState_failed(state) ? "session closed | Ctrl-Q and relaunch"
+                       : PrimeagenScreenState_busy(state) ? "working | Ctrl-Q cancels locally"
+                       : PrimeagenScreenState_sessionMode(state) ? "OpenCode chat | inspect auto | edit/shell ask"
                        : "disconnected | /connect uses your login";
     putText(&centre, 0, statusRow, status, lookMuted(look));
 
@@ -421,10 +482,10 @@ bool PrimeagenScreen_renderChat(PrimeagenScreen *self, const PrimeagenScreenStat
         TerminalCanvas people = TerminalCanvas_sub(&inner, columns - right, 0, right, rows);
         TerminalCanvas_vline(&inner, columns - right - 1, '|', lookRule(look));
         putCentered(&people, 0, "Users", lookText(look));
-        TerminalRule_drawCut(&(*look).rule, &people, 1, 1, lookRule(look));
+        TerminalRule_drawCut(TerminalAppearance_rule(look), &people, 1, 1, lookRule(look));
         for (bytes i = 0; i < itemCount && i + 2 < TerminalCanvas_getHeight(&people); ++i) {
-            bool selected = (i32) i == (*state).selection;
-            TerminalPen pen = selected ? selectionPen(look, (*state).focusPanel == 2) : lookMuted(look);
+            bool selected = (i32) i == selection;
+            TerminalPen pen = selected ? selectionPen(look, focusPanel == 2) : lookMuted(look);
             putText(&people, 1, i + 2, items[i], pen);
         }
     }
@@ -469,20 +530,25 @@ static i16 pairFor(u32 rgb) {
 bool PrimeagenScreen_present(const PrimeagenScreen *self, WINDOW *win) {
     if (!PrimeagenScreen_isBound(self) || win == nullptr)
         return false;
-    for (bytes y = 0; y < (*self).rows; ++y) {
-        for (bytes x = 0; x < (*self).columns; ++x) {
-            bytes index = y * (*self).columns + x;
-            u32 cp = (*self).cells[index];
+    bytes rows = PrimeagenScreen_rows(self);
+    bytes columns = PrimeagenScreen_columns(self);
+    const u32 *cells = PrimeagenScreen_cells(self);
+    const u16 *styles = PrimeagenScreen_styles(self);
+    const u32 *fg = PrimeagenScreen_fg(self);
+    for (bytes y = 0; y < rows; ++y) {
+        for (bytes x = 0; x < columns; ++x) {
+            bytes index = y * columns + x;
+            u32 cp = cells[index];
             if (cp == 0)
                 continue;
-            u16 style = (*self).styles[index];
+            u16 style = styles[index];
             attr_t attr = A_NORMAL;
             if (style & TERMINAL_STYLE_DIM) attr |= A_DIM;
             if (style & TERMINAL_STYLE_BOLD) attr |= A_BOLD;
             if (style & TERMINAL_STYLE_REVERSE) attr |= A_REVERSE;
             if (style & TERMINAL_STYLE_MUTED) attr |= A_DIM;
             if (style & TERMINAL_STYLE_ACCENT) attr |= A_BOLD;
-            i16 pair = pairFor((*self).fg[index]);
+            i16 pair = pairFor(fg[index]);
             wchar_t text[2] = { (wchar_t) cp, L'\0' };
             cchar_t glyph;
             if (setcchar(&glyph, text, attr, pair, nullptr) != OK)

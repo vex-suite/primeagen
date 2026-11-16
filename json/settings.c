@@ -77,12 +77,20 @@ Settings Settings_0() {
     return settings;
 }
 
+;;GETTER
+static inline char *Settings_appearanceMut(Settings *self) { return (*self).appearance; }
+;;GETTER
+static inline char *Settings_providerMut(Settings *self) { return (*self).provider; }
+;;GETTER
+static inline char *Settings_modelMut(Settings *self) { return (*self).model; }
+
 bool Settings_setAppearance(Settings *self, const char *value) {
     if (self == nullptr)
         return false;
-    return copyBounded((*self).appearance, SETTINGS_APPEARANCE_MAX, value);
+    return copyBounded(Settings_appearanceMut(self), SETTINGS_APPEARANCE_MAX, value);
 }
 
+;;GETTER
 const char *Settings_getAppearance(const Settings *self) {
     return (self && (*self).appearance[0] != '\0') ? (*self).appearance : SETTINGS_APPEARANCE_DEFAULT;
 }
@@ -90,13 +98,13 @@ const char *Settings_getAppearance(const Settings *self) {
 bool Settings_setProvider(Settings *self, const char *value) {
     if (self == nullptr)
         return false;
-    return copyBounded((*self).provider, SETTINGS_PROVIDER_MAX, value);
+    return copyBounded(Settings_providerMut(self), SETTINGS_PROVIDER_MAX, value);
 }
 
 bool Settings_setModel(Settings *self, const char *value) {
     if (self == nullptr)
         return false;
-    return copyBounded((*self).model, SETTINGS_MODEL_MAX, value);
+    return copyBounded(Settings_modelMut(self), SETTINGS_MODEL_MAX, value);
 }
 
 fn Settings_setOwo(Settings *self, bool value) {
@@ -111,18 +119,22 @@ bool Settings_setConsent(Settings *self, u32 value) {
     return true;
 }
 
+;;GETTER
 const char *Settings_getProvider(const Settings *self) {
     return self == nullptr ? "" : (*self).provider;
 }
 
+;;GETTER
 const char *Settings_getModel(const Settings *self) {
     return self == nullptr ? "" : (*self).model;
 }
 
+;;GETTER
 bool Settings_isOwo(const Settings *self) {
     return self != nullptr && (*self).owo;
 }
 
+;;GETTER
 u32 Settings_getConsent(const Settings *self) {
     return self == nullptr ? SETTINGS_CONSENT_PROMPT : (*self).consent;
 }
@@ -258,8 +270,8 @@ bool Settings_save(const Settings *self, const char *path) {
     }
     char body[SETTINGS_BYTES_MAX];
     i32 length = snprintf(body, sizeof body, "provider=%s\nmodel=%s\nowo=%d\nconsent=%s\nappearance=%s\n",
-                          (*self).provider, (*self).model, (*self).owo ? 1 : 0,
-                          (*self).consent == SETTINGS_CONSENT_DENY ? "deny" : "prompt",
+                          Settings_getProvider(self), Settings_getModel(self), Settings_isOwo(self) ? 1 : 0,
+                          Settings_getConsent(self) == SETTINGS_CONSENT_DENY ? "deny" : "prompt",
                           Settings_getAppearance(self));
     if (length <= 0 || (bytes) length >= sizeof body) {
         close(descriptor);

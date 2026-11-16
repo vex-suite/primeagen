@@ -33,6 +33,9 @@ static i32 compare(const_any left, const_any right) {
     return strcmp(a, b);
 }
 
+;;GETTER
+static inline const char *dirent_d_name(const struct dirent *entry) { return (*entry).d_name; }
+
 bool ToolList_execute(i32 root, const char *path, bytes cap, char **dest, bytes *outLength) {
     if (root < 0 || path == nullptr || dest == nullptr || outLength == nullptr || cap < 2 || cap > TOOL_BYTES_MAX) {
         THROW("list: invalid arguments or capacity");
@@ -66,7 +69,7 @@ bool ToolList_execute(i32 root, const char *path, bytes cap, char **dest, bytes 
             ok = errno == 0;
             break;
         }
-        const char *name = (*entry).d_name;
+        const char *name = dirent_d_name(entry);
         if (strcmp(name, ".") == 0 || strcmp(name, "..") == 0)
             continue;
         bytes length = strlen(name);

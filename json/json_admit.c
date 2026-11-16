@@ -76,37 +76,53 @@ bool JsonAdmit_depthOk(const char *text) {
     return depth == 0;
 }
 
+;;GETTER
+static inline JsonNode *JsonDoc_nodes(const JsonDoc *self) { return (*self).nodes; }
+;;GETTER
+static inline bool JsonDoc_ok(const JsonDoc *self) { return (*self).ok; }
+;;GETTER
+static inline u32 JsonDoc_nodeCount(const JsonDoc *self) { return (*self).nodeCount; }
+;;GETTER
+static inline JsonRef JsonNode_child(const JsonNode *self) { return (*self).child; }
+;;GETTER
+static inline JsonRef JsonNode_next(const JsonNode *self) { return (*self).next; }
+;;GETTER
+static inline JsonType JsonNode_type(const JsonNode *self) { return (*self).type; }
+
 /** One object's member list must not repeat a key. Iterative over child/next. */
 static bool memberKeysUnique(const JsonDoc *doc, JsonRef objectRef) {
-    JsonNode *object = &(*doc).nodes[objectRef];
-    for (JsonRef a = (*object).child; a >= 0; ) {
-        JsonNode *nodeA = &(*doc).nodes[a];
+    JsonNode *nodes = JsonDoc_nodes(doc);
+    JsonNode *object = &nodes[objectRef];
+    for (JsonRef a = JsonNode_child(object); a >= 0; ) {
+        JsonNode *nodeA = &nodes[a];
         u32 aLen = 0;
         const char *aKey = Json_key(doc, a, &aLen);
         if (aKey == nullptr)
             return false;
-        for (JsonRef b = (*nodeA).next; b >= 0; ) {
-            JsonNode *nodeB = &(*doc).nodes[b];
+        for (JsonRef b = JsonNode_next(nodeA); b >= 0; ) {
+            JsonNode *nodeB = &nodes[b];
             u32 bLen = 0;
             const char *bKey = Json_key(doc, b, &bLen);
             if (bKey == nullptr)
                 return false;
             if (aLen == bLen && memcmp(aKey, bKey, aLen) == 0)
                 return false;
-            b = (*nodeB).next;
+            b = JsonNode_next(nodeB);
         }
-        a = (*nodeA).next;
+        a = JsonNode_next(nodeA);
     }
     return true;
 }
 
 /** Iterative over the whole node pool: no object may carry a duplicate key. */
 bool JsonAdmit_noDuplicateKeys(const JsonDoc *doc) {
-    if (doc == nullptr || !(*doc).ok)
+    if (doc == nullptr || !JsonDoc_ok(doc))
         return false;
-    for (u32 i = 0; i < (*doc).nodeCount; ++i) {
-        JsonNode *node = &(*doc).nodes[i];
-        if ((*node).type != JSON_OBJECT)
+    JsonNode *nodes = JsonDoc_nodes(doc);
+    u32 count = JsonDoc_nodeCount(doc);
+    for (u32 i = 0; i < count; ++i) {
+        JsonNode *node = &nodes[i];
+        if (JsonNode_type(node) != JSON_OBJECT)
             continue;
         if (!memberKeysUnique(doc, (JsonRef) i))
             return false;

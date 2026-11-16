@@ -136,6 +136,46 @@
 
 ;;INTENTION("derived count/capacity/backing/inputLength change only through admitted operations; raw setters would forge ownership per the Conflict Triage Law + Single Class Per File Law (Java Law)")
 
+;;GETTER
+static inline TuiEntry *Tui_entries(const Tui *self) { return (*self).entries; }
+;;SETTER
+static inline fn Tui_setEntries(Tui *self, TuiEntry *entries) { (*self).entries = entries; }
+;;SETTER
+static inline fn Tui_setCount(Tui *self, bytes count) { (*self).count = count; }
+;;SETTER
+static inline fn Tui_setCapacity(Tui *self, bytes capacity) { (*self).capacity = capacity; }
+;;GETTER
+static inline char *Tui_inputMut(Tui *self) { return (*self).input; }
+;;SETTER
+static inline fn Tui_setInputPtr(Tui *self, char *input) { (*self).input = input; }
+;;SETTER
+static inline fn Tui_setInputLength(Tui *self, bytes inputLength) { (*self).inputLength = inputLength; }
+;;SETTER
+static inline fn Tui_setInputCapacity(Tui *self, bytes inputCapacity) { (*self).inputCapacity = inputCapacity; }
+;;SETTER
+static inline fn Tui_setScrollRaw(Tui *self, bytes scroll) { (*self).scroll = scroll; }
+;;GETTER
+static inline i32 Tui_rows(const Tui *self) { return (*self).rows; }
+;;SETTER
+static inline fn Tui_setRows(Tui *self, i32 rows) { (*self).rows = rows; }
+;;GETTER
+static inline i32 Tui_columns(const Tui *self) { return (*self).columns; }
+;;SETTER
+static inline fn Tui_setColumns(Tui *self, i32 columns) { (*self).columns = columns; }
+
+;;GETTER
+static inline char *TuiEntry_text(const TuiEntry *self) { return (*self).text; }
+;;SETTER
+static inline fn TuiEntry_setText(TuiEntry *self, char *text) { (*self).text = text; }
+;;GETTER
+static inline u8 *TuiEntry_styles(const TuiEntry *self) { return (*self).styles; }
+;;SETTER
+static inline fn TuiEntry_setStyles(TuiEntry *self, u8 *styles) { (*self).styles = styles; }
+;;GETTER
+static inline bytes TuiEntry_length(const TuiEntry *self) { return (*self).length; }
+;;SETTER
+static inline fn TuiEntry_setLength(TuiEntry *self, bytes length) { (*self).length = length; }
+
 /* Report one cold rejection; no error text is supplied by model output here. */
 static bool reject(const char *reason) {
     THROW("tui: %s", reason);
@@ -191,16 +231,17 @@ Tui Tui_1(bytes inputCapacity) {
 bool Tui_entriesReserve(Tui *self, bytes capacity) {
     if (!Tui_isReady(self))
         return reject("unready entry owner");
-    if (capacity <= (*self).capacity)
+    bytes curCap = Tui_getCapacity(self);
+    if (capacity <= curCap)
         return true;
     bytes next;
-    if (!growth((*self).capacity, capacity, sizeof(TuiEntry), &next))
+    if (!growth(curCap, capacity, sizeof(TuiEntry), &next))
         return false;
-    TuiEntry *entries = realloc((*self).entries, next * sizeof(TuiEntry));
+    TuiEntry *entries = realloc(Tui_entries(self), next * sizeof(TuiEntry));
     if (entries == nullptr)
         return reject("entry growth allocation failed");
-    (*self).entries = entries;
-    (*self).capacity = next;
+    Tui_setEntries(self, entries);
+    Tui_setCapacity(self, next);
     return true;
 }
 
@@ -208,16 +249,17 @@ bool Tui_entriesReserve(Tui *self, bytes capacity) {
 bool Tui_inputReserve(Tui *self, bytes capacity) {
     if (!Tui_isReady(self))
         return reject("unready input owner");
-    if (capacity <= (*self).inputCapacity)
+    bytes curCap = Tui_getInputCapacity(self);
+    if (capacity <= curCap)
         return true;
     bytes next;
-    if (!growth((*self).inputCapacity, capacity, sizeof(char), &next))
+    if (!growth(curCap, capacity, sizeof(char), &next))
         return false;
-    char *input = realloc((*self).input, next);
+    char *input = realloc(Tui_inputMut(self), next);
     if (input == nullptr)
         return reject("input growth allocation failed");
-    (*self).input = input;
-    (*self).inputCapacity = next;
+    Tui_setInputPtr(self, input);
+    Tui_setInputCapacity(self, next);
     return true;
 }
 
@@ -229,7 +271,7 @@ bool Tui_add(Tui *self, const char *text, bytes length) {
 bool Tui_addStyled(Tui *self, const char *text, bytes length, u8 baseStyle, bool markdown) {
     if (baseStyle & ~TEXT_STYLE_MASK)
         return reject("invalid display style");
-    if (!Tui_isReady(self) || text == nullptr || length > (bytes) PTRDIFF_MAX / 4 - 1 || (*self).count == SIZE_MAX)
+    if (!Tui_isReady(self) || text == nullptr || length > (bytes) PTRDIFF_MAX / 4 - 1 || Tui_getCount(self) == SIZE_MAX)
         return reject("invalid transcript span");
     bytes previousRows = Tui_getVisualRowCount(self);
     char *copy = malloc(length * 4 + 1);
@@ -278,22 +320,24 @@ bool Tui_addStyled(Tui *self, const char *text, bytes length, u8 baseStyle, bool
     } else
         memset(styles, baseStyle, used);
     styles[used] = 0;
-    if (!Tui_entriesReserve(self, (*self).count + 1)) {
+    bytes count = Tui_getCount(self);
+    if (!Tui_entriesReserve(self, count + 1)) {
         free(copy);
         free(styles);
         return false;
     }
-    TuiEntry *entry = &(*self).entries[(*self).count];
-    (*entry).text = copy;
-    (*entry).styles = styles;
-    (*entry).length = used;
-    ++(*self).count;
-    if ((*self).scroll != 0) {
+    TuiEntry *entry = &Tui_entries(self)[count];
+    TuiEntry_setText(entry, copy);
+    TuiEntry_setStyles(entry, styles);
+    TuiEntry_setLength(entry, used);
+    Tui_setCount(self, count + 1);
+    bytes scroll = Tui_getScroll(self);
+    if (scroll != 0) {
         bytes added = Tui_getVisualRowCount(self) - previousRows;
-        (*self).scroll = added > SIZE_MAX - (*self).scroll ? SIZE_MAX : (*self).scroll + added;
+        scroll = added > SIZE_MAX - scroll ? SIZE_MAX : scroll + added;
     }
-    Tui_setScroll(self, (*self).scroll);
-    (*self).dirty = true;
+    Tui_setScroll(self, scroll);
+    Tui_setDirty(self, true);
     return true;
 }
 
@@ -313,55 +357,62 @@ bool Tui_setInput(Tui *self, const char *text, bytes length) {
         free(copy);
         return false;
     }
-    memcpy((*self).input, copy, length + 1);
+    memcpy(Tui_inputMut(self), copy, length + 1);
     free(copy);
-    (*self).inputLength = length;
-    (*self).dirty = true;
+    Tui_setInputLength(self, length);
+    Tui_setDirty(self, true);
     return true;
 }
 
 bool Tui_inputAddChar(Tui *self, i32 character) {
-    if (!Tui_isReady(self) || character < ' ' || character > '~' || (*self).inputLength >= PTRDIFF_MAX - 1)
+    bytes inputLen = Tui_getInputLength(self);
+    if (!Tui_isReady(self) || character < ' ' || character > '~' || inputLen >= PTRDIFF_MAX - 1)
         return reject("invalid input character");
-    if (!Tui_inputReserve(self, (*self).inputLength + 2))
+    if (!Tui_inputReserve(self, inputLen + 2))
         return false;
-    (*self).input[(*self).inputLength++] = (char) character;
-    (*self).input[(*self).inputLength] = '\0';
-    (*self).dirty = true;
+    char *input = Tui_inputMut(self);
+    input[inputLen++] = (char) character;
+    input[inputLen] = '\0';
+    Tui_setInputLength(self, inputLen);
+    Tui_setDirty(self, true);
     return true;
 }
 
 bool Tui_inputBackspace(Tui *self) {
     if (!Tui_isReady(self))
         return reject("unready input owner");
-    if ((*self).inputLength == 0)
+    bytes inputLen = Tui_getInputLength(self);
+    if (inputLen == 0)
         return false;
-    (*self).input[--(*self).inputLength] = '\0';
-    (*self).dirty = true;
+    Tui_inputMut(self)[--inputLen] = '\0';
+    Tui_setInputLength(self, inputLen);
+    Tui_setDirty(self, true);
     return true;
 }
 
 fn Tui_inputClear(Tui *self) {
-    if (self == nullptr || (*self).input == nullptr)
+    if (self == nullptr || Tui_inputMut(self) == nullptr)
         return;
-    (*self).input[0] = '\0';
-    (*self).inputLength = 0;
-    (*self).dirty = true;
+    Tui_inputMut(self)[0] = '\0';
+    Tui_setInputLength(self, 0);
+    Tui_setDirty(self, true);
 }
 
 /* Reclaim copied entries, retain growable backing, and return to tail following. */
 fn Tui_clear(Tui *self) {
     if (self == nullptr)
         return;
-    for (bytes i = 0; i < (*self).count; ++i) {
-        TuiEntry *entry = &(*self).entries[i];
-        free((*entry).text);
-        free((*entry).styles);
+    bytes count = Tui_getCount(self);
+    TuiEntry *entries = Tui_entries(self);
+    for (bytes i = 0; i < count; ++i) {
+        TuiEntry *entry = &entries[i];
+        free(TuiEntry_text(entry));
+        free(TuiEntry_styles(entry));
         *entry = (TuiEntry) {0};
     }
-    (*self).count = 0;
-    (*self).scroll = 0;
-    (*self).dirty = true;
+    Tui_setCount(self, 0);
+    Tui_setScrollRaw(self, 0);
+    Tui_setDirty(self, true);
 }
 
 /* Drop only the newest entry: the caller owns the "it was the trailing one"
@@ -369,15 +420,16 @@ fn Tui_clear(Tui *self) {
 bool Tui_popLast(Tui *self) {
     if (!Tui_isReady(self))
         return reject("unready transcript owner");
-    if ((*self).count == 0)
+    bytes count = Tui_getCount(self);
+    if (count == 0)
         return false;
-    TuiEntry *entry = &(*self).entries[(*self).count - 1];
-    free((*entry).text);
-    free((*entry).styles);
+    TuiEntry *entry = &Tui_entries(self)[count - 1];
+    free(TuiEntry_text(entry));
+    free(TuiEntry_styles(entry));
     *entry = (TuiEntry) {0};
-    --(*self).count;
-    Tui_setScroll(self, (*self).scroll);
-    (*self).dirty = true;
+    Tui_setCount(self, count - 1);
+    Tui_setScroll(self, Tui_getScroll(self));
+    Tui_setDirty(self, true);
     return true;
 }
 
@@ -385,26 +437,26 @@ fn Tui_free(Tui *self) {
     if (self == nullptr)
         return;
     Tui_clear(self);
-    free((*self).entries);
-    free((*self).input);
+    free(Tui_entries(self));
+    free(Tui_inputMut(self));
     *self = (Tui) {0};
 }
 
 bool Tui_setSize(Tui *self, i32 rows, i32 columns) {
     if (self == nullptr || rows < 0 || columns < 0)
         return reject("invalid terminal geometry");
-    (*self).rows = rows;
-    (*self).columns = columns;
-    Tui_setScroll(self, (*self).scroll);
-    (*self).dirty = true;
+    Tui_setRows(self, rows);
+    Tui_setColumns(self, columns);
+    Tui_setScroll(self, Tui_getScroll(self));
+    Tui_setDirty(self, true);
     return true;
 }
 
 fn Tui_getSize(const Tui *self, i32 *outRows, i32 *outColumns) {
     if (outRows != nullptr)
-        *outRows = self == nullptr ? 0 : (*self).rows;
+        *outRows = self == nullptr ? 0 : Tui_rows(self);
     if (outColumns != nullptr)
-        *outColumns = self == nullptr ? 0 : (*self).columns;
+        *outColumns = self == nullptr ? 0 : Tui_columns(self);
 }
 
 /* Scroll is clamped to actual current wrapped content, not transcript entries. */
@@ -414,14 +466,14 @@ fn Tui_setScroll(Tui *self, bytes rowsFromBottom) {
     bytes total = Tui_getVisualRowCount(self);
     bytes height = Tui_getViewportHeight(self);
     bytes maximum = total > height ? total - height : 0;
-    (*self).scroll = rowsFromBottom < maximum ? rowsFromBottom : maximum;
-    (*self).dirty = true;
+    Tui_setScrollRaw(self, rowsFromBottom < maximum ? rowsFromBottom : maximum);
+    Tui_setDirty(self, true);
 }
 
 fn Tui_scrollBy(Tui *self, i64 delta) {
     if (self == nullptr)
         return;
-    bytes current = (*self).scroll;
+    bytes current = Tui_getScroll(self);
     if (delta >= 0) {
         u64 magnitude = (u64) delta;
         bytes next = magnitude > SIZE_MAX - current ? SIZE_MAX : current + (bytes) magnitude;
@@ -432,30 +484,40 @@ fn Tui_scrollBy(Tui *self, i64 delta) {
     }
 }
 
+;;SETTER
 fn Tui_setDirty(Tui *self, bool dirty) {
     if (self != nullptr)
         (*self).dirty = dirty;
 }
 
-bool Tui_isReady(const Tui *self) { return self != nullptr && (*self).input != nullptr && (*self).entries != nullptr; }
+bool Tui_isReady(const Tui *self) { return self != nullptr && Tui_getInput(self) != nullptr && Tui_entries(self) != nullptr; }
+;;GETTER
 bool Tui_isDirty(const Tui *self) { return self != nullptr && (*self).dirty; }
+;;GETTER
 bytes Tui_getCount(const Tui *self) { return self == nullptr ? 0 : (*self).count; }
+;;GETTER
 bytes Tui_getCapacity(const Tui *self) { return self == nullptr ? 0 : (*self).capacity; }
+;;GETTER
 const char *Tui_getInput(const Tui *self) { return self == nullptr ? nullptr : (*self).input; }
+;;GETTER
 bytes Tui_getInputLength(const Tui *self) { return self == nullptr ? 0 : (*self).inputLength; }
+;;GETTER
 bytes Tui_getInputCapacity(const Tui *self) { return self == nullptr ? 0 : (*self).inputCapacity; }
+;;GETTER
 bytes Tui_getScroll(const Tui *self) { return self == nullptr ? 0 : (*self).scroll; }
-bytes Tui_getViewportHeight(const Tui *self) { return self == nullptr || (*self).rows < TUI_MIN_ROWS ? 0 : (bytes) ((*self).rows - TUI_CHROME_ROWS); }
-bytes Tui_getViewportWidth(const Tui *self) { return self == nullptr || (*self).columns < TUI_MIN_COLUMNS ? 0 : (bytes) ((*self).columns - 2); }
+bytes Tui_getViewportHeight(const Tui *self) { return self == nullptr || Tui_rows(self) < TUI_MIN_ROWS ? 0 : (bytes) (Tui_rows(self) - TUI_CHROME_ROWS); }
+bytes Tui_getViewportWidth(const Tui *self) { return self == nullptr || Tui_columns(self) < TUI_MIN_COLUMNS ? 0 : (bytes) (Tui_columns(self) - 2); }
 
 bytes Tui_getRowCapacity(const Tui *self) {
     bytes capacity = 1;
     if (self == nullptr)
         return capacity;
-    for (bytes i = 0; i < (*self).count; ++i) {
-        const TuiEntry *entry = &(*self).entries[i];
-        if ((*entry).length + 1 > capacity)
-            capacity = (*entry).length + 1;
+    bytes count = Tui_getCount(self);
+    const TuiEntry *entries = Tui_entries(self);
+    for (bytes i = 0; i < count; ++i) {
+        bytes len = TuiEntry_length(&entries[i]);
+        if (len + 1 > capacity)
+            capacity = len + 1;
     }
     return capacity;
 }
@@ -482,17 +544,21 @@ bytes Tui_getVisualRowCount(const Tui *self) {
     if (self == nullptr || width == 0)
         return 0;
     bytes total = 0;
-    for (bytes i = 0; i < (*self).count; ++i) {
-        const TuiEntry *entry = &(*self).entries[i];
+    bytes count = Tui_getCount(self);
+    const TuiEntry *entries = Tui_entries(self);
+    for (bytes i = 0; i < count; ++i) {
+        const TuiEntry *entry = &entries[i];
+        const char *text = TuiEntry_text(entry);
+        bytes len = TuiEntry_length(entry);
         bytes start = 0;
-        for (bytes at = 0; at <= (*entry).length; ++at)
-            if (at == (*entry).length || (*entry).text[at] == '\n') {
+        for (bytes at = 0; at <= len; ++at)
+            if (at == len || text[at] == '\n') {
                 bytes next = start;
                 do {
                     if (total == SIZE_MAX)
                         return SIZE_MAX;
                     ++total;
-                    next = rowEnd((*entry).text, next, at, width);
+                    next = rowEnd(text, next, at, width);
                 } while (next < at);
                 start = at + 1;
             }
@@ -506,7 +572,8 @@ bytes Tui_getFirstVisibleRow(const Tui *self) {
     if (self == nullptr || total <= height)
         return 0;
     bytes bottom = total - height;
-    return (*self).scroll > bottom ? 0 : bottom - (*self).scroll;
+    bytes scroll = Tui_getScroll(self);
+    return scroll > bottom ? 0 : bottom - scroll;
 }
 
 /* Copy one full visual row or flag the partial buffer; absence leaves empty text. */
@@ -528,35 +595,40 @@ bool Tui_copyStyledRow(const Tui *self, bytes rowIndex, char *dest, u8 *styles, 
     bytes width = Tui_getViewportWidth(self);
     if (self == nullptr || width == 0)
         return reject("row unavailable");
-    for (bytes i = 0; i < (*self).count; ++i) {
-        const TuiEntry *entry = &(*self).entries[i];
+    bytes count = Tui_getCount(self);
+    const TuiEntry *entries = Tui_entries(self);
+    for (bytes i = 0; i < count; ++i) {
+        const TuiEntry *entry = &entries[i];
+        const char *text = TuiEntry_text(entry);
+        const u8 *entryStyles = TuiEntry_styles(entry);
+        bytes len = TuiEntry_length(entry);
         bytes start = 0;
-        for (bytes at = 0; at <= (*entry).length; ++at)
-            if (at == (*entry).length || (*entry).text[at] == '\n') {
+        for (bytes at = 0; at <= len; ++at)
+            if (at == len || text[at] == '\n') {
                 bytes next = start;
                 do {
-                    bytes end = rowEnd((*entry).text, next, at, width);
+                    bytes end = rowEnd(text, next, at, width);
                     if (rowIndex != 0) {
                         --rowIndex;
                         next = end;
                         continue;
                     }
-                    bytes count = end - next;
+                    bytes rowCount = end - next;
                     bytes copied = 0;
-                    while (copied < count) {
+                    while (copied < rowCount) {
                         u32 scalar;
-                        bytes bytes = TuiUtf8_decode((*entry).text + next + copied, count - copied, &scalar);
+                        bytes bytes = TuiUtf8_decode(text + next + copied, rowCount - copied, &scalar);
                         if (bytes > cap - 1 - copied)
                             break;
                         copied += bytes;
                     }
-                    memcpy(dest, (*entry).text + next, copied);
+                    memcpy(dest, text + next, copied);
                     dest[copied] = '\0';
                     if (styles != nullptr) {
-                        memcpy(styles, (*entry).styles + next, copied);
+                        memcpy(styles, entryStyles + next, copied);
                         styles[copied] = 0;
                     }
-                    if (copied != count) {
+                    if (copied != rowCount) {
                         if (outTruncated != nullptr)
                             *outTruncated = true;
                         return reject("row projection truncated");
@@ -593,17 +665,20 @@ static bool format(char *dest, bytes cap, bool *outTruncated, const char *patter
 bool Tui_toString(const Tui *self, char *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)
         return format(dest, cap, outTruncated, "nullptr");
-    return format(dest, cap, outTruncated, "tui: %zu entries, %zu input bytes, %zu rows above tail", (*self).count, (*self).inputLength, (*self).scroll);
+    return format(dest, cap, outTruncated, "tui: %zu entries, %zu input bytes, %zu rows above tail",
+                  Tui_getCount(self), Tui_getInputLength(self), Tui_getScroll(self));
 }
 
 /* Declaration-order field dump, with real Vexspoke JSON string escaping. */
 bool Tui_toStringStruct(const Tui *self, char *dest, bytes cap, bool *outTruncated) {
     if (self == nullptr)
         return format(dest, cap, outTruncated, "nullptr");
-    if (!format(dest, cap, outTruncated, "Tui{entries=%p,count=%zu,capacity=%zu,input=", (any) (*self).entries, (*self).count, (*self).capacity))
+    if (!format(dest, cap, outTruncated, "Tui{entries=%p,count=%zu,capacity=%zu,input=",
+                (any) Tui_entries(self), Tui_getCount(self), Tui_getCapacity(self)))
         return false;
     bytes used = strlen(dest);
-    i64 length = Json_writeString(dest + used, cap - used, (*self).input == nullptr ? "" : (*self).input);
+    const char *input = Tui_getInput(self);
+    i64 length = Json_writeString(dest + used, cap - used, input == nullptr ? "" : input);
     if (length < 0) {
         dest[used] = '\0';
         if (outTruncated != nullptr)
@@ -611,5 +686,7 @@ bool Tui_toStringStruct(const Tui *self, char *dest, bytes cap, bool *outTruncat
         return reject("input projection truncated");
     }
     used += (bytes) length;
-    return format(dest + used, cap - used, outTruncated, ",inputLength=%zu,inputCapacity=%zu,scroll=%zu,rows=%d,columns=%d,dirty=%s}", (*self).inputLength, (*self).inputCapacity, (*self).scroll, (*self).rows, (*self).columns, (*self).dirty ? "true" : "false");
+    return format(dest + used, cap - used, outTruncated, ",inputLength=%zu,inputCapacity=%zu,scroll=%zu,rows=%d,columns=%d,dirty=%s}",
+                  Tui_getInputLength(self), Tui_getInputCapacity(self), Tui_getScroll(self),
+                  Tui_rows(self), Tui_columns(self), Tui_isDirty(self) ? "true" : "false");
 }

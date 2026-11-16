@@ -91,6 +91,63 @@
  * or secrets.
  * ============================================================================ */
 ;;INTENTION("derived wire identity/buffers mutate only through admission/decide/poll/free; projections redact transcript buffers and summarize the borrowed Haven driver (which has no bounded projection), preserving privacy under the Conflict Triage Law")
+
+;;GETTER
+static inline Harness *SessionBridge_harness(SessionBridge *self) { return &(*self).harness; }
+;;GETTER
+static inline const Harness *SessionBridge_harnessConst(const SessionBridge *self) { return &(*self).harness; }
+;;GETTER
+static inline i32 SessionBridge_readFd(const SessionBridge *self) { return (*self).readFd; }
+;;GETTER
+static inline i32 SessionBridge_writeFd(const SessionBridge *self) { return (*self).writeFd; }
+;;GETTER
+static inline u32 SessionBridge_jobId(const SessionBridge *self) { return (*self).jobId; }
+;;GETTER
+static inline u32 *SessionBridge_jobIdPtr(SessionBridge *self) { return &(*self).jobId; }
+;;SETTER
+static inline fn SessionBridge_setJobId(SessionBridge *self, u32 jobId) { (*self).jobId = jobId; }
+;;GETTER
+static inline u64 SessionBridge_startedMs(const SessionBridge *self) { return (*self).startedMs; }
+;;SETTER
+static inline fn SessionBridge_setStartedMs(SessionBridge *self, u64 startedMs) { (*self).startedMs = startedMs; }
+;;GETTER
+static inline char *SessionBridge_request(SessionBridge *self) { return (*self).request; }
+;;GETTER
+static inline bytes SessionBridge_requestLength(const SessionBridge *self) { return (*self).requestLength; }
+;;SETTER
+static inline fn SessionBridge_setRequestLength(SessionBridge *self, bytes requestLength) { (*self).requestLength = requestLength; }
+;;GETTER
+static inline bytes SessionBridge_requestOffset(const SessionBridge *self) { return (*self).requestOffset; }
+;;SETTER
+static inline fn SessionBridge_setRequestOffset(SessionBridge *self, bytes requestOffset) { (*self).requestOffset = requestOffset; }
+;;GETTER
+static inline char *SessionBridge_response(SessionBridge *self) { return (*self).response; }
+;;GETTER
+static inline bytes SessionBridge_responseLength(const SessionBridge *self) { return (*self).responseLength; }
+;;SETTER
+static inline fn SessionBridge_setResponseLength(SessionBridge *self, bytes responseLength) { (*self).responseLength = responseLength; }
+;;GETTER
+static inline char *SessionBridge_textMut(SessionBridge *self) { return (*self).text; }
+;;GETTER
+static inline bool SessionBridge_failed(const SessionBridge *self) { return (*self).failed; }
+;;SETTER
+static inline fn SessionBridge_setFailed(SessionBridge *self, bool failed) { (*self).failed = failed; }
+;;SETTER
+static inline fn SessionBridge_setAwaiting(SessionBridge *self, bool awaiting) { (*self).awaiting = awaiting; }
+;;SETTER
+static inline fn SessionBridge_setApprovalSerial(SessionBridge *self, u32 approvalSerial) { (*self).approvalSerial = approvalSerial; }
+;;GETTER
+static inline char *SessionBridge_approvalId(SessionBridge *self) { return (*self).approvalId; }
+;;GETTER
+static inline char *SessionBridge_approvalLabelMut(SessionBridge *self) { return (*self).approvalLabel; }
+;;GETTER
+static inline char *SessionBridge_note(SessionBridge *self) { return (*self).note; }
+;;GETTER
+static inline bool SessionBridge_notePending(const SessionBridge *self) { return (*self).notePending; }
+;;SETTER
+static inline fn SessionBridge_setNotePending(SessionBridge *self, bool notePending) { (*self).notePending = notePending; }
+;;GETTER
+static inline char *SessionBridge_decision(SessionBridge *self) { return (*self).decision; }
 static u64 nowMs() {
     struct timespec stamp;
     if (clock_gettime(CLOCK_MONOTONIC, &stamp) != 0)
@@ -99,16 +156,18 @@ static u64 nowMs() {
 }
 ;;WHAT("SessionBridge")
 static bool queueText(SessionBridge *self, const char *key, const char *value) {
-    JsonWriter writer = JsonWriter((*self).request, sizeof((*self).request) - 1);
+    char *request = SessionBridge_request(self);
+    JsonWriter writer = JsonWriter(request, sizeof(((SessionBridge) {0}).request) - 1);
     Json_beginObject(&writer);
     Json_addKey(&writer, key);
     Json_stringVal(&writer, value);
     Json_endObject(&writer);
     if (!JsonWriter_ok(&writer))
         return false;
-    (*self).requestLength = JsonWriter_used(&writer);
-    (*self).request[(*self).requestLength++] = '\n';
-    (*self).requestOffset = 0;
+    bytes len = JsonWriter_used(&writer);
+    request[len++] = '\n';
+    SessionBridge_setRequestLength(self, len);
+    SessionBridge_setRequestOffset(self, 0);
     return true;
 }
 ;;WHAT("SessionBridge")
@@ -118,27 +177,30 @@ static bool spawn(any context, const EngineProviderSlot *engine, const char *pro
     (discard) length;
     (discard) timeoutMs;
     SessionBridge *self = context;
-    JsonWriter writer = JsonWriter((*self).request, sizeof((*self).request) - 1);
+    char *request = SessionBridge_request(self);
+    JsonWriter writer = JsonWriter(request, sizeof(((SessionBridge) {0}).request) - 1);
     Json_beginObject(&writer);
     Json_addKey(&writer, "prompt");
     Json_stringVal(&writer, prompt);
     Json_addKey(&writer, "instructions");
-    Json_stringVal(&writer, Owo_instructions((*self).owo));
+    Json_stringVal(&writer, Owo_instructions(SessionBridge_isOwo(self)));
     Json_endObject(&writer);
     if (!JsonWriter_ok(&writer))
         return false;
-    (*self).requestLength = JsonWriter_used(&writer);
-    (*self).request[(*self).requestLength++] = '\n';
-    (*self).requestOffset = 0;
-    (*self).responseLength = 0;
-    (*self).startedMs = nowMs();
-    (*self).text[0] = '\0';
-    (*self).awaiting = false;
-    (*self).notePending = false;
-    (*self).note[0] = '\0';
-    (*self).decision[0] = '\0';
+    bytes len = JsonWriter_used(&writer);
+    request[len++] = '\n';
+    SessionBridge_setRequestLength(self, len);
+    SessionBridge_setRequestOffset(self, 0);
+    SessionBridge_setResponseLength(self, 0);
+    u64 started = nowMs();
+    SessionBridge_setStartedMs(self, started);
+    SessionBridge_textMut(self)[0] = '\0';
+    SessionBridge_setAwaiting(self, false);
+    SessionBridge_setNotePending(self, false);
+    SessionBridge_note(self)[0] = '\0';
+    SessionBridge_decision(self)[0] = '\0';
     *outHandle = self;
-    return (*self).startedMs != 0;
+    return started != 0;
 }
 ;;WHAT("SessionBridge")
 static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
@@ -160,15 +222,17 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
         JsonStringView display = Json_getString(doc, label);
         if (!idValue || idLength == 0 || memchr(idValue, '\0', idLength) || !labelValue ||
             memchr(labelValue, '\0', labelLength) || id.data == nullptr ||
-            id.length >= sizeof((*self).approvalId) || display.data == nullptr ||
-            display.length >= sizeof((*self).approvalLabel))
+            id.length >= sizeof(((SessionBridge) {0}).approvalId) || display.data == nullptr ||
+            display.length >= sizeof(((SessionBridge) {0}).approvalLabel))
             return HARNESS_STATUS_TIMEOUT;
-        memcpy((*self).approvalId, id.data, id.length);
-        (*self).approvalId[id.length] = '\0';
-        memcpy((*self).approvalLabel, display.data, display.length);
-        (*self).approvalLabel[display.length] = '\0';
-        (*self).awaiting = true;
-        (*self).approvalSerial++;
+        char *approvalId = SessionBridge_approvalId(self);
+        char *approvalLabel = SessionBridge_approvalLabelMut(self);
+        memcpy(approvalId, id.data, id.length);
+        approvalId[id.length] = '\0';
+        memcpy(approvalLabel, display.data, display.length);
+        approvalLabel[display.length] = '\0';
+        SessionBridge_setAwaiting(self, true);
+        SessionBridge_setApprovalSerial(self, SessionBridge_getApprovalSerial(self) + 1);
         return HARNESS_STATUS_RUNNING;
     }
     if (Json_count(doc, root) == 1 && Json_type(doc, note) == JSON_STRING) {
@@ -177,11 +241,12 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
         const char *noteValue = Json_string(doc, note, &noteLength);
         JsonStringView noteText = Json_getString(doc, note);
         if (!noteValue || noteLength == 0 || memchr(noteValue, '\0', noteLength) ||
-            noteText.data == nullptr || noteText.length >= sizeof((*self).note))
+            noteText.data == nullptr || noteText.length >= sizeof(((SessionBridge) {0}).note))
             return HARNESS_STATUS_TIMEOUT;
-        memcpy((*self).note, noteText.data, noteText.length);
-        (*self).note[noteText.length] = '\0';
-        (*self).notePending = true;
+        char *noteBuf = SessionBridge_note(self);
+        memcpy(noteBuf, noteText.data, noteText.length);
+        noteBuf[noteText.length] = '\0';
+        SessionBridge_setNotePending(self, true);
         return HARNESS_STATUS_RUNNING;
     }
     JsonRef success = Json_member(doc, root, "ok");
@@ -194,44 +259,50 @@ static HarnessStatus handleFrame(SessionBridge *self, JsonDoc *doc) {
     const char *value = Json_string(doc, text, &textLength);
     JsonStringView textValue = Json_getString(doc, text);
     if (!value || memchr(value, '\0', textLength) || !Json_bool(doc, success) ||
-        textValue.data == nullptr || textValue.length >= sizeof((*self).text))
+        textValue.data == nullptr || textValue.length >= sizeof(((SessionBridge) {0}).text))
         return HARNESS_STATUS_TIMEOUT;
-    memcpy((*self).text, textValue.data, textValue.length);
-    (*self).text[textValue.length] = '\0';
+    char *textBuf = SessionBridge_textMut(self);
+    memcpy(textBuf, textValue.data, textValue.length);
+    textBuf[textValue.length] = '\0';
     return HARNESS_STATUS_DONE;
 }
 ;;WHAT("SessionBridge")
 static HarnessStatus pollJob(any context, any handle, u64 timeoutMs) {
     (discard) handle;
     SessionBridge *self = context;
-    if ((*self).failed)
+    if (SessionBridge_failed(self))
         goto fail;
-    if ((*self).requestOffset < (*self).requestLength) {
-        ssize_t sent = write((*self).writeFd, (*self).request + (*self).requestOffset,
-                             (*self).requestLength - (*self).requestOffset);
+    bytes reqOffset = SessionBridge_requestOffset(self);
+    bytes reqLen = SessionBridge_requestLength(self);
+    if (reqOffset < reqLen) {
+        ssize_t sent = write(SessionBridge_writeFd(self), SessionBridge_request(self) + reqOffset,
+                             reqLen - reqOffset);
         if (sent > 0)
-            (*self).requestOffset += (bytes) sent;
+            SessionBridge_setRequestOffset(self, reqOffset + (bytes) sent);
         else if (sent < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
             goto fail;
     }
     /* Exactly one frame per call keeps a burst of streamed notes ordered. A frame
      * already buffered is progress we hold, so it is consumed before the watchdog
      * is consulted; the watchdog only measures silence with nothing in hand. */
-    char *newline = memchr((*self).response, '\n', (*self).responseLength);
+    char *response = SessionBridge_response(self);
+    bytes respLen = SessionBridge_responseLength(self);
+    char *newline = memchr(response, '\n', respLen);
     if (newline == nullptr) {
         /* The human wait is not the model's budget: while an approval is displayed
          * the watchdog is suspended and SessionBridge_decide restarts it on
          * submission. Otherwise it measures silence since the last frame, not the
          * turn's total duration, so tool-using turns may run for minutes. */
-        if (!(*self).awaiting) {
+        if (!SessionBridge_isAwaiting(self)) {
             u64 now = nowMs();
-            if (!now || now < (*self).startedMs || now - (*self).startedMs >= timeoutMs)
+            u64 started = SessionBridge_startedMs(self);
+            if (!now || now < started || now - started >= timeoutMs)
                 goto fail;
         }
-        if ((*self).responseLength >= sizeof((*self).response) - 1)
+        if (respLen >= sizeof(((SessionBridge) {0}).response) - 1)
             goto fail;
-        ssize_t n = read((*self).readFd, (*self).response + (*self).responseLength,
-                         sizeof((*self).response) - 1 - (*self).responseLength);
+        ssize_t n = read(SessionBridge_readFd(self), response + respLen,
+                         sizeof(((SessionBridge) {0}).response) - 1 - respLen);
         if (n == 0)
             goto fail;
         if (n < 0) {
@@ -239,48 +310,50 @@ static HarnessStatus pollJob(any context, any handle, u64 timeoutMs) {
                 return HARNESS_STATUS_RUNNING;
             goto fail;
         }
-        if (memchr((*self).response + (*self).responseLength, '\0', (bytes) n))
+        if (memchr(response + respLen, '\0', (bytes) n))
             goto fail;
-        (*self).responseLength += (bytes) n;
-        (*self).response[(*self).responseLength] = '\0';
-        newline = memchr((*self).response, '\n', (*self).responseLength);
+        respLen += (bytes) n;
+        SessionBridge_setResponseLength(self, respLen);
+        response[respLen] = '\0';
+        newline = memchr(response, '\n', respLen);
         if (newline == nullptr)
             return HARNESS_STATUS_RUNNING;
     }
-    bytes frame = (bytes) (newline - (*self).response);
+    bytes frame = (bytes) (newline - response);
     *newline = '\0';
     JsonDoc doc;
     JsonNode nodes[8];
     char scratch[SESSION_RESPONSE_CAP];
-    if (!Json_parse(&doc, nodes, 8, scratch, sizeof(scratch), (*self).response))
+    if (!Json_parse(&doc, nodes, 8, scratch, sizeof(scratch), response))
         goto fail;
     HarnessStatus status = handleFrame(self, &doc);
-    bytes remaining = (*self).responseLength - frame - 1;
-    memmove((*self).response, newline + 1, remaining);
-    (*self).responseLength = remaining;
+    bytes remaining = respLen - frame - 1;
+    memmove(response, newline + 1, remaining);
+    SessionBridge_setResponseLength(self, remaining);
     if (status == HARNESS_STATUS_TIMEOUT)
         goto fail;
     /* Any frame is progress: the watchdog measures remote silence, not total
      * duration, so a i64 multi-tool turn is not killed for taking minutes. */
-    (*self).startedMs = nowMs();
-    if (!(*self).startedMs)
+    u64 started = nowMs();
+    SessionBridge_setStartedMs(self, started);
+    if (!started)
         goto fail;
     return status;
 fail:
-    (*self).failed = true;
-    (*self).awaiting = false;
-    (*self).notePending = false;
-    strcpy((*self).text, "OpenCode turn failed or timed out. Exit and relaunch; remote cancellation is best effort.");
+    SessionBridge_setFailed(self, true);
+    SessionBridge_setAwaiting(self, false);
+    SessionBridge_setNotePending(self, false);
+    strcpy(SessionBridge_textMut(self), "OpenCode turn failed or timed out. Exit and relaunch; remote cancellation is best effort.");
     return HARNESS_STATUS_TIMEOUT;
 }
 ;;WHAT("SessionBridge")
 static fn cancel(any context, any handle) {
     (discard) handle;
     SessionBridge *self = context;
-    (*self).failed = true;
-    (*self).awaiting = false;
-    (*self).notePending = false;
-    (*self).requestLength = 0;
+    SessionBridge_setFailed(self, true);
+    SessionBridge_setAwaiting(self, false);
+    SessionBridge_setNotePending(self, false);
+    SessionBridge_setRequestLength(self, 0);
 }
 SessionBridge SessionBridge_0() {
     SessionBridge self = {0};
@@ -298,8 +371,8 @@ SessionBridge SessionBridge_2(i32 readFd, i32 writeFd) {
     return self;
 }
 bool SessionBridge_submit(SessionBridge *self, const char *prompt) {
-    if (!self || !prompt || !*prompt || (*self).readFd < 0 || (*self).writeFd < 0 ||
-        (*self).failed || (*self).jobId || (*self).awaiting ||
+    if (!self || !prompt || !*prompt || SessionBridge_readFd(self) < 0 || SessionBridge_writeFd(self) < 0 ||
+        SessionBridge_failed(self) || SessionBridge_jobId(self) || SessionBridge_isAwaiting(self) ||
         strnlen(prompt, SESSION_REQUEST_CAP) >= SESSION_REQUEST_CAP / 2) {
         THROW("session turn rejected: empty, oversized, busy or unbound wire");
         return false;
@@ -310,49 +383,56 @@ bool SessionBridge_submit(SessionBridge *self, const char *prompt) {
             return false;
         }
     HarnessDriverTable table = {spawn, pollJob, cancel};
-    Harness *harness = &(*self).harness;
+    Harness *harness = SessionBridge_harness(self);
     Harness_setDriver(harness, self, table);
-    bool ok = Harness_run(harness, prompt, strlen(prompt), 0, &(*self).jobId);
+    bool ok = Harness_run(harness, prompt, strlen(prompt), 0, SessionBridge_jobIdPtr(self));
     if (!ok)
         THROW("session request exceeds wire capacity");
     return ok;
 }
 i32 SessionBridge_poll(SessionBridge *self) {
-    if (!self || !(*self).jobId)
+    u32 jobId = self ? SessionBridge_jobId(self) : 0;
+    if (!self || !jobId)
         return 0;
-    HarnessStatus status = Harness_poll(&(*self).harness, (*self).jobId);
+    HarnessStatus status = Harness_poll(SessionBridge_harness(self), jobId);
     if (status == HARNESS_STATUS_RUNNING)
         return 0;
-    (*self).jobId = 0;
-    (*self).awaiting = false;
+    SessionBridge_setJobId(self, 0);
+    SessionBridge_setAwaiting(self, false);
     return status == HARNESS_STATUS_DONE ? 1 : -1;
 }
 fn SessionBridge_free(SessionBridge *self) {
     if (!self)
         return;
-    if ((*self).jobId)
-        Harness_cancel(&(*self).harness, (*self).jobId);
-    (*self).jobId = 0;
-    (*self).awaiting = false;
+    u32 jobId = SessionBridge_jobId(self);
+    if (jobId)
+        Harness_cancel(SessionBridge_harness(self), jobId);
+    SessionBridge_setJobId(self, 0);
+    SessionBridge_setAwaiting(self, false);
 }
+;;SETTER
 fn SessionBridge_setOwo(SessionBridge *self, bool enabled) {
     if (self)
         (*self).owo = enabled;
 }
+;;GETTER
 bool SessionBridge_isOwo(const SessionBridge *self) { return self && (*self).owo; }
-bool SessionBridge_isBusy(const SessionBridge *self) { return self && (*self).jobId; }
+bool SessionBridge_isBusy(const SessionBridge *self) { return self && SessionBridge_jobId(self); }
+;;GETTER
 bool SessionBridge_isAwaiting(const SessionBridge *self) { return self && (*self).awaiting; }
+;;GETTER
 const char *SessionBridge_getApprovalLabel(const SessionBridge *self) { return self ? (*self).approvalLabel : ""; }
+;;GETTER
 u32 SessionBridge_getApprovalSerial(const SessionBridge *self) { return self ? (*self).approvalSerial : 0; }
 const char *SessionBridge_takeNote(SessionBridge *self) {
-    if (self == nullptr || !(*self).notePending)
+    if (self == nullptr || !SessionBridge_notePending(self))
         return nullptr;
-    (*self).notePending = false;
-    return (*self).note;
+    SessionBridge_setNotePending(self, false);
+    return SessionBridge_note(self);
 }
 bool SessionBridge_decide(SessionBridge *self, const char *decision) {
-    if (!self || !decision || !(*self).jobId || (*self).failed || !(*self).awaiting ||
-        (*self).requestOffset != (*self).requestLength) {
+    if (!self || !decision || !SessionBridge_jobId(self) || SessionBridge_failed(self) || !SessionBridge_isAwaiting(self) ||
+        SessionBridge_requestOffset(self) != SessionBridge_requestLength(self)) {
         THROW("session decision rejected: idle, not awaiting, unflushed or null");
         return false;
     }
@@ -364,22 +444,24 @@ bool SessionBridge_decide(SessionBridge *self, const char *decision) {
         THROW("session decision exceeds wire capacity");
         return false;
     }
-    strcpy((*self).decision, decision);
-    (*self).awaiting = false;
-    (*self).startedMs = nowMs();
-    return (*self).startedMs != 0;
+    strcpy(SessionBridge_decision(self), decision);
+    SessionBridge_setAwaiting(self, false);
+    u64 started = nowMs();
+    SessionBridge_setStartedMs(self, started);
+    return started != 0;
 }
 bool SessionBridge_setTimeout(SessionBridge *self, u64 timeoutMs) {
-    if (!self || !timeoutMs || timeoutMs > SESSION_TIMEOUT_MS_MAX || (*self).jobId) {
+    if (!self || !timeoutMs || timeoutMs > SESSION_TIMEOUT_MS_MAX || SessionBridge_jobId(self)) {
         THROW("session timeout rejected: null, busy or out of safety range");
         return false;
     }
-    Harness_setTimeout(&(*self).harness, timeoutMs);
+    Harness_setTimeout(SessionBridge_harness(self), timeoutMs);
     return true;
 }
 u64 SessionBridge_getTimeout(const SessionBridge *self) {
-    return self ? Harness_getTimeout(&(*self).harness) : 0;
+    return self ? Harness_getTimeout(SessionBridge_harnessConst(self)) : 0;
 }
+;;GETTER
 const char *SessionBridge_getText(const SessionBridge *self) { return self ? (*self).text : ""; }
 bool SessionBridge_toString(const SessionBridge *self, char *dest, bytes cap, bool *outTruncated) {
     if (outTruncated)
@@ -401,10 +483,10 @@ bool SessionBridge_toStringStruct(const SessionBridge *self, char *dest, bytes c
     if (!dest || !cap)
         return false;
     i32 n = snprintf(dest, cap, "{harness:borrowed-driver,readFd:%d,writeFd:%d,owo:%d,jobId:%u,startedMs:%llu,request:redacted,requestLength:%zu,requestOffset:%zu,response:redacted,responseLength:%zu,text:redacted,failed:%d,awaiting:%d,approvalSerial:%u,approvalId:redacted,approvalLabel:redacted,note:redacted,notePending:%d,decision:redacted}",
-                     (*self).readFd, (*self).writeFd, (*self).owo, (*self).jobId,
-                     (u64) (*self).startedMs, (*self).requestLength,
-                     (*self).requestOffset, (*self).responseLength, (*self).failed,
-                     (*self).awaiting, (*self).approvalSerial, (*self).notePending);
+                     SessionBridge_readFd(self), SessionBridge_writeFd(self), SessionBridge_isOwo(self), SessionBridge_jobId(self),
+                     (u64) SessionBridge_startedMs(self), SessionBridge_requestLength(self),
+                     SessionBridge_requestOffset(self), SessionBridge_responseLength(self), SessionBridge_failed(self),
+                     SessionBridge_isAwaiting(self), SessionBridge_getApprovalSerial(self), SessionBridge_notePending(self));
     bool cut = n < 0 || (bytes) n >= cap;
     if (outTruncated)
         *outTruncated = cut;
