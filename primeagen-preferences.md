@@ -1,20 +1,20 @@
-# Primeagen — Personal R5 Preferences
+# Primeagen — Personal `app` Preferences
 
 ## Constitution Link
 
-gist.md (`../../metadata/gists/preferences/gist.md`) is the compressed law list; all universal laws bind this repository. Read one on demand: `./tools/prefs law "<title>"`. Universal laws are inherited, never restated.
+gist.md (`../../../metadata/gists/preferences/gist.md`) is the compressed law list; all universal laws bind this repository. Read one on demand: `./tools/prefs law "<title>"`. Universal laws are inherited, never restated.
 
-Tier: app (R5). Owns: personal agent CLI/TUI frontend, ncurses view, consent policy. Borrows: Vexspoke JSON string writer (consumed, not duplicated), Harness Message and API Haven request envelopes via C23 binding.
+Tier: app. Owns: personal agent CLI/TUI frontend, ncurses view, consent policy. Borrows: Vexspoke JSON string writer (consumed, not duplicated), Harness Message and API Haven request envelopes via C23 binding.
 
 ## Exclusive Laws
 
 | Law Title | Scope | Enforcement |
-| **Personal Agent Boundary Law** | Standalone R5 app and dependencies | Mandatory for `primeagen` |
+| **Personal Agent Boundary Law** | Standalone `app` and dependencies | Mandatory for `primeagen` |
 | **Explicit Tool Consent Law** | Read/build/run and model output | Mandatory for `primeagen` |
 
 ### Personal Agent Boundary Law
 
-* Primeagen lives outside the ecosystem tree, checkout anywhere — personal R5 consumer, not a replacement R4 Harness or R3 connector.
+* Primeagen lives outside the ecosystem tree, checkout anywhere — personal `app` consumer, not a replacement `core` Harness or API Haven connector.
 * No reverse includes, implicit fetches or duplicate ecosystem owners.
 * Python: cold CLI/policy/host adapter; a C23 binding consumes real Harness Message and API Haven request envelopes.
 * Dependencies come via source-root options; Func is an independent bounded tool invocation, never included.
